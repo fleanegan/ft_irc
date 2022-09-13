@@ -12,4 +12,4 @@ jobs:
     - name: make
       run: make
     - name: tests
-      run: make runtest
+      run: make runTest
