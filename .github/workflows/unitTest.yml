@@ -8,7 +8,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make
+    - name: dependencies
+      run: sudo apt-get install libgtest-dev
     - name: make
       run: make
     - name: tests
