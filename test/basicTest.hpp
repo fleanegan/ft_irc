@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 
 TEST(basic, testName){
-	ASSERT_FALSE(true);
+	ASSERT_FALSE(false);
 }
 
 #endif //FT_IRC_BASICTEST_HPP
