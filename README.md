@@ -1,5 +1,5 @@
-[![cppLint](https://github.com/fleanegan/ft_irc/actions/workflows/cppLint.yml/badge.svg)](https://github.com/fleanegan/ft_irc/actions/workflows/cppLint.yml)
-[![unitTest](https://github.com/fleanegan/ft_irc/actions/workflows/unitTest.yml/badge.svg)](https://github.com/fleanegan/ft_irc/actions/workflows/unitTest.yml)
+[![cppLint](https://github.com/fleanegan/ft_irc/actions/workflows/ccpLint.yml/badge.svg?branch=main)](https://github.com/fleanegan/ft_irc/actions/workflows/ccpLint.yml)
+[![unitTest](https://github.com/fleanegan/ft_irc/actions/workflows/unitTest.yml/badge.svg?branch=main)](https://github.com/fleanegan/ft_irc/actions/workflows/unitTest.yml)
 # ft_irc
 This project aims to create an irc server from scratch
 
