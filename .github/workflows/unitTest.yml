@@ -11,5 +11,5 @@ jobs:
     - run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make
     - name: make
       run: make
-    - name: make test
-      run: make test && ./ircserv_test
+    - name: tests
+      run: make runtest
