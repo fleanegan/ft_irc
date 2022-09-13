@@ -68,6 +68,9 @@ fclean:	clean
 	@echo "Delete $(NAME)"
 	@rm -f $(NAME) db
 
+runTest: test
+	./$(TEST_NAME)
+
 -include $(DEP_NAME)
 -include $(TEST_DEP_NAME)
 
