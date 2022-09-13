@@ -1,0 +1,4 @@
+commit_message="$1"
+
+python .git-hooks/check_conventional_commit.py "$commit_message"
+
