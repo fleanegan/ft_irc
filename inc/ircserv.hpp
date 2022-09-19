@@ -1,5 +1,5 @@
-#ifndef INC_IRCSERV_HPP
-# define INC_IRCSERV_HPP
+#ifndef INC_IRCSERV_HPP_
+# define INC_IRCSERV_HPP_
 
 #include <netinet/in.h>
 #include <stdio.h>
