@@ -1,5 +1,5 @@
-#ifndef IRCSERV_HPP
-# define IRCSERV_HPP
+#ifndef INC_IRCSERV_HPP
+# define INC_IRCSERV_HPP
 
 #include <netinet/in.h>
 #include <stdio.h>
@@ -8,4 +8,4 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#endif // IRCSERV_HPP
+#endif // INC_IRCSERV_HPP
