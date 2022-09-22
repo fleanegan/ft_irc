@@ -13,6 +13,8 @@
 
 // CPP libs
 #include <iostream>
+#include <vector>
+#include <string>
 
 // local includes
 #include "./Server.hpp"

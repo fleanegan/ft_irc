@@ -50,24 +50,45 @@ Server::~Server( void ) {
 	shutdown(_fd, SHUT_RDWR);
 }
 
+static int	getNextCommand(int socket, std::string* command)
+{
+	int valread, ret;
+	char buffer[1];
+
+	ret = 0;
+	while ((valread = recv(socket, buffer, 1, 0)))
+	{
+		if (valread < 0)
+			return (valread);
+		*command += *buffer;
+		ret++;
+		if (command->size() >= 2 && *(command->rbegin()) == '\n'
+				&& *(command->rbegin() + 1) == '\r')
+			break;
+	}
+	return (ret);
+}
+
 void	Server::host( void ) {
-	int	new_socket;
-	int valread;
-	char	buffer[4096];
+	int		new_socket;
+	int		valread;
+	std::string	command;
+	std::vector<std::string> commands;
 
 	if (listen(_fd, 3) < 0)
 		throw brokenConnectionException();
 	if ((new_socket = accept(_fd, reinterpret_cast<struct sockaddr*>(&_addr),
 				reinterpret_cast<socklen_t*>(&_addrLen))) < 0)
 		throw brokenConnectionException();
-	while (1) {
-		while ((valread = read(new_socket, buffer, 4096)) > 0)
-		{
-			std::cout << buffer << std::endl;
-			memset(&buffer, 0, 4096);
-		}
-		send(new_socket, "pong\n", strlen("pong\n"), 0);
+	while ((valread = getNextCommand(new_socket, &command)) > 0)
+	{
+		commands.push_back(command);
+		command.clear();
 	}
+	send(new_socket, "pong\n", strlen("pong\n"), 0);
+	for (std::vector<std::string>::iterator it = commands.begin();
+			it != commands.end(); it++)
+		std::cout << *it;
     close(new_socket);
 }
 
