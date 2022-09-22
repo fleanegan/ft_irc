@@ -10,7 +10,9 @@ TEST_PATH = ./test/
 
 # Names
 
-SRC_NAME =	main.cpp\
+SRC_NAME = Server.cpp\
+		   main.cpp\
+			
 
 TEST_SRC_NAME =	test_main.cpp \
 

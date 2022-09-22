@@ -1,11 +1,20 @@
 #ifndef INC_IRCSERV_HPP_
-# define INC_IRCSERV_HPP_
+#define INC_IRCSERV_HPP_
 
+// network C lib
 #include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
-#endif // INC_IRCSERV_HPP
+// other C libs
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+
+// CPP libs
+#include <iostream>
+
+// local includes
+#include "./Server.hpp"
+
+#endif // INC_IRCSERV_HPP_
