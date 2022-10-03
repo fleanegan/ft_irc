@@ -17,12 +17,17 @@ IRC_Logic::~IRC_Logic() {
 
 }
 
-void IRC_Logic::removeMessageTermination(const std::string &message) {
-	message.erase(message.size() - 3, 3);
+void IRC_Logic::removeMessageTermination(std::string *message) {
+	message->erase(message->size() - 3, 3);
 }
 
-void IRC_Logic::cleanupName(const std::string &name) {
-	name.erase(0, 1);
+void IRC_Logic::cleanupName(std::string *name) {
+	name->erase(0, 1);
+	name->erase(name->size() - 1, 1);
+}
+
+bool IRC_Logic::isMessageUserCreation(const std::vector<std::string> &splitMessageVector) const {
+	return splitMessageVector.size() >= 5 && splitMessageVector[0] == "USER";
 }
 
 void IRC_Logic::receive(const std::string &string) {
@@ -30,17 +35,21 @@ void IRC_Logic::receive(const std::string &string) {
 	User result;
 
 	_remain += string;
-	splitMessageVector = splitMessage(string);
-	if (splitMessageVector.size() >= 5 && splitMessageVector[0] == "USER")
-	{
-		std::string name;
-		for (size_t i = 4; i < splitMessageVector.size(); i++) {
-			name += splitMessageVector[i] + " ";
-		}
-		removeMessageTermination(name);
-		cleanupName(name);
-		_users.push_back(User(splitMessageVector[1], name));
+	if (_remain.find("\r\n") == std::string::npos)
+		return ;
+	splitMessageVector = splitMessage(_remain.substr(0, _remain.find("\r\n")));
+	if (isMessageUserCreation(splitMessageVector))
+		_users.push_back(User(splitMessageVector[1], buildFullName(splitMessageVector)));
+}
+
+std::string IRC_Logic::buildFullName(const std::vector<std::string> &splitMessageVector) {
+	std::string name;
+
+	for (size_t i = 4; i < splitMessageVector.size(); i++) {
+		name += splitMessageVector[i] + " ";
 	}
+	cleanupName(&name);
+	return name;
 }
 
 std::vector<std::string> IRC_Logic::splitMessage(std::string string) const {

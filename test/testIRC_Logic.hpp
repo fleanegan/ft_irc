@@ -36,7 +36,19 @@ TEST(IRC_Logic, bullshitMessageDoesNotAddUser){
 TEST(IRC_Logic, successfulRegistrationAddsUserToList){
 	IRC_Logic logic;
 
-	logic.receive("USER nick nick * :Full Name\r\n");
+	logic.receive("USER nick nick * ");
+	logic.receive(":Full Name\r\n");
+
+	ASSERT_EQ(1, logic.getUsers().size());
+	ASSERT_STREQ("nick", logic.getUsers().at(0).nick.c_str());
+	ASSERT_STREQ("Full Name", logic.getUsers().at(0).name.c_str());
+}
+
+TEST(IRC_Logic, userCreationMessageFollowedByOtherContentStopsAtDelimeter){
+	IRC_Logic logic;
+
+	logic.receive("USER nick nick * ");
+	logic.receive(":Full Name\r\n awetihoaw");
 
 	ASSERT_EQ(1, logic.getUsers().size());
 	ASSERT_STREQ("nick", logic.getUsers().at(0).nick.c_str());

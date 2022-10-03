@@ -24,12 +24,14 @@ public:
 	IRC_Logic(const IRC_Logic &other);
 	IRC_Logic &operator=(const IRC_Logic &);
 	~IRC_Logic();
-	void cleanupName(const std::string &name);
-	void removeMessageTermination(const std::string &message);
+	void cleanupName(std::string *name);
+	void removeMessageTermination(std::string *message);
 	void receive(const std::string &string);
 	std::string getNextCommand();
 	std::vector<User> getUsers();
 	std::vector<std::string> splitMessage(std::string string) const;
+	std::string buildFullName(const std::vector<std::string> &splitMessageVector);
+	bool isMessageUserCreation(const std::vector<std::string> &splitMessageVector) const;
 };
 
 #endif //INC_IRC_LOGIC_HPP_
