@@ -1,23 +1,32 @@
-#ifndef INC_SERVER_HPP_
-#define INC_SERVER_HPP_
+#ifndef INC_TCP_SERVER_HPP_
+#define INC_TCP_SERVER_HPP_
 
-# include "ircserv.hpp"
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <exception>
+#include <string>
 
-class Server {
-	private:
+
+class TCP_Server {
+	protected:
 		int	_fd;
 		int	_opt;
 		int	_port;
 		int	_addrLen;
 		struct sockaddr_in	_addr;
+
 	public:
-		Server( void );
-		Server( int port, int opt);
-		Server( const Server& other );
+		TCP_Server( void );
+		TCP_Server( int port, int opt);
+		TCP_Server( const TCP_Server& other );
 
-		Server& operator = ( const Server& other);
+		TCP_Server& operator = ( const TCP_Server& other);
 
-		~Server( void );
+		~TCP_Server( void );
+
+		virtual void	getMessage( char* buffer ) = 0;
+		virtual std::string	sendMessage( void ) = 0;
 
 		void	host( void );
 
@@ -43,4 +52,4 @@ class Server {
 		};
 };
 
-#endif // INC_SERVER_HPP_
+#endif // INC_TCP_SERVER_HPP_

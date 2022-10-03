@@ -1,4 +1,7 @@
-#include "../inc/ircserv.hpp"
+#include <stdlib.h>
+
+#include "../inc/IRC_Server.hpp"
+#include <iostream>
 
 // MAIN_CPP
 int	main(int ac, char **av)
@@ -10,7 +13,7 @@ int	main(int ac, char **av)
 		return 1;
 	}
 	try {
-		Server server(atoi(av[1]), 1);
+		IRC_Server server(atoi(av[1]), 1);
 		server.host();
 	} catch (const std::exception& e) {
 		std::cout << "ircserv: " << e.what() << std::endl;
