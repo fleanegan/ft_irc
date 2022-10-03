@@ -9,6 +9,6 @@ to the port and accessible by the password defined by the arguments given
 
 ## Usage
 ```
-git clone https://github.com/AntoineLemarchand/ft_irc
+git clone https://github.com/fleanegan/ft_irc
 ./ircserv [port] [password]
 ```

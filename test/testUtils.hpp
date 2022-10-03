@@ -1,5 +1,5 @@
-#ifndef TEST_UTILS_H
-# define TEST_UTILS_H
+#ifndef TEST_TESTUTILS_HPP_
+#define TEST_TESTUTILS_HPP_
+#include "../inc/IRC_Logic.hpp"
 
-
-#endif     // TEST_UTILS_H
+#endif     // TEST_TESTUTILS_HPP_

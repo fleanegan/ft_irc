@@ -1,7 +1,7 @@
 #include <cstdio>
 #include "gtest/gtest.h"
-#include "testUtils.hpp"
-#include "basicTest.hpp"
+#include "./testUtils.hpp"
+#include "./testIRC_Logic.hpp"
 
 GTEST_API_ int main(int argc, char **argv) {
 	std::cout << "Running main() from " << __FILE__ << std::endl;
