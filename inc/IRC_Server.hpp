@@ -1,5 +1,5 @@
-#ifndef INC_IRC_SERVER_
-#define INC_IRC_SERVER_
+#ifndef INC_IRC_SERVER_HPP_
+#define INC_IRC_SERVER_HPP_
 
 #include <unistd.h>
 #include <cstring>
@@ -29,4 +29,4 @@ class IRC_Server: public TCP_Server {
 		std::string	sendMessage( void );
 };
 
-#endif // INC_IRC_SERVER_
+#endif // INC_IRC_SERVER_HPP_

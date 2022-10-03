@@ -1,7 +1,7 @@
 #include <stdlib.h>
-
-#include "../inc/IRC_Server.hpp"
 #include <iostream>
+#include "../inc/IRC_Server.hpp"
+#include "../inc/IRC_Logic.hpp"
 
 // MAIN_CPP
 int	main(int ac, char **av)

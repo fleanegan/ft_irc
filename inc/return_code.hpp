@@ -1,5 +1,5 @@
-#ifndef ERROR_CODE_HPP
-# define ERROR_CODE_HPP
+#ifndef INC_RETURN_CODE_HPP_
+#define INC_RETURN_CODE_HPP_
 
 # define RPL_WELCOME 001
 # define RPL_YOURHOST 002 
@@ -289,4 +289,4 @@
 # define ERR_TEXTTOOSHORT 983 
 # define ERR_NUMERIC_ERR 999 
 
-#endif //ERROR_CODE_HPP
+#endif //INC_RETURN_CODE_HPP_
