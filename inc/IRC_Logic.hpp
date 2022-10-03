@@ -5,6 +5,14 @@
 
 struct User{
 	std::string nick;
+	std::string name;
+
+	User(): nick("JD"), name("John Doe"){
+	}
+
+	User(const std::string &nick, const std::string &name):
+		nick(nick), name(name) {
+	}
 };
 
 class IRC_Logic {
@@ -16,6 +24,8 @@ public:
 	IRC_Logic(const IRC_Logic &other);
 	IRC_Logic &operator=(const IRC_Logic &);
 	~IRC_Logic();
+	void cleanupName(const std::string &name);
+	void removeMessageTermination(const std::string &message);
 	void receive(const std::string &string);
 	std::string getNextCommand();
 	std::vector<User> getUsers();

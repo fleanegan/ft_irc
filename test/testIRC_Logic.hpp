@@ -33,15 +33,14 @@ TEST(IRC_Logic, bullshitMessageDoesNotAddUser){
 	ASSERT_TRUE(logic.getUsers().empty());
 }
 
-//TEST(IRC_Logic, successfulRegistrationAddsUserToList){
-//	IRC_Logic logic;
-//
-//	logic.receive("USER nick nick * :Full Name\r\n");
-//
-//	ASSERT_EQ(1, logic.getUsers().size());
-//	ASSERT_STREQ("nick", logic.getUsers().at(0).nick.c_str());
-//}
+TEST(IRC_Logic, successfulRegistrationAddsUserToList){
+	IRC_Logic logic;
 
-// bullshitMessageDoesNotAddUser
+	logic.receive("USER nick nick * :Full Name\r\n");
+
+	ASSERT_EQ(1, logic.getUsers().size());
+	ASSERT_STREQ("nick", logic.getUsers().at(0).nick.c_str());
+	ASSERT_STREQ("Full Name", logic.getUsers().at(0).name.c_str());
+}
 
 #endif //TEST_TESTIRC_LOGIC_HPP_

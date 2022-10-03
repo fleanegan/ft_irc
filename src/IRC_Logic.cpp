@@ -17,6 +17,14 @@ IRC_Logic::~IRC_Logic() {
 
 }
 
+void IRC_Logic::removeMessageTermination(const std::string &message) {
+	message.erase(message.size() - 3, 3);
+}
+
+void IRC_Logic::cleanupName(const std::string &name) {
+	name.erase(0, 1);
+}
+
 void IRC_Logic::receive(const std::string &string) {
 	std::vector<std::string> splitMessageVector;
 	User result;
@@ -24,7 +32,15 @@ void IRC_Logic::receive(const std::string &string) {
 	_remain += string;
 	splitMessageVector = splitMessage(string);
 	if (splitMessageVector.size() >= 5 && splitMessageVector[0] == "USER")
-		_users.push_back(User());
+	{
+		std::string name;
+		for (size_t i = 4; i < splitMessageVector.size(); i++) {
+			name += splitMessageVector[i] + " ";
+		}
+		removeMessageTermination(name);
+		cleanupName(name);
+		_users.push_back(User(splitMessageVector[1], name));
+	}
 }
 
 std::vector<std::string> IRC_Logic::splitMessage(std::string string) const {
