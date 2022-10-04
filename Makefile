@@ -13,6 +13,7 @@ TEST_PATH = ./test/
 SRC_NAME =	TCP_Server.cpp\
 			IRC_Server.cpp\
 			IRC_Logic.cpp\
+			IRC_Client.cpp\
 			main.cpp\
 			
 
