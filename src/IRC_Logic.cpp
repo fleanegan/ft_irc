@@ -1,8 +1,10 @@
 #include <vector>
 #include "../inc/IRC_Logic.hpp"
 
-IRC_Logic::IRC_Logic() {
+IRC_Logic::IRC_Logic(): _password("password") {
+}
 
+IRC_Logic::IRC_Logic( const std::string& password): _password(password) {
 }
 
 IRC_Logic::IRC_Logic(const IRC_Logic &other) {
@@ -26,34 +28,56 @@ void IRC_Logic::cleanupName(std::string *name) {
 	name->erase(name->size() - 1, 1);
 }
 
-bool IRC_Logic::isMessageClientCreation(const std::vector<std::string> &splitMessageVector) const {
+bool IRC_Logic::isUserMessage(const std::vector<std::string> &splitMessageVector) const {
 	return splitMessageVector.size() >= 5 && splitMessageVector[0] == "USER";
 }
 
-void IRC_Logic::receive(const std::string &string) {
+void IRC_Logic::receive(int fd, const std::string &string) {
 	std::vector<std::string> splitMessageVector;
-	IRC_Client result;
 
 	_remain += string;
-	if (_remain.find("\r\n") == std::string::npos)
-		return ;
-	splitMessageVector = splitMessage(_remain.substr(0, _remain.find("\r\n")));
-    _remain.erase(0, _remain.find("\r\n") + 2);
-	std::string &nick = splitMessageVector[1];
-	if (isMessageClientCreation(splitMessageVector)){
-        if (isClientAlreadyPresent(nick))
-            return;
-        if (! IRC_Client::isValidCreationString(splitMessageVector))
-            return;
-        _clients.push_back(IRC_Client(nick, buildFullName(splitMessageVector)));
+    while (_remain.find("\r\n") != std::string::npos) {
+        splitMessageVector = splitMessage(_remain.substr(0, _remain.find("\r\n")));
+        _remain.erase(0, _remain.find("\r\n") + 2);
+        if (splitMessageVector[0] == "PASS" && !getUserByFd(fd)){
+			if (splitMessageVector.size() == 2 && splitMessageVector[1] == _password){
+				_users.push_back(IRC_User(fd));
+			}
+        }
+		if (!getUserByFd(fd))
+			return;
+		if (isNickMessage(splitMessageVector)) {
+            if (splitMessageVector.size() == 2 && !isNickAlreadyPresent(splitMessageVector[1]))
+			    getUserByFd(fd)->nick = splitMessageVector[1];
+		}
+        if (isUserMessage(splitMessageVector)) {
+            if (!IRC_User::isValidCreationString(splitMessageVector))
+                return;
+			_response += "Welcome\r\n";
+        }
     }
 }
 
-bool IRC_Logic::isClientAlreadyPresent(const std::string &nick) {
-    for (std::vector<IRC_Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-        if (it->nick == nick)
+bool IRC_Logic::isNickMessage(const std::vector<std::string> &splitMessageVector) const {
+    return splitMessageVector[0] == "NICK"
+               && IRC_User::isNickValid(splitMessageVector[1]);
+}
+
+bool IRC_Logic::isNickAlreadyPresent(const std::string &nick) {
+    for (std::vector<IRC_User>::iterator user = _users.begin(); user != _users.end(); ++user)
+        if (stringToLower(user->nick)== stringToLower(nick))
             return true;
     return false;
+}
+
+std::string IRC_Logic::stringToLower(const std::string &input) const {
+    std::string result;
+
+    for (std::string::const_iterator it = input.begin();
+         it != input.end(); ++it) {
+        result += tolower(*it);
+    }
+    return result;
 }
 
 std::string IRC_Logic::buildFullName(const std::vector<std::string> &splitMessageVector) {
@@ -78,6 +102,21 @@ std::vector<std::string> IRC_Logic::splitMessage(std::string string) const {
 	return result;
 }
 
-std::vector<IRC_Client> IRC_Logic::getClients() {
-	return _clients;
+std::vector<IRC_User> IRC_Logic::getRegisteredUsers() {
+	return _users;
+}
+
+std::string IRC_Logic::popMessage() {
+	std::string ret;
+	ret.swap(_response);
+	return (ret);
+}
+
+IRC_User* IRC_Logic::getUserByFd(const int& fd) {
+    for (std::vector<IRC_User>::iterator it = _users.begin();
+            it  != _users.end(); it++){
+        if (it->fd == fd)
+            return &(*it);
+    }
+    return NULL;
 }
