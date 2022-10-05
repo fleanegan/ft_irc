@@ -109,9 +109,28 @@ TEST(IRC_Logic, passFromDifferentFdDoesNotUnlockNick){
 TEST(IRC_Logic, wrongPasswordDoesNotEnableRegistration){
 	IRC_Logic logic("password");
 
-	registerUser(&logic, 0, "wrong password", "nick", "username", "Full Name");
+	std::string result = registerUser(&logic, 0, "wrong password", "nick", "username", "Full Name");
 
     ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
+	ASSERT_TRUE(reponseContainsCode(result, ERR_PASSWDMISMATCH));
+}
+
+TEST(IRC_Logic, noPasswordSendReturnsError){
+	IRC_Logic logic("password");
+
+	std::string result = logic.processInput(0, "PASS\r\n", "localhost");
+
+	ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
+	ASSERT_TRUE(reponseContainsCode(result, ERR_NEEDMOREPARAMS));
+}
+
+TEST(IRC_Logic, douplicatePassReturnsError){
+	IRC_Logic logic("password");
+
+	authenticate(&logic, 0, "password");
+	std::string result = authenticate(&logic, 0, "password");
+	
+	ASSERT_TRUE(reponseContainsCode(result, ERR_ALREADYREGISTERED));
 }
 
 TEST(IRC_Logic, duplicateNickRequestMustNotBeSet){
@@ -174,12 +193,10 @@ TEST(IRC_Logic, aUserPlacesMessageBetweenIncompleteMessageOfOtherUser){
 TEST(IRC_Logic, processInputReturnsMessageAccordingToUserRequest){
 	IRC_Logic logic("password");
 	std::string rep;
-	IRC_User *user;
 	authenticate(&logic, 0, "password");
 	setNick(&logic, 0, "nick");
 
 	rep = setUser(&logic, 0, "username", "Full Name");
-	user = &logic.getRegisteredUsers()[0];
 
 	ASSERT_TRUE(isValidUserRegistrationResponse(rep));
 }

@@ -5,15 +5,13 @@
 # define RPL_YOURHOST "002"
 # define RPL_CREATED "003"
 # define RPL_MYINFO "004"
-# define RPL_MYINFO "004"
 # define RPL_ISUPPORT "005"
+# define ERR_NEEDMOREPARAMS "461"
+# define ERR_ALREADYREGISTERED "462"
+# define ERR_PASSWDMISMATCH "464"
 
 #include <string>
 #include "./IRC_User.hpp"
 
-std::string rplWelcome(const IRC_User& user);
-std::string rplYourHost();
-std::string rplCreated();
-std::string rplMyInfo();
-std::string rplISupport();
+std::string generateResponse(const std::string& returnCode, const std::string& explanation);
 #endif //INC_RETURN_CODE_HPP_

@@ -66,11 +66,15 @@ bool IRC_Logic::isAuthenticationMessage(const std::vector<std::string> &splitMes
 }
 
 std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	if (user->isAuthenticated)
+		return generateResponse(ERR_ALREADYREGISTERED, "Do you really like to type the pw that much?");
 	if (splitMessageVector.size() == 2 && splitMessageVector[1] == _password) {
 		user->isAuthenticated = true;
 		return "";
 	}
-	return ""; // todo: handle error here
+	else if (splitMessageVector.size() == 1)
+		return generateResponse(ERR_NEEDMOREPARAMS, "You did not enter a password");
+	return generateResponse(ERR_PASSWDMISMATCH, "You did not enter the correct password");
 }
 
 std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -79,7 +83,11 @@ std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std:
 	user->name = splitMessageVector[1];
 	user->fullName = buildFullName(splitMessageVector);
 	if (userIsRegistered(user)) {
-		return rplWelcome(*user) + rplYourHost() + rplCreated() + rplMyInfo() + rplISupport();
+		return generateResponse(RPL_WELCOME, "Welcome to the land of fromage")
+			   + generateResponse(RPL_YOURHOST, "This is a ft_irc server")
+			   + generateResponse(RPL_CREATED, "The server was probably created in 2022")
+			   + generateResponse(RPL_MYINFO, "This server has got channels, believe me")
+			   + generateResponse(RPL_ISUPPORT, "Moderate demands");
 	}
 	return ""; // todo: handle error code here
 }

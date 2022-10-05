@@ -50,4 +50,10 @@ bool isValidUserRegistrationResponse(const std::string &returnMessage){
 			returnMessage.find(RPL_ISUPPORT) != std::string::npos;
 }
 
+bool reponseContainsCode(const std::string &returnMessage, const std::string &code){
+	return 	returnMessage.find(code) != std::string::npos;
+}
+
+
+
 #endif     // TEST_TESTUTILS_HPP_
