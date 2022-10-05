@@ -14,8 +14,7 @@ struct IRC_User{
 
 	IRC_User(int fd, const std::string &hostName);
 	IRC_User(const std::string &nick, const std::string &name, const int &fd);
-    static bool isValidCreationString(const std::vector<std::string>& splitMessageVector);
-    static bool isNickValid(const std::string &nick);
+	static bool isNickValid(const std::string &nick);
 private:
 	IRC_User();
 	//todo: implement

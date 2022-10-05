@@ -26,7 +26,7 @@ void IRC_Logic::cleanupName(std::string *name) {
 }
 
 bool IRC_Logic::isUserMessage(const std::vector<std::string> &splitMessageVector) const {
-	return splitMessageVector.size() >= 5 && splitMessageVector[0] == "USER";
+	return splitMessageVector[0] == "USER";
 }
 
 std::string IRC_Logic::processInput(int fd, const std::string &input, const std::string &hostName) {
@@ -77,11 +77,30 @@ std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std:
 	return generateResponse(ERR_PASSWDMISMATCH, "You did not enter the correct password");
 }
 
+std::string IRC_Logic::processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	std::string result;
+
+	if (splitMessageVector.size() == 1)
+		return (generateResponse(ERR_NONICKNAMEGIVEN, "You should consider having a nickname"));
+	else if (IRC_User::isNickValid(splitMessageVector[1]) == false || splitMessageVector.size() != 2)
+		return generateResponse(ERR_ERRONEOUSNICK, "Sigh, think again. NO FORBIDDEN CHARACTERS!");
+	else if (isNickAlreadyPresent(splitMessageVector[1]))
+		return generateResponse(ERR_NICKNAMEINUSE, "Sorry, someone was just as creative as you are.");
+	user->nick = splitMessageVector[1];
+	return welcomeNewUser(user);
+}
+
 std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	if (!IRC_User::isValidCreationString(splitMessageVector))
-		return ""; // todo
+	if (user->name != "" || user->fullName != "")
+		return generateResponse(ERR_ALREADYREGISTERED, "Call USER once. Not twice.");
+	if (splitMessageVector.size() < 5)
+		return generateResponse(ERR_NEEDMOREPARAMS, "You need to send username, username, unused and fullname.");
 	user->name = splitMessageVector[1];
 	user->fullName = buildFullName(splitMessageVector);
+	return welcomeNewUser(user);
+}
+
+std::string IRC_Logic::welcomeNewUser(IRC_User *user) {
 	if (userIsRegistered(user)) {
 		return generateResponse(RPL_WELCOME, "Welcome to the land of fromage")
 			   + generateResponse(RPL_YOURHOST, "This is a ft_irc server")
@@ -89,21 +108,12 @@ std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std:
 			   + generateResponse(RPL_MYINFO, "This server has got channels, believe me")
 			   + generateResponse(RPL_ISUPPORT, "Moderate demands");
 	}
-	return ""; // todo: handle error code here
+	return "";
 }
 
-std::string IRC_Logic::processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	std::string result;
-
-	if (splitMessageVector.size() == 2 && !isNickAlreadyPresent(splitMessageVector[1]))
-		user->nick = splitMessageVector[1];
-	return ""; // todo
-}
-
-//todo: inline function and move check to processNickMessage
+//todo: inline function
 bool IRC_Logic::isNickMessage(const std::vector<std::string> &splitMessageVector) const {
-	return splitMessageVector[0] == "NICK"
-		   && IRC_User::isNickValid(splitMessageVector[1]);
+	return splitMessageVector[0] == "NICK";
 }
 
 bool IRC_Logic::isNickAlreadyPresent(const std::string &nick) {

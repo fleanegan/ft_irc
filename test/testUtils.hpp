@@ -19,7 +19,7 @@ std::string setNick(IRC_Logic *logic, int fd, const std::string &nick) {
 	return logic->processInput(fd, "NICK " + nick + "\r\n", "hostName");
 }
 
-std::string connectAndSetNick(IRC_Logic *logic, int fd, const std::string &password, const std::string &nick){
+std::string authenticateAndSetNick(IRC_Logic *logic, int fd, const std::string &password, const std::string &nick){
 	std::string result;
     result += authenticate(logic, fd, password);
     result += setNick(logic, fd, nick);
