@@ -2,16 +2,17 @@
 #define TEST_TESTUTILS_HPP_
 #include <string>
 #include <vector>
+#include "gtest/gtest.h"
 #include "../inc/IRC_Logic.hpp"
 #include "../inc/IRC_User.hpp"
-#include "gtest/gtest.h"
+#include "../inc/return_code.hpp"
 
 void authenticate(IRC_Logic *logic, int fd, const std::string &password ){
     logic->receive(fd, "PASS " + password + "\r\n");
 }
 
-void createUser(IRC_Logic *logic, int fd, const std::string &nick, const std::string &name) {
-    logic->receive(fd, "USER " + nick + " " + nick + " * :" + name + "\r\n");
+void setUser(IRC_Logic *logic, int fd, const std::string &userName, const std::string &fullName) {
+    logic->receive(fd, "USER " + userName + " " + userName + " * :" + fullName + "\r\n");
 }
 
 void setNick(IRC_Logic *logic, int fd, const std::string &nick) {
@@ -21,6 +22,12 @@ void setNick(IRC_Logic *logic, int fd, const std::string &nick) {
 void connectAndSetNick(IRC_Logic *logic, int fd, const std::string &password, const std::string &nick){
     authenticate(logic, fd, password);
     setNick(logic, fd, nick);
+}
+
+void registerUser(IRC_Logic *logic, int fd, const std::string &password, const std::string &nick, const std::string &userName, const std::string &fullName){
+	authenticate(logic, fd, password);
+	setNick(logic, fd, nick);
+	setUser(logic, fd, userName, fullName);
 }
 
 void assertAllNicksEmpty(IRC_Logic *logic) {

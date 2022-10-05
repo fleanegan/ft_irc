@@ -6,6 +6,7 @@
 struct IRC_User{
     std::string nick;
     std::string name;
+    std::string fullName;
     int fd;
 
     explicit IRC_User(const int &fd);

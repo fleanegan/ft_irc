@@ -1,4 +1,4 @@
-#include "inc/IRC_User.hpp"
+#include "../inc/IRC_User.hpp"
 
 IRC_User::IRC_User(const int &fd) : nick(""), name(""), fd(fd){
 }
