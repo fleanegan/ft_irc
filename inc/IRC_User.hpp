@@ -4,18 +4,23 @@
 #include <vector>
 
 struct IRC_User{
-    std::string nick;
+	std::string nick;
     std::string name;
     std::string fullName;
+	std::string receivedCharacters;
+	std::string hostName;
+	bool isAuthenticated;
     int fd;
 
-    explicit IRC_User(const int &fd);
-    IRC_User(const std::string &nick, const std::string &name, const int &fd);
+	IRC_User(int fd, const std::string &hostName);
+	IRC_User(const std::string &nick, const std::string &name, const int &fd);
     static bool isValidCreationString(const std::vector<std::string>& splitMessageVector);
     static bool isNickValid(const std::string &nick);
 private:
-		IRC_User();
-
+	IRC_User();
+	//todo: implement
+//	IRC_User(const IRC_User &);
+//	IRC_User &operator=(const IRC_User &);
 };
 
 

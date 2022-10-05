@@ -15,18 +15,18 @@ TEST(IRC_Logic, noActionMeansNoReturnCode){
 	ASSERT_TRUE(logic.getReturnCodes().empty());
 }
 
-TEST(IRC_Logic, bullshitMessageDoesNotAddUser){
+TEST(IRC_Logic, firstConnectionOfFdAddsUserToList){
 	IRC_Logic logic("password");
 
-	logic.receive(0, "Bullshit One Two Three Four\r\n");
+	logic.processInput(0, "Bullshit One Two Three Four\r\n", "localhost");
 
-	ASSERT_TRUE(logic.getRegisteredUsers().empty());
+	ASSERT_EQ(1, logic.getRegisteredUsers().size());
 }
 
 TEST(IRC_Logic, userCreationMessageFollowedByOtherContentStopsAtDelimeter){
 	IRC_Logic logic("password");
 
-	logic.receive(0, "PASS password\r\nalkdfaslkfy");
+	logic.processInput(0, "PASS password\r\nalkdfaslkfy", "localhost");
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
 }
@@ -66,7 +66,7 @@ TEST(IRC_Logic, nickCannotContainReservedCharacter){
 TEST(IRC_Logic, sendingTwoCommandAtOnceShouldExecuteBoth){
     IRC_Logic logic("password");
 
-	logic.receive(0, "PASS password\r\nNICK JD\r\n");
+	logic.processInput(0, "PASS password\r\nNICK JD\r\n", "localhost");
     ASSERT_EQ(1, logic.getRegisteredUsers().size());
     ASSERT_STREQ("JD", logic.getRegisteredUsers()[0].nick.c_str());
 }
@@ -76,13 +76,13 @@ TEST(IRC_Logic, cannotSetNickWithoutSuccessfulPass){
 
 	setNick(&logic, 0, "JD");
 
-    ASSERT_TRUE(logic.getRegisteredUsers().empty());
+    ASSERT_STREQ("", logic.getRegisteredUsers().front().nick.c_str());
 }
 
 TEST(IRC_Logic, SuccessfulPassCommandAddsUser){
 	IRC_Logic logic("password");
 
-    logic.receive(0, "PASS password\r\n");
+	logic.processInput(0, "PASS password\r\n", "localhost");
 	setUser(&logic, 0, "nick", "Full Name");
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
@@ -91,8 +91,8 @@ TEST(IRC_Logic, SuccessfulPassCommandAddsUser){
 TEST(IRC_Logic, nickRegistersANickName){
     IRC_Logic logic("password");
 
-    logic.receive(0, "PASS password\r\n");
-    logic.receive(0, "NICK nickname\r\n");
+	logic.processInput(0, "PASS password\r\n", "localhost");
+	logic.processInput(0, "NICK nickname\r\n", "localhost");
 
     ASSERT_STREQ("nickname", logic.getRegisteredUsers()[0].nick.c_str());
 }
@@ -103,16 +103,15 @@ TEST(IRC_Logic, passFromDifferentFdDoesNotUnlockNick){
 	authenticate(&logic, 0, "password");
 	setNick(&logic, 1, "JD");
 
-    ASSERT_EQ(1, logic.getRegisteredUsers().size());
     ASSERT_STREQ("", logic.getRegisteredUsers()[0].nick.c_str());
 }
 
-TEST(IRC_Logic, wrongPasswordShouldNotGenerateUser){
+TEST(IRC_Logic, wrongPasswordDoesNotEnableRegistration){
 	IRC_Logic logic("password");
 
-	authenticate(&logic, 0, "wrongPassword");
+	registerUser(&logic, 0, "wrong password", "nick", "username", "Full Name");
 
-    ASSERT_TRUE(logic.getRegisteredUsers().empty());
+    ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
 }
 
 TEST(IRC_Logic, duplicateNickRequestMustNotBeSet){
@@ -135,23 +134,11 @@ TEST(IRC_Logic, userMessageSetsUserNameAndFullName){
 	IRC_Logic logic("password");
 
 	authenticate(&logic, 0, "password");
-	logic.receive(0, "USER JD JD * :John Doe\r\n");
+	logic.processInput(0, "USER JD JD * :John Doe\r\n", "localhost");
 	setNick(&logic, 0, "JayDee");
 	ASSERT_STREQ("JayDee", logic.getRegisteredUsers()[0].nick.c_str());
 	ASSERT_STREQ("JD", logic.getRegisteredUsers()[0].name.c_str());
 	ASSERT_STREQ("John Doe", logic.getRegisteredUsers()[0].fullName.c_str());
-}
-
-TEST(IRC_Logic, completedUserRegistrationSendsAcknowledgement){
-    IRC_Logic logic("password");
-
-	registerUser(&logic, 0, "password", "nick", "userName", "Full Name");
-
-    ASSERT_EQ(RPL_WELCOME, logic.getReturnCodes()[0]);
-    ASSERT_EQ(RPL_YOURHOST, logic.getReturnCodes()[1]);
-    ASSERT_EQ(RPL_CREATED, logic.getReturnCodes()[2]);
-    ASSERT_EQ(RPL_MYINFO, logic.getReturnCodes()[3]);
-    ASSERT_EQ(RPL_ISUPPORT, logic.getReturnCodes()[4]);
 }
 
 TEST(IRC_Logic, incompletedUserRegistrationDoesNotSendAcknowledgement){
@@ -172,6 +159,32 @@ TEST(IRC_Logic, incompletedNickRegistrationDoesNotSendAcknowledgement){
 	ASSERT_TRUE(logic.getReturnCodes().empty());
 }
 
+TEST(IRC_Logic, aUserPlacesMessageBetweenIncompleteMessageOfOtherUser){
+	IRC_Logic logic("password");
+
+	logic.processInput(0, "PASS passw", "localhost");
+	authenticate(&logic, 1, "password");
+	logic.processInput(0, "ord\r\n", "localhost");
+
+	ASSERT_EQ(2, logic.getRegisteredUsers().size());
+	ASSERT_TRUE(logic.getRegisteredUsers()[0].isAuthenticated);
+	ASSERT_TRUE(logic.getRegisteredUsers()[1].isAuthenticated);
+}
+
+TEST(IRC_Logic, processInputReturnsMessageAccordingToUserRequest){
+	IRC_Logic logic("password");
+	std::string rep;
+	IRC_User *user;
+	authenticate(&logic, 0, "password");
+	setNick(&logic, 0, "nick");
+
+	rep = setUser(&logic, 0, "username", "Full Name");
+	user = &logic.getRegisteredUsers()[0];
+
+	ASSERT_TRUE(isValidUserRegistrationResponse(rep));
+}
+
+// TEST(IRC_Logic, callingNickWhenSetChangesNick){
 /*
 TEST(IRC_Logic, SendingNickMultipleTimeShouldSendAnError){
 	IRC_Logic logic;
@@ -187,7 +200,7 @@ TEST(IRC_Logic, SendingNickMultipleTimeShouldSendAnError){
 TEST(IRC_Logic, weIgnoreAllCapabilityNegociation){
     IRC_Logic logic("password");
 
-    logic.receive("CAP LS 302\r\n");
+    logic.processInput("CAP LS 302\r\n");
     setUser(&logic, "camembert", "De Meaux");
 
     ASSERT_EQ(1, logic.getRegisteredUsers().size());
