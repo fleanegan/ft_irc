@@ -43,20 +43,18 @@ std::string IRC_Logic::processInput(int fd, const std::string &input, const std:
 }
 
 std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &splitMessageVector, IRC_User *user) {
-	std::string	result;
-
 	const std::vector<std::string> &splitMessageVector1 = splitMessageVector;
+
 	if (splitMessageVector1[0] == "PASS")
-		result += processPassMessage(user, splitMessageVector);
+		return processPassMessage(user, splitMessageVector);
 	else if (user->isAuthenticated == false)
 		return generateResponse(ERR_CONNECTWITHOUTPWD, "This server is password protected. Have you forgotten to send PASS?");
 	else if (splitMessageVector[0] == "NICK")
-		result += processNickMessage(user, splitMessageVector);
+		return processNickMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "USER")
-		result += processUserMessage(user, splitMessageVector);
+		return processUserMessage(user, splitMessageVector);
 	else
 		return "\r\n";
-	return result;
 }
 
 std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
