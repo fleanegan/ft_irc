@@ -238,6 +238,14 @@ TEST(IRC_Logic, sendingUserMessageTwiceReturnsError){
 	ASSERT_TRUE(reponseContainsCode(rep, ERR_ALREADYREGISTERED));
 }
 
+TEST(IRC_Logic, irssiLoginSequenceRegistersAUser){
+	IRC_Logic logic("password");
+	std::string rep;
+
+	rep = setNick(&logic, 0, "nick");
+
+	ASSERT_TRUE(reponseContainsCode(rep, ERR_CONNECTWITHOUTPWD));
+}
 
 // TEST(IRC_Logic, callingNickWhenSetChangesNick){
 // TEST(IRC_Logic, truncateNickNameToNineCharacters){

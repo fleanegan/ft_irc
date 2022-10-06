@@ -12,6 +12,7 @@
 # define ERR_NEEDMOREPARAMS "461"
 # define ERR_ALREADYREGISTERED "462"
 # define ERR_PASSWDMISMATCH "464"
+# define ERR_CONNECTWITHOUTPWD "ERROR"
 
 #include <string>
 #include "./IRC_User.hpp"

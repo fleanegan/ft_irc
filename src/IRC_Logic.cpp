@@ -49,7 +49,7 @@ std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &sp
 	if (splitMessageVector1[0] == "PASS")
 		result += processPassMessage(user, splitMessageVector);
 	else if (user->isAuthenticated == false)
-		return result; // todo: handle error here
+		return generateResponse(ERR_CONNECTWITHOUTPWD, "This server is password protected. Have you forgotten to send PASS?");
 	else if (splitMessageVector[0] == "NICK")
 		result += processNickMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "USER")
