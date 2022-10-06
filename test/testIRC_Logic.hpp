@@ -249,19 +249,9 @@ TEST(IRC_Logic, irssiLoginSequenceRegistersAUser){
 
 // TEST(IRC_Logic, callingNickWhenSetChangesNick){
 // TEST(IRC_Logic, truncateNickNameToNineCharacters){
+// TEST(IRC_Logic, sendingNickOnARegisteredUserChangesNick){
 
 /*
-TEST(IRC_Logic, SendingNickMultipleTimeShouldSendAnError){
-	IRC_Logic logic;
-
-	createUser(&logic, "nick", "Full Name");
-	createUser(&logic, "nick", "Full Name");
-
-	ASSERT_EQ(1, logic.getRegisteredUsers().size());
-	ASSERT_STREQ("nick", logic.getRegisteredUsers().at(0).nick.c_str());
-	ASSERT_STREQ("Full Name", logic.getRegisteredUsers().at(0).name.c_str());
-}
-
 TEST(IRC_Logic, weIgnoreAllCapabilityNegociation){
     IRC_Logic logic("password");
 
@@ -270,7 +260,8 @@ TEST(IRC_Logic, weIgnoreAllCapabilityNegociation){
 
     ASSERT_EQ(1, logic.getRegisteredUsers().size());
 }
-
 */
 
 #endif //TEST_TESTIRC_LOGIC_HPP_
+
+//for (std::vector<pollfd>::reverse_iterator it = _fds.rbegin(); it < _fds.rend() - 1; ++it) {

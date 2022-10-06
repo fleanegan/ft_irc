@@ -7,10 +7,6 @@ IRC_Server::IRC_Server( void ): TCP_Server(), _logic("password") {
 IRC_Server::IRC_Server( int port, const std::string& password): TCP_Server(port), _logic(password) {
 }
 
-IRC_Server::IRC_Server( const IRC_Server& other):TCP_Server(*this), _logic(other._logic) {
-	(void)other;
-}
-
 IRC_Server::~IRC_Server() {
 }
 

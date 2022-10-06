@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#define BUFFER_LEN 1024
 
 class TCP_Server {
 	protected:
@@ -18,17 +19,14 @@ class TCP_Server {
 		struct sockaddr_in	_servAddr;
 		int	_port;
 
+	TCP_Server( const TCP_Server& other );
+	TCP_Server& operator = ( const TCP_Server& other);
+
 	public:
 		TCP_Server( void );
 		TCP_Server( int port);
-		TCP_Server( const TCP_Server& other );
-
-		TCP_Server& operator = ( const TCP_Server& other);
-
 		~TCP_Server( void );
-
 		virtual std::string	processMessage( int fd, const std::string& buffer ) = 0;
-
 		void	host( void );
 
 		class socketFailedException: public std::exception {
@@ -45,6 +43,9 @@ class TCP_Server {
 			public:
 				virtual const char* what() const throw();
 		};
+
+	void setUpTcpSocket(int port);
+	void saveConnectionInfo(int fd);
 };
 
 #endif // INC_TCP_SERVER_HPP_
