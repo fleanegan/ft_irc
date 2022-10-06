@@ -50,10 +50,13 @@ bool isValidUserRegistrationResponse(const std::string &returnMessage){
 			returnMessage.find(RPL_ISUPPORT) != std::string::npos;
 }
 
-bool reponseContainsCode(const std::string &returnMessage, const std::string &code){
+bool responseContainsCode(const std::string &returnMessage, const std::string &code){
 	return 	returnMessage.find(code) != std::string::npos;
 }
 
+void registerDummyUser(IRC_Logic *logic){
+	registerUser(logic, 0, "password", "nick", "username", "Full Name");
+}
 
 
 #endif     // TEST_TESTUTILS_HPP_

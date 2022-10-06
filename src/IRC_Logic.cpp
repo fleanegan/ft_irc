@@ -28,7 +28,7 @@ void IRC_Logic::cleanupName(std::string *name) {
 std::string IRC_Logic::processInput(int fd, const std::string &input) {
 	std::vector<std::string> splitMessageVector;
 	IRC_User *currentUser = getUserByFd(fd);
-	std::string	result;
+	std::string result;
 
 	if (currentUser == NULL) {
 		_users.push_back(IRC_User(fd));
@@ -50,13 +50,24 @@ std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &sp
 	else if (splitMessageVector[0] == "CAP")
 		return "";
 	else if (user->isAuthenticated == false)
-		return generateResponse(ERR_CONNECTWITHOUTPWD, "This server is password protected. Have you forgotten to send PASS?");
+		return generateResponse(ERR_CONNECTWITHOUTPWD,
+								"This server is password protected. Have you forgotten to send PASS?");
 	else if (splitMessageVector[0] == "NICK")
 		return processNickMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "USER")
 		return processUserMessage(user, splitMessageVector);
+	else if (splitMessageVector[0] == "PRIVMSG")
+		return processPrivMsgMessage(splitMessageVector);
 	else
 		return "";
+}
+
+std::string IRC_Logic::processPrivMsgMessage(const std::vector<std::string>& splitMessageVector) {
+	if (splitMessageVector.size() < 3)
+		return generateResponse(ERR_NOTEXTTOSEND, "Dont bother your friends if you have nothing to tell them! Add a message");
+	if (!getUserByNick(splitMessageVector[1]))
+		return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This nick does not exist!");
+	return "";
 }
 
 std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -65,8 +76,7 @@ std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std:
 	if (splitMessageVector.size() == 2 && splitMessageVector[1] == _password) {
 		user->isAuthenticated = true;
 		return "";
-	}
-	else if (splitMessageVector.size() == 1)
+	} else if (splitMessageVector.size() == 1)
 		return generateResponse(ERR_NEEDMOREPARAMS, "You did not enter a password");
 	return generateResponse(ERR_PASSWDMISMATCH, "You did not enter the correct password");
 }
@@ -148,6 +158,15 @@ IRC_User *IRC_Logic::getUserByFd(const int &fd) {
 	for (std::vector<IRC_User>::iterator it = _users.begin();
 		 it != _users.end(); it++) {
 		if (it->fd == fd)
+			return &(*it);
+	}
+	return NULL;
+}
+
+IRC_User *IRC_Logic::getUserByNick(const std::string &nick) {
+	for (std::vector<IRC_User>::iterator it = _users.begin();
+		 it != _users.end(); it++) {
+		if (it->nick == nick)
 			return &(*it);
 	}
 	return NULL;
