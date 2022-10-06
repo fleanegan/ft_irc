@@ -8,7 +8,6 @@
 
 class IRC_Logic {
 private:
-    std::vector<int> _returnCodes;
     std::string _password;
     std::vector<IRC_User> _users;
 

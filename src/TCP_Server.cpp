@@ -66,7 +66,8 @@ void TCP_Server::host(void) {
 					_VERBOSE && std::cerr << "content:\n\t" << buffer << std::endl;
 					response = processMessage(it->fd, buffer);
 					_VERBOSE && std::cerr << "sending:\n\t" << response << std::endl;
-					send(it->fd, response.c_str(), response.size(), 0);
+					if (response.size() > 0)
+						send(it->fd, response.c_str(), response.size(), 0);
 				}
 			}
 		}

@@ -47,6 +47,8 @@ std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &sp
 
 	if (splitMessageVector1[0] == "PASS")
 		return processPassMessage(user, splitMessageVector);
+	else if (splitMessageVector[0] == "CAP")
+		return "";
 	else if (user->isAuthenticated == false)
 		return generateResponse(ERR_CONNECTWITHOUTPWD, "This server is password protected. Have you forgotten to send PASS?");
 	else if (splitMessageVector[0] == "NICK")
@@ -54,7 +56,7 @@ std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &sp
 	else if (splitMessageVector[0] == "USER")
 		return processUserMessage(user, splitMessageVector);
 	else
-		return "\r\n";
+		return "";
 }
 
 std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -78,7 +80,7 @@ std::string IRC_Logic::processNickMessage(IRC_User *user, const std::vector<std:
 		return generateResponse(ERR_ERRONEOUSNICK, "Sigh, think again. NO FORBIDDEN CHARACTERS!");
 	else if (isNickAlreadyPresent(splitMessageVector[1]))
 		return generateResponse(ERR_NICKNAMEINUSE, "Sorry, someone was just as creative as you are.");
-	user->nick = splitMessageVector[1];
+	user->nick = splitMessageVector[1].substr(0, 9);
 	return welcomeNewUser(user);
 }
 
@@ -147,10 +149,6 @@ std::vector<std::string> IRC_Logic::extractFirstMessage(IRC_User *user) {
 
 std::vector<IRC_User> IRC_Logic::getRegisteredUsers() {
 	return _users;
-}
-
-std::vector<int> IRC_Logic::getReturnCodes() {
-	return _returnCodes;
 }
 
 IRC_User *IRC_Logic::getUserByFd(const int &fd) {
