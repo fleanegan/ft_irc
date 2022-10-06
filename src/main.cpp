@@ -13,7 +13,7 @@ int	main(int ac, char **av)
 		return 1;
 	}
 	try {
-		IRC_Server server(atoi(av[1]), 1);
+		IRC_Server server(atoi(av[1]), av[2]);
 		server.host();
 	} catch (const std::exception& e) {
 		std::cout << "ircserv: " << e.what() << std::endl;

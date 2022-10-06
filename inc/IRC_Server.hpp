@@ -7,26 +7,23 @@
 #include <vector>
 #include <queue>
 
+#include "./IRC_Logic.hpp"
 #include "./TCP_Server.hpp"
 
 class IRC_Server: public TCP_Server {
 	private:
-		std::queue<std::string>	_commands;
-		std::string	_remain;
-
-		std::string	retrieveMessage( char* buffer );
-		std::string	processCommand( std::string command );
+		IRC_Logic _logic;
 	public:
 		IRC_Server( void );
-		IRC_Server( int port, int opt);
+		IRC_Server( int port, const std::string& password);
 		IRC_Server( const IRC_Server& other);
 
 		~IRC_Server();
 
 		IRC_Server& operator = (const IRC_Server& other);
 
-		void	getMessage( char* buffer );
-		std::string	sendMessage( void );
+		std::string processMessage(int fd, const std::string& buffer);
+
 };
 
 #endif // INC_IRC_SERVER_HPP_

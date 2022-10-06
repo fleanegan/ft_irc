@@ -37,7 +37,6 @@ private:
 	std::string processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	bool userIsRegistered(IRC_User* user);
-	bool isAuthenticationMessage(const std::vector<std::string> &splitMessageVector) const;
 	std::string welcomeNewUser(IRC_User *user);
 };
 #endif //INC_IRC_LOGIC_HPP_

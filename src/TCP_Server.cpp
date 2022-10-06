@@ -1,32 +1,38 @@
 #include "../inc/TCP_Server.hpp"
 
 TCP_Server::TCP_Server( void ) {
-	_opt = 1;
-	_addrLen = sizeof(_addr);
-	if ((_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+	socklen_t addrLen = sizeof(_servAddr);
+	int opt = 0;
+
+	_fds.push_back((pollfd){0, POLLIN, 0});
+	if ((_fds.front().fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
 		throw socketFailedException();
-	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-				&_opt, sizeof(_opt)))
+	if (setsockopt(_fds.front().fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
+				&opt, sizeof(opt)))
 		throw socketFailedException();
-	_addr.sin_family = AF_INET;
-	_addr.sin_addr.s_addr = INADDR_ANY;
-	_addr.sin_port = htons(6667);
-	if (bind(_fd, reinterpret_cast<struct sockaddr*>(&_addr), _addrLen))
+	_servAddr.sin_family = AF_INET;
+	_servAddr.sin_addr.s_addr = INADDR_ANY;
+	_servAddr.sin_port = htons(6667);
+	if (bind(_fds.front().fd, reinterpret_cast<struct sockaddr*>(&_servAddr),
+				addrLen))
 		throw couldNotBindException();
 }
 
-TCP_Server::TCP_Server( int port, int opt) {
-	_opt = opt;
-	_addrLen = sizeof(_addr);
-	if ((_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+TCP_Server::TCP_Server( int port ) {
+	socklen_t addrLen = sizeof(_servAddr);
+	int opt = 0;
+
+	_fds.push_back((pollfd){0, POLLIN, 0});
+	if ((_fds.front().fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
 		throw socketFailedException();
-	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-				&_opt, sizeof(_opt)))
+	if (setsockopt(_fds.front().fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
+				&opt, sizeof(opt)))
 		throw socketFailedException();
-	_addr.sin_family = AF_INET;
-	_addr.sin_addr.s_addr = INADDR_ANY;
-	_addr.sin_port = htons(port);
-	if (bind(_fd, reinterpret_cast<struct sockaddr*>(&_addr), _addrLen))
+	_servAddr.sin_family = AF_INET;
+	_servAddr.sin_addr.s_addr = INADDR_ANY;
+	_servAddr.sin_port = htons(port);
+	if (bind(_fds.front().fd, reinterpret_cast<struct sockaddr*>(&_servAddr),
+				addrLen))
 		throw couldNotBindException();
 }
 
@@ -37,58 +43,53 @@ TCP_Server::TCP_Server( const TCP_Server& other ) {
 TCP_Server& TCP_Server::operator = ( const TCP_Server& other) {
 	if (this != &other)
 	{
-		_fd = other.getFd();
-		_opt = other.getOpt();
-		_port = other.getPort();
-		_addrLen = other.getAddrLen();
-		_addr = other.getAddr();
+		_fds = other._fds;
+		_port = other._port;
+		_servAddr = other._servAddr;
 	}
 	return *this;
 }
 
 TCP_Server::~TCP_Server( void ) {
-	shutdown(_fd, SHUT_RDWR);
+	shutdown(_fds.front().fd, SHUT_RDWR);
 }
 
 void	TCP_Server::host( void ) {
-	int		new_socket;
-	int		valread;
-	char	buffer[1024];
+	sockaddr_in	cliaddr;
+	socklen_t addrLen = sizeof(cliaddr);
+	std::string response;
+	char buffer[1024];
+	int	bytesRead;
+	int newClient;
 
-	if (listen(_fd, 3) < 0)
-		throw brokenConnectionException();
-	if ((new_socket = accept(_fd, reinterpret_cast<struct sockaddr*>(&_addr),
-				reinterpret_cast<socklen_t*>(&_addrLen))) < 0)
-		throw brokenConnectionException();
-	while ((valread = recv(new_socket, buffer, 1024, 0)) != 0)
-	{
-		if (valread < 0)
-			throw brokenConnectionException();
-		getMessage(buffer);
-		std::string rep = sendMessage();
-		send(new_socket, rep.c_str(), rep.size(), 0);
+	listen(_fds.front().fd, 3);
+	while (1) {
+		if (!poll(_fds.data(), _fds.size(), -1))
+			break;
+		if (_fds.front().revents & POLLIN) {
+			std::cerr << "New client socket" << std::endl;
+			newClient = accept(_fds.front().fd, reinterpret_cast<sockaddr*>(&cliaddr), &addrLen),
+			_fds.push_back((pollfd){ newClient, POLLIN | POLLERR, 0});
+		}
+		for (std::vector<pollfd>::iterator it = ++_fds.begin(); it != _fds.end(); ++it) {
+			memset(buffer, 0, 1024);
+			if (it->fd != -1 && it->revents & POLLIN) {
+				bytesRead = recv(it->fd, buffer, 1024, 0);
+				if (bytesRead <= 0) {
+					std::cerr << "Connection closed with " << it->fd << std::endl;
+					close(it->fd);
+					it->fd = -1;
+				}
+				else {
+					std::cerr << "read "<< bytesRead << " bytes from fd " << it->fd << std::endl;
+					std::cerr << "content:\n\t" << buffer << std::endl;
+					response = processMessage(it->fd, buffer);
+					std::cerr << "sending:\n\t" << response << std::endl;
+					send(it->fd, response.c_str(), response.size(), 0);
+				}
+			}	
+		}
 	}
-    close(new_socket);
-}
-
-int	TCP_Server::getFd( void ) const {
-	return _fd;
-}
-
-int	TCP_Server::getOpt( void ) const {
-	return _opt;
-}
-
-int	TCP_Server::getPort( void ) const {
-	return _port;
-}
-
-int	TCP_Server::getAddrLen( void ) const {
-	return _addrLen;
-}
-
-struct sockaddr_in	TCP_Server::getAddr( void ) const {
-	return _addr;
 }
 
 const char* TCP_Server::socketFailedException::what() const throw() {

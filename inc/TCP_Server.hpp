@@ -4,37 +4,32 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <poll.h>
+#include <iostream>
+#include <cstring>
 #include <exception>
 #include <string>
+#include <vector>
 
 
 class TCP_Server {
 	protected:
-		int	_fd;
-		int	_opt;
+		std::vector<struct pollfd> _fds;
+		struct sockaddr_in	_servAddr;
 		int	_port;
-		int	_addrLen;
-		struct sockaddr_in	_addr;
 
 	public:
 		TCP_Server( void );
-		TCP_Server( int port, int opt);
+		TCP_Server( int port);
 		TCP_Server( const TCP_Server& other );
 
 		TCP_Server& operator = ( const TCP_Server& other);
 
 		~TCP_Server( void );
 
-		virtual void	getMessage( char* buffer ) = 0;
-		virtual std::string	sendMessage( void ) = 0;
+		virtual std::string	processMessage( int fd, const std::string& buffer ) = 0;
 
 		void	host( void );
-
-		int	getFd( void ) const;
-		int	getOpt( void ) const;
-		int	getPort( void ) const;
-		int	getAddrLen( void ) const;
-		struct sockaddr_in	getAddr( void ) const;
 
 		class socketFailedException: public std::exception {
 			public:

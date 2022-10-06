@@ -25,10 +25,6 @@ void IRC_Logic::cleanupName(std::string *name) {
 	name->erase(name->size() - 1, 1);
 }
 
-bool IRC_Logic::isUserMessage(const std::vector<std::string> &splitMessageVector) const {
-	return splitMessageVector[0] == "USER";
-}
-
 std::string IRC_Logic::processInput(int fd, const std::string &input, const std::string &hostName) {
 	std::vector<std::string> splitMessageVector;
 	IRC_User *currentUser = getUserByFd(fd);
@@ -49,20 +45,18 @@ std::string IRC_Logic::processInput(int fd, const std::string &input, const std:
 std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &splitMessageVector, IRC_User *user) {
 	std::string	result;
 
-	if (isAuthenticationMessage(splitMessageVector))
+	const std::vector<std::string> &splitMessageVector1 = splitMessageVector;
+	if (splitMessageVector1[0] == "PASS")
 		result += processPassMessage(user, splitMessageVector);
 	else if (user->isAuthenticated == false)
 		return result; // todo: handle error here
-	else if (isNickMessage(splitMessageVector))
+	else if (splitMessageVector[0] == "NICK")
 		result += processNickMessage(user, splitMessageVector);
-	else if (isUserMessage(splitMessageVector))
+	else if (splitMessageVector[0] == "USER")
 		result += processUserMessage(user, splitMessageVector);
+	else
+		return "\r\n";
 	return result;
-}
-
-//todo: inline function
-bool IRC_Logic::isAuthenticationMessage(const std::vector<std::string> &splitMessageVector) const {
-	return splitMessageVector[0] == "PASS";
 }
 
 std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -109,11 +103,6 @@ std::string IRC_Logic::welcomeNewUser(IRC_User *user) {
 			   + generateResponse(RPL_ISUPPORT, "Moderate demands");
 	}
 	return "";
-}
-
-//todo: inline function
-bool IRC_Logic::isNickMessage(const std::vector<std::string> &splitMessageVector) const {
-	return splitMessageVector[0] == "NICK";
 }
 
 bool IRC_Logic::isNickAlreadyPresent(const std::string &nick) {
