@@ -16,5 +16,5 @@ IRC_Server& IRC_Server::operator = (const IRC_Server& other) {
 }
 
 std::string IRC_Server::processMessage(int fd, const std::string& buffer) {
-	return _logic.processInput(fd, buffer, "localhost");
+	return _logic.processInput(fd, buffer);
 }

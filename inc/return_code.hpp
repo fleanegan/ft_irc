@@ -14,8 +14,4 @@
 # define ERR_PASSWDMISMATCH "464"
 # define ERR_CONNECTWITHOUTPWD "ERROR"
 
-#include <string>
-#include "./IRC_User.hpp"
-
-std::string generateResponse(const std::string& returnCode, const std::string& explanation);
 #endif //INC_RETURN_CODE_HPP_

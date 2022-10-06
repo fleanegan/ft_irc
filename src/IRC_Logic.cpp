@@ -25,13 +25,13 @@ void IRC_Logic::cleanupName(std::string *name) {
 	name->erase(name->size() - 1, 1);
 }
 
-std::string IRC_Logic::processInput(int fd, const std::string &input, const std::string &hostName) {
+std::string IRC_Logic::processInput(int fd, const std::string &input) {
 	std::vector<std::string> splitMessageVector;
 	IRC_User *currentUser = getUserByFd(fd);
 	std::string	result;
 
 	if (currentUser == NULL) {
-		_users.push_back(IRC_User(fd, hostName));
+		_users.push_back(IRC_User(fd));
 		currentUser = &_users.back();
 	}
 	currentUser->receivedCharacters += input;
@@ -95,7 +95,7 @@ std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std:
 }
 
 std::string IRC_Logic::welcomeNewUser(IRC_User *user) {
-	if (userIsRegistered(user)) {
+	if (isUserRegistered(user)) {
 		return generateResponse(RPL_WELCOME, "Welcome to the land of fromage")
 			   + generateResponse(RPL_YOURHOST, "This is a ft_irc server")
 			   + generateResponse(RPL_CREATED, "The server was probably created in 2022")
@@ -112,23 +112,16 @@ bool IRC_Logic::isNickAlreadyPresent(const std::string &nick) {
 	return false;
 }
 
-std::string IRC_Logic::stringToLower(const std::string &input) const {
-	std::string result;
-
-	for (std::string::const_iterator it = input.begin();
-		 it != input.end(); ++it) {
-		result += tolower(*it);
-	}
-	return result;
-}
-
 std::string IRC_Logic::buildFullName(const std::vector<std::string> &splitMessageVector) {
 	std::string name;
 
 	for (size_t i = 4; i < splitMessageVector.size(); i++) {
-		name += splitMessageVector[i] + " ";
+		name += splitMessageVector[i];
+		if (i < splitMessageVector.size() - 1)
+			name += " ";
 	}
-	cleanupName(&name);
+	if (name[0] == ':')
+		name = name.substr(1, name.size());
 	return name;
 }
 
@@ -160,7 +153,7 @@ IRC_User *IRC_Logic::getUserByFd(const int &fd) {
 	return NULL;
 }
 
-bool IRC_Logic::userIsRegistered(IRC_User *user) {
+bool IRC_Logic::isUserRegistered(IRC_User *user) {
 	if (!user || user->nick == "" || user->name == "" || user->fullName == "")
 		return false;
 	return true;

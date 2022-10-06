@@ -5,6 +5,7 @@
 #include <queue>
 #include "./IRC_User.hpp"
 #include "./return_code.hpp"
+#include "./utils.hpp"
 
 class IRC_Logic {
 private:
@@ -17,7 +18,7 @@ public:
     IRC_Logic(const IRC_Logic &other);
     IRC_Logic &operator=(const IRC_Logic &);
     ~IRC_Logic();
-	std::string processInput(int fd, const std::string &input, const std::string &hostName);
+	std::string processInput(int fd, const std::string &input);
 	std::vector<IRC_User> getRegisteredUsers();
 	IRC_User *getUserByFd(const int &fd);
 	std::vector<int> getReturnCodes();
@@ -30,12 +31,11 @@ private:
     bool isUserMessage(const std::vector<std::string> &splitMessageVector) const;
     bool isNickAlreadyPresent(const std::string &nick);
     bool isNickMessage(const std::vector<std::string> &splitMessageVector) const;
-    std::string stringToLower(const std::string &input) const;
 	std::string processIncomingMessage(const std::vector<std::string> &splitMessageVector, IRC_User *user);
 	std::string processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	bool userIsRegistered(IRC_User* user);
+	bool isUserRegistered(IRC_User* user);
 	std::string welcomeNewUser(IRC_User *user);
 };
 #endif //INC_IRC_LOGIC_HPP_

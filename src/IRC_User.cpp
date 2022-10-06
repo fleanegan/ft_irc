@@ -1,6 +1,6 @@
 #include "../inc/IRC_User.hpp"
 
-IRC_User::IRC_User(int fd, const std::string &hostName) : hostName(hostName), isAuthenticated(false), fd(fd){
+IRC_User::IRC_User(int fd) : isAuthenticated(false), fd(fd){
 }
 
 IRC_User::IRC_User(const std::string &nick, const std::string &name, const int &fd):

@@ -8,11 +8,10 @@ struct IRC_User{
     std::string name;
     std::string fullName;
 	std::string receivedCharacters;
-	std::string hostName;
 	bool isAuthenticated;
     int fd;
 
-	IRC_User(int fd, const std::string &hostName);
+	IRC_User(int fd);
 	IRC_User(const std::string &nick, const std::string &name, const int &fd);
 	static bool isNickValid(const std::string &nick);
 private:

@@ -8,15 +8,15 @@
 #include "../inc/return_code.hpp"
 
 std::string authenticate(IRC_Logic *logic, int fd, const std::string &password ){
-	return logic->processInput(fd, "PASS " + password + "\r\n", "hostName");
+	return logic->processInput(fd, "PASS " + password + "\r\n");
 }
 
 std::string setUser(IRC_Logic *logic, int fd, const std::string &userName, const std::string &fullName) {
-	return logic->processInput(fd, "USER " + userName + " " + userName + " * :" + fullName + "\r\n", "hostName");
+	return logic->processInput(fd, "USER " + userName + " " + userName + " * :" + fullName + "\r\n");
 }
 
 std::string setNick(IRC_Logic *logic, int fd, const std::string &nick) {
-	return logic->processInput(fd, "NICK " + nick + "\r\n", "hostName");
+	return logic->processInput(fd, "NICK " + nick + "\r\n");
 }
 
 std::string authenticateAndSetNick(IRC_Logic *logic, int fd, const std::string &password, const std::string &nick){
