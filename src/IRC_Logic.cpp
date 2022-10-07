@@ -49,6 +49,8 @@ std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &sp
 		return processPassMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "CAP")
 		return "";
+	else if (splitMessageVector[0] == "PING")
+		return processPingMessage(splitMessageVector);
 	else if (user->isAuthenticated == false)
 		return generateResponse(ERR_CONNECTWITHOUTPWD,
 								"This server is password protected. Have you forgotten to send PASS?");
@@ -80,6 +82,12 @@ std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std:
 		return generateResponse(ERR_NEEDMOREPARAMS, "You did not enter a password");
 	}
 	return generateResponse(ERR_PASSWDMISMATCH, "You did not enter the correct password");
+}
+
+std::string IRC_Logic::processPingMessage(const std::vector<std::string> &splitMessageVector) {
+	if (splitMessageVector.size() == 1)
+		return generateResponse(ERR_NEEDMOREPARAMS, "Ping must have a token");
+	return ("PONG " + splitMessageVector[1] + "\r\n");
 }
 
 std::string IRC_Logic::processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {

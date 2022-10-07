@@ -12,7 +12,7 @@ TEST(IRC_LogicPrivateMessage, sendingToNonExistingNickGeneratesError) {
 
 	result = logic.processInput(0, "PRIVMSG nonExisingNick content\r\n");
 
-	ASSERT_TRUE(responseContainsCode(result, ERR_NOSUCHNICK));
+	ASSERT_TRUE(responseContains(result, ERR_NOSUCHNICK));
 }
 
 TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
@@ -22,7 +22,7 @@ TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
 
 	result = logic.processInput(0, "PRIVMSG nonExisingNick\r\n");
 
-	ASSERT_TRUE(responseContainsCode(result, ERR_NOTEXTTOSEND));
+	ASSERT_TRUE(responseContains(result, ERR_NOTEXTTOSEND));
 }
 
 TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageShouldNotGenerateError) {
@@ -30,7 +30,6 @@ TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageShouldNotGenerateError) 
 	std::string result;
 	registerDummyUser(&logic);
 	registerUser(&logic, 0, "password", "otherNick", "usernam", "Fuller Name");
-
 
 	result = logic.processInput(0, "PRIVMSG otherNick content\r\n");
 

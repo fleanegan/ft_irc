@@ -38,6 +38,7 @@ private:
 	std::string processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+	std::string processPingMessage(const std::vector<std::string> &splitMessageVector);
 	std::string processPrivMsgMessage(const std::vector<std::string>& splitMessageVector);
 };
 #endif //INC_IRC_LOGIC_HPP_

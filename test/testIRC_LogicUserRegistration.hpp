@@ -58,7 +58,7 @@ TEST(IRC_LogicUserRegistration, nickCannotContainReservedCharacter) {
 	result = authenticateAndSetNick(&logic, 5, "password", "hello world");
 
 	assertAllNicksEmpty(&logic);
-	ASSERT_TRUE(responseContainsCode(result, ERR_ERRONEOUSNICK));
+	ASSERT_TRUE(responseContains(result, ERR_ERRONEOUSNICK));
 }
 
 TEST(IRC_LogicUserRegistration, sendingTwoCommandAtOnceShouldExecuteBoth) {
@@ -110,7 +110,7 @@ TEST(IRC_LogicUserRegistration, wrongPasswordDoesNotEnableRegistration) {
 	std::string result = registerUser(&logic, 0, "wrong password", "nick", "username", "Full Name");
 
 	ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
-	ASSERT_TRUE(responseContainsCode(result, ERR_PASSWDMISMATCH));
+	ASSERT_TRUE(responseContains(result, ERR_PASSWDMISMATCH));
 }
 
 TEST(IRC_LogicUserRegistration, noPasswordSendReturnsError) {
@@ -119,7 +119,7 @@ TEST(IRC_LogicUserRegistration, noPasswordSendReturnsError) {
 	std::string result = logic.processInput(0, "PASS\r\n");
 
 	ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
-	ASSERT_TRUE(responseContainsCode(result, ERR_NEEDMOREPARAMS));
+	ASSERT_TRUE(responseContains(result, ERR_NEEDMOREPARAMS));
 }
 
 TEST(IRC_LogicUserRegistration, duplicatePassReturnsError) {
@@ -128,7 +128,7 @@ TEST(IRC_LogicUserRegistration, duplicatePassReturnsError) {
 	authenticate(&logic, 0, "password");
 	std::string result = authenticate(&logic, 0, "password");
 
-	ASSERT_TRUE(responseContainsCode(result, ERR_ALREADYREGISTERED));
+	ASSERT_TRUE(responseContains(result, ERR_ALREADYREGISTERED));
 }
 
 TEST(IRC_LogicUserRegistration, duplicateNickRequestMustNotBeSet) {
@@ -146,7 +146,7 @@ TEST(IRC_LogicUserRegistration, nickApprovalShouldBeCaseInsensitive) {
 	std::string result = authenticateAndSetNick(&logic, 1, "password", "jD");
 
 	ASSERT_STREQ("", logic.getRegisteredUsers()[1].nick.c_str());
-	ASSERT_TRUE(responseContainsCode(result, ERR_NICKNAMEINUSE));
+	ASSERT_TRUE(responseContains(result, ERR_NICKNAMEINUSE));
 }
 
 TEST(IRC_LogicUserRegistration, nickWithoutParameterReturnsError) {
@@ -155,7 +155,7 @@ TEST(IRC_LogicUserRegistration, nickWithoutParameterReturnsError) {
 
 	authenticate(&logic, 0, "password");
 	result = logic.processInput(0, "NICK\r\n");
-	ASSERT_TRUE(responseContainsCode(result, ERR_NONICKNAMEGIVEN));
+	ASSERT_TRUE(responseContains(result, ERR_NONICKNAMEGIVEN));
 }
 
 TEST(IRC_LogicUserRegistration, userRegistrationWorksNoMatterTheUserNickOrder) {
@@ -222,7 +222,7 @@ TEST(IRC_LogicUserRegistration, blankUserNameReturnsError) {
 
 	rep = logic.processInput(0, "USER\r\n");
 
-	ASSERT_TRUE(responseContainsCode(rep, ERR_NEEDMOREPARAMS));
+	ASSERT_TRUE(responseContains(rep, ERR_NEEDMOREPARAMS));
 }
 
 TEST(IRC_LogicUserRegistration, sendingUserMessageTwiceReturnsError) {
@@ -233,7 +233,7 @@ TEST(IRC_LogicUserRegistration, sendingUserMessageTwiceReturnsError) {
 	rep = setUser(&logic, 0, "user", "Full User");
 	rep = setUser(&logic, 0, "user", "Full User");
 
-	ASSERT_TRUE(responseContainsCode(rep, ERR_ALREADYREGISTERED));
+	ASSERT_TRUE(responseContains(rep, ERR_ALREADYREGISTERED));
 }
 
 TEST(IRC_LogicUserRegistration, irssiLoginSequenceRegistersAUser) {
@@ -242,7 +242,7 @@ TEST(IRC_LogicUserRegistration, irssiLoginSequenceRegistersAUser) {
 
 	rep = setNick(&logic, 0, "nick");
 
-	ASSERT_TRUE(responseContainsCode(rep, ERR_CONNECTWITHOUTPWD));
+	ASSERT_TRUE(responseContains(rep, ERR_CONNECTWITHOUTPWD));
 }
 
 TEST(IRC_LogicUserRegistration, callingNickWhenSetChangesNick) {
@@ -277,6 +277,24 @@ TEST(IRC_LogicUserRegistration, capabilitiesNegociationRequestShouldBeignored){
 	registerUser(&logic, 0, "password", "nick", "username", "Full name");
 
 	ASSERT_STREQ("Full name", logic.getRegisteredUsers().front().fullName.c_str());
+}
+
+TEST(IRC_LogicUserRegistration, receivingPingReturnsPong){
+	IRC_Logic logic("password");
+	std::string result;
+
+	result = logic.processInput(0, "PING nonEmptyToken\r\n");
+
+	ASSERT_TRUE(responseContains(result, "nonEmptyToken"));
+}
+
+TEST(IRC_LogicUserRegistration, receivingPingWithoutArgumentsReturnsError){
+	IRC_Logic logic("password");
+	std::string result;
+
+	result = logic.processInput(0, "PING\r\n");
+
+	ASSERT_TRUE(responseContains(result, ERR_NEEDMOREPARAMS));
 }
 
 #endif //TEST_TESTIRC_LOGICUSERREGISTRATION_HPP_
