@@ -1,5 +1,5 @@
-#include "../inc/return_code.hpp"
 #include <string>
+#include "../inc/return_code.hpp"
 
 std::string generateResponse(const std::string &returnCode, const std::string &explanation) {
 	std::string result;

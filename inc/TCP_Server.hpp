@@ -14,35 +14,36 @@
 #define BUFFER_LEN 1024
 
 class TCP_Server {
-	protected:
-		std::vector<struct pollfd> _fds;
-		struct sockaddr_in	_servAddr;
-		int	_port;
 
-	TCP_Server( const TCP_Server& other );
-	TCP_Server& operator = ( const TCP_Server& other);
+private:
+	TCP_Server(const TCP_Server &other);
+	TCP_Server &operator=(const TCP_Server &other);
+protected:
+	std::vector<struct pollfd> _fds;
+	struct sockaddr_in _servAddr;
+	int _port;
 
+public:
+	TCP_Server(void);
+	explicit TCP_Server(int port);
+	~TCP_Server(void);
+	virtual std::string processMessage(int fd, const std::string &buffer) = 0;
+	void host(void);
+
+	class socketFailedException : public std::exception {
 	public:
-		TCP_Server( void );
-		TCP_Server( int port);
-		~TCP_Server( void );
-		virtual std::string	processMessage( int fd, const std::string& buffer ) = 0;
-		void	host( void );
+		virtual const char *what() const throw();
+	};
 
-		class socketFailedException: public std::exception {
-			public:
-				virtual const char* what() const throw();
-		};
+	class couldNotBindException : public std::exception {
+	public:
+		virtual const char *what() const throw();
+	};
 
-		class couldNotBindException: public std::exception {
-			public:
-				virtual const char* what() const throw();
-		};
-
-		class brokenConnectionException: public std::exception {
-			public:
-				virtual const char* what() const throw();
-		};
+	class brokenConnectionException : public std::exception {
+	public:
+		virtual const char *what() const throw();
+	};
 
 	void setUpTcpSocket(int port);
 	void saveConnectionInfo(int fd);

@@ -1,6 +1,7 @@
 #ifndef TEST_TESTIRC_LOGICUSERREGISTRATION_HPP_
 #define TEST_TESTIRC_LOGICUSERREGISTRATION_HPP_
 
+#include <string>
 #include "./testUtils.hpp"
 #include "gtest/gtest.h"
 

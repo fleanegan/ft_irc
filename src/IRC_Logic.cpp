@@ -76,8 +76,9 @@ std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std:
 	if (splitMessageVector.size() == 2 && splitMessageVector[1] == _password) {
 		user->isAuthenticated = true;
 		return "";
-	} else if (splitMessageVector.size() == 1)
+	} else if (splitMessageVector.size() == 1){
 		return generateResponse(ERR_NEEDMOREPARAMS, "You did not enter a password");
+	}
 	return generateResponse(ERR_PASSWDMISMATCH, "You did not enter the correct password");
 }
 

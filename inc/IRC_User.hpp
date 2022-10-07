@@ -11,7 +11,7 @@ struct IRC_User{
 	bool isAuthenticated;
     int fd;
 
-	IRC_User(int fd);
+	explicit IRC_User(int fd);
 	IRC_User(const std::string &nick, const std::string &name, const int &fd);
 	static bool isNickValid(const std::string &nick);
 private:
