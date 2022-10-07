@@ -6,11 +6,13 @@
 #include "./IRC_User.hpp"
 #include "./return_code.hpp"
 #include "./utils.hpp"
+#include "IRC_Message.hpp"
 
 class IRC_Logic {
 private:
     std::string _password;
     std::vector<IRC_User> _users;
+	std::queue<IRC_Message> _messageQueue;
 
 	IRC_Logic();
 public:
@@ -22,16 +24,13 @@ public:
 	std::vector<IRC_User> getRegisteredUsers();
 	IRC_User *getUserByFd(const int &fd);
 	IRC_User *getUserByNick(const std::string &nick);
-	std::vector<int> getReturnCodes();
+	std::queue<IRC_Message> &getMessageQueue();
 
 private:
     void cleanupName(std::string *name);
 	void removeMessageTermination(std::string *message);
     std::vector<std::string> extractFirstMessage(IRC_User *user);
-    std::string buildFullName(const std::vector<std::string> &splitMessageVector);
-    bool isUserMessage(const std::vector<std::string> &splitMessageVector) const;
-    bool isNickAlreadyPresent(const std::string &nick);
-    bool isNickMessage(const std::vector<std::string> &splitMessageVector) const;
+	bool isNickAlreadyPresent(const std::string &nick);
 	bool isUserRegistered(IRC_User* user);
 	std::string welcomeNewUser(IRC_User *user);
 	std::string processIncomingMessage(const std::vector<std::string> &splitMessageVector, IRC_User *user);

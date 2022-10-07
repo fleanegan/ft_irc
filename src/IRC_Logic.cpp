@@ -1,6 +1,8 @@
 #include <vector>
 #include "../inc/IRC_Logic.hpp"
 
+std::string concatenateContentFromIndex(int startIndex, const std::vector<std::string> &splitMessageVector);
+
 IRC_Logic::IRC_Logic(const std::string &password) : _password(password) {
 }
 
@@ -65,10 +67,18 @@ std::string IRC_Logic::processIncomingMessage(const std::vector<std::string> &sp
 }
 
 std::string IRC_Logic::processPrivMsgMessage(const std::vector<std::string>& splitMessageVector) {
+	std::queue<int> recipients;
+	IRC_User *recipient;
+	std::string content;
+
 	if (splitMessageVector.size() < 3)
 		return generateResponse(ERR_NOTEXTTOSEND, "Dont bother your friends if you have nothing to tell them! Add a message");
-	if (!getUserByNick(splitMessageVector[1]))
+	recipient = getUserByNick(splitMessageVector[1]);
+	if (!recipient)
 		return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This nick does not exist!");
+	recipients.push(recipient->fd);
+	content = IRC_Message::buildMessageContent(splitMessageVector);
+	_messageQueue.push(IRC_Message(recipients, content));
 	return "";
 }
 
@@ -109,7 +119,7 @@ std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std:
 	if (splitMessageVector.size() < 5)
 		return generateResponse(ERR_NEEDMOREPARAMS, "You need to send username, username, unused and fullname.");
 	user->name = splitMessageVector[1];
-	user->fullName = buildFullName(splitMessageVector);
+	user->fullName = IRC_User::buildFullName(splitMessageVector);
 	return welcomeNewUser(user);
 }
 
@@ -131,19 +141,6 @@ bool IRC_Logic::isNickAlreadyPresent(const std::string &nick) {
 	return false;
 }
 
-std::string IRC_Logic::buildFullName(const std::vector<std::string> &splitMessageVector) {
-	std::string name;
-
-	for (size_t i = 4; i < splitMessageVector.size(); i++) {
-		name += splitMessageVector[i];
-		if (i < splitMessageVector.size() - 1)
-			name += " ";
-	}
-	if (name[0] == ':')
-		name = name.substr(1, name.size());
-	return name;
-}
-
 std::vector<std::string> IRC_Logic::extractFirstMessage(IRC_User *user) {
 	size_t pos;
 	std::string message;
@@ -161,6 +158,10 @@ std::vector<std::string> IRC_Logic::extractFirstMessage(IRC_User *user) {
 
 std::vector<IRC_User> IRC_Logic::getRegisteredUsers() {
 	return _users;
+}
+
+std::queue<IRC_Message> &IRC_Logic::getMessageQueue() {
+	return _messageQueue;
 }
 
 IRC_User *IRC_Logic::getUserByFd(const int &fd) {

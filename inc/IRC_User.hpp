@@ -2,6 +2,7 @@
 #define INC_IRC_USER_HPP_
 #include <string>
 #include <vector>
+#include "utils.hpp"
 
 struct IRC_User{
 	std::string nick;
@@ -14,6 +15,8 @@ struct IRC_User{
 	explicit IRC_User(int fd);
 	IRC_User(const std::string &nick, const std::string &name, const int &fd);
 	static bool isNickValid(const std::string &nick);
+	static std::string buildFullName(const std::vector<std::string>& splitMessageVector);
+
 private:
 	IRC_User();
 	//todo: implement

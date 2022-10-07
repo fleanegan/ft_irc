@@ -54,8 +54,20 @@ bool responseContains(const std::string &returnMessage, const std::string &code)
 	return 	returnMessage.find(code) != std::string::npos;
 }
 
-void registerDummyUser(IRC_Logic *logic){
-	registerUser(logic, 0, "password", "nick", "username", "Full Name");
+#include <sstream>
+
+void registerDummyUser(IRC_Logic *logic, int n) {
+	std::string nick("nick");
+	std::string userName("username");
+	std::string fullName("Full Name");
+	std::string indexString;
+
+	while (--n >= 0) {
+		std::stringstream ss;
+		ss << n;
+		ss >> indexString;
+		registerUser(logic, n, "password", nick + indexString, userName + indexString, fullName + indexString);
+	}
 }
 
 

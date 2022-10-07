@@ -18,3 +18,10 @@ bool IRC_User::isNickValid(const std::string &nick) {
     return true;
 }
 
+std::string IRC_User::buildFullName(const std::vector<std::string> &splitMessageVector) {
+	std::string name = concatenateContentFromIndex(4, splitMessageVector);
+
+	removeLeadingColon(&name);
+	return name;
+}
+
