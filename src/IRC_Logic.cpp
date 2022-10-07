@@ -189,6 +189,6 @@ bool IRC_Logic::isUserRegistered(IRC_User *user) {
 }
 
 std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	return std::string(user->nick);
+	return std::string(RPL_WHOISUSER) + " " + user->nick + " " + user->userName + " " + user->userName + " 127.0.0.1 * :" + user->fullName + "\r\n";
 	(void) splitMessageVector;
 }

@@ -304,7 +304,8 @@ TEST(IRC_LogicUserRegistration, RecievingWhoIsShouldSendInformationsAboutUser){
 
 	result = logic.processInput(0, "WHOIS nick0\r\n");
 
-	ASSERT_STRNE("", result.c_str());
+	//nick userName userName host * :fullName
+	ASSERT_TRUE(responseContains(result, RPL_WHOISUSER));
 }
 
 #endif //TEST_TESTIRC_LOGICUSERREGISTRATION_HPP_
