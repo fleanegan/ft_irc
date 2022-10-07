@@ -8,20 +8,22 @@
 #include <queue>
 #include <string>
 #include "utils.hpp"
+#include "IRC_User.hpp"
 
 class IRC_Message {
 private:
 	IRC_Message();
 public:
 	std::queue<int> recipients;
+	IRC_User const* sender;
 	std::string content;
 
-	IRC_Message(const std::queue<int>& recipients, const std::string& content);
+	IRC_Message(const std::queue<int> &recipients, std::vector<std::string> splitMessageVector, IRC_User *sender);
 	IRC_Message(const IRC_Message &other);
 	IRC_Message &operator=(const IRC_Message &);
 	~IRC_Message();
 
-	static std::string buildMessageContent(const std::vector<std::string> &splitMessageVector);
+	std::string buildMessageContent(const std::vector<std::string> &splitMessageVector);
 };
 
 #endif //FT_IRC_IRC_MESSAGE_HPP

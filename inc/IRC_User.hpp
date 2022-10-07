@@ -6,7 +6,7 @@
 
 struct IRC_User{
 	std::string nick;
-    std::string name;
+    std::string userName;
     std::string fullName;
 	std::string receivedCharacters;
 	bool isAuthenticated;

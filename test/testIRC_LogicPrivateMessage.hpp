@@ -34,7 +34,17 @@ TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageRegistersMessage) {
 	ASSERT_EQ(1, logic.getMessageQueue().size());
 	ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
 	ASSERT_EQ(1, logic.getMessageQueue().front().recipients.front());
-	ASSERT_STREQ("content is cool", logic.getMessageQueue().front().content.c_str());
 }
+
+TEST(IRC_LogicPrivateMessage, messagesSentWithPrefixContainingNick) {
+	IRC_Logic logic("password");
+	registerDummyUser(&logic, 2);
+
+	logic.processInput(0, "PRIVMSG nick1 :content is cool\r\n");
+
+	ASSERT_STREQ(":nick0!~username0@127.0.0.1 PRIVMSG nick1 :content is cool", logic.getMessageQueue().front().content.c_str());
+}
+
+//:nick_!~fleanegan@127.0.0.1 PRIVMSG testSender:
 
 #endif //TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_

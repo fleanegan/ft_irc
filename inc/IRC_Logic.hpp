@@ -33,11 +33,12 @@ private:
 	bool isNickAlreadyPresent(const std::string &nick);
 	bool isUserRegistered(IRC_User* user);
 	std::string welcomeNewUser(IRC_User *user);
-	std::string processIncomingMessage(const std::vector<std::string> &splitMessageVector, IRC_User *user);
+	std::string processIncomingMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processPingMessage(const std::vector<std::string> &splitMessageVector);
-	std::string processPrivMsgMessage(const std::vector<std::string>& splitMessageVector);
+	std::string processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+	std::string processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 };
 #endif //INC_IRC_LOGIC_HPP_

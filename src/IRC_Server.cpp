@@ -1,7 +1,7 @@
 #include "../inc/IRC_Server.hpp"
 #include <iostream>
 
-IRC_Server::IRC_Server( void ): TCP_Server(), _logic("password") {
+IRC_Server::IRC_Server(void ): TCP_Server(), _logic("password") {
 }
 
 IRC_Server::IRC_Server( int port, const std::string& password): TCP_Server(port), _logic(password) {
@@ -16,5 +16,20 @@ IRC_Server& IRC_Server::operator = (const IRC_Server& other) {
 }
 
 std::string IRC_Server::processMessage(int fd, const std::string& buffer) {
-	return _logic.processInput(fd, buffer);
+	std::string result = _logic.processInput(fd, buffer);
+	IRC_Message* currentMessage;
+	int			currentFd;
+
+	while (! _logic.getMessageQueue().empty()) {
+		currentMessage = &_logic.getMessageQueue().front();
+		while (! currentMessage->recipients.empty()) {
+			currentFd = currentMessage->recipients.front();
+			currentMessage->recipients.pop();
+			_VERBOSE && std::cerr << "sending " << currentMessage->content << " to fd " << currentFd << std::endl;
+			std::string sendString = (currentMessage->content + "\r\n");
+			send(currentFd, sendString.c_str(), sendString.size(), 0);
+		}
+		_logic.getMessageQueue().pop();
+	}
+	return result;
 }

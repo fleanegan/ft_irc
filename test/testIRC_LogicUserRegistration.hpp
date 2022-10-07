@@ -167,7 +167,7 @@ TEST(IRC_LogicUserRegistration, userRegistrationWorksNoMatterTheUserNickOrder) {
 	rep += setNick(&logic, 0, "JayDee");
 
 	ASSERT_STREQ("JayDee", logic.getRegisteredUsers()[0].nick.c_str());
-	ASSERT_STREQ("JD", logic.getRegisteredUsers()[0].name.c_str());
+	ASSERT_STREQ("JD", logic.getRegisteredUsers()[0].userName.c_str());
 	ASSERT_STREQ("John Doe", logic.getRegisteredUsers()[0].fullName.c_str());
 	ASSERT_TRUE(isValidUserRegistrationResponse(rep));
 }
@@ -274,9 +274,9 @@ TEST(IRC_LogicUserRegistration, removingRealNameLeadingColon){
 TEST(IRC_LogicUserRegistration, capabilitiesNegociationRequestShouldBeignored){
     IRC_Logic logic("password");
 
-	registerUser(&logic, 0, "password", "nick", "username", "Full name");
+	registerUser(&logic, 0, "password", "nick", "username", "Full userName");
 
-	ASSERT_STREQ("Full name", logic.getRegisteredUsers().front().fullName.c_str());
+	ASSERT_STREQ("Full userName", logic.getRegisteredUsers().front().fullName.c_str());
 }
 
 TEST(IRC_LogicUserRegistration, receivingPingReturnsPong){
@@ -295,6 +295,16 @@ TEST(IRC_LogicUserRegistration, receivingPingWithoutArgumentsReturnsError){
 	result = logic.processInput(0, "PING\r\n");
 
 	ASSERT_TRUE(responseContains(result, ERR_NEEDMOREPARAMS));
+}
+
+TEST(IRC_LogicUserRegistration, RecievingWhoIsShouldSendInformationsAboutUser){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 1);
+
+	result = logic.processInput(0, "WHOIS nick0\r\n");
+
+	ASSERT_STRNE("", result.c_str());
 }
 
 #endif //TEST_TESTIRC_LOGICUSERREGISTRATION_HPP_

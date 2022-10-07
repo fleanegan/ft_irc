@@ -12,6 +12,7 @@
 #include <vector>
 
 #define BUFFER_LEN 1024
+#define _VERBOSE true
 
 class TCP_Server {
 

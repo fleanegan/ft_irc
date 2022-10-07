@@ -1,7 +1,5 @@
 #include "../inc/TCP_Server.hpp"
 
-#define _VERBOSE true
-
 TCP_Server::TCP_Server(void) {
 	setUpTcpSocket(6667);
 }
