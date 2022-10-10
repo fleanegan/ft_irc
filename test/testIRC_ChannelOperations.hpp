@@ -48,5 +48,17 @@ TEST(IRC_ChannelOperations, JoiningAnExistingChannelDoesNotCreateNewChannel){
 	ASSERT_EQ(1, logic.getChannels().size());
 }
 
+TEST(IRC_ChannelOperations, allMembersOfAChannelReceiveTheMessage){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 2);
+	logic.processInput(0, "JOIN #mychan\r\n");
+	logic.processInput(1, "JOIN #mychan\r\n");
+
+	logic.processInput(1, "PRIVMSG #mychan messageContent\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "PRIVMSG #mychan messageContent"));
+}
+
 #endif //TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
 

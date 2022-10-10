@@ -4,7 +4,10 @@
 #include "utils.hpp"
 
 struct IRC_Channel{
+	typedef std::vector<IRC_Channel>::iterator ChannelIterator;
+
 	std::string name;
+	std::vector<int> membersFd;
 
 	IRC_Channel(const std::string& channelName);
 	bool operator==(const IRC_Channel &rhs) const;

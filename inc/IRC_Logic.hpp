@@ -49,6 +49,6 @@ private:
 	std::string processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const;
 	std::string processJoinMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	bool isChannelAlreadyPresent(const IRC_Channel &channelCandidate);
+	IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 };
 #endif //INC_IRC_LOGIC_HPP_
