@@ -15,6 +15,7 @@ SRC_NAME =	TCP_Server.cpp\
 			IRC_Logic.cpp\
 			IRC_User.cpp\
 			IRC_Message.cpp\
+			IRC_Channel.cpp\
 			utils.cpp\
 			main.cpp\
 			

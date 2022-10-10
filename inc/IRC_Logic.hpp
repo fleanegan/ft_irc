@@ -7,11 +7,13 @@
 #include "./return_code.hpp"
 #include "./utils.hpp"
 #include "IRC_Message.hpp"
+#include "IRC_Channel.hpp"
 
 class IRC_Logic {
 private:
     std::string _password;
     std::vector<IRC_User> _users;
+	std::vector<IRC_Channel> _channels;
 	std::vector<IRC_User> _prevUsers;
 	std::queue<IRC_Message> _messageQueue;
 
@@ -23,11 +25,12 @@ public:
     IRC_Logic &operator=(const IRC_Logic &);
     ~IRC_Logic();
 	std::string processInput(int fd, const std::string &input);
-	std::vector<IRC_User> getRegisteredUsers();
 	IRC_User::UserIterator getUserByFd(const int &fd);
 	IRC_User::UserIterator getUserByNick(const std::string &nick);
 	std::queue<IRC_Message> &getMessageQueue();
 	void disconnectUser( int fd );
+	std::vector<IRC_User>& getRegisteredUsers();
+	std::vector<IRC_Channel>& getChannels();
 
 private:
     void cleanupName(std::string *name);
@@ -45,5 +48,7 @@ private:
 	std::string processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const;
+	std::string processJoinMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+	bool isChannelAlreadyPresent(const IRC_Channel &channelCandidate);
 };
 #endif //INC_IRC_LOGIC_HPP_

@@ -1,12 +1,12 @@
-#ifndef TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
-#define TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
+#ifndef TEST_TESTIRC_CHANNELOPERATIONS_HPP_
+#define TEST_TESTIRC_CHANNELOPERATIONS_HPP_
 
 #include <string>
 #include "./testUtils.hpp"
 #include "gtest/gtest.h"
 
 
-TEST(IRC_LogicUserRegistration, callingNickWhenSetChangesNick) {
+TEST(IRC_UserOperations, callingNickWhenSetChangesNick) {
 	IRC_Logic logic("password");
 
 	registerUser(&logic, 0, "password", "nick", "username", "Full Name");
@@ -15,7 +15,7 @@ TEST(IRC_LogicUserRegistration, callingNickWhenSetChangesNick) {
 	ASSERT_STREQ("newNick", logic.getRegisteredUsers().front().nick.c_str());
 }
 
-TEST(IRC_LogicUserRegistration, receivingPingReturnsPong){
+TEST(IRC_UserOperations, receivingPingReturnsPong){
 	IRC_Logic logic("password");
 	std::string result;
 
@@ -24,7 +24,7 @@ TEST(IRC_LogicUserRegistration, receivingPingReturnsPong){
 	ASSERT_TRUE(responseContains(result, "nonEmptyToken"));
 }
 
-TEST(IRC_LogicUserRegistration, receivingPingWithoutArgumentsReturnsError){
+TEST(IRC_UserOperations, receivingPingWithoutArgumentsReturnsError){
 	IRC_Logic logic("password");
 	std::string result;
 
@@ -33,7 +33,7 @@ TEST(IRC_LogicUserRegistration, receivingPingWithoutArgumentsReturnsError){
 	ASSERT_TRUE(responseContains(result, ERR_NEEDMOREPARAMS));
 }
 
-TEST(IRC_LogicUserRegistration, receivingWhoIsShouldSendInformationsAboutUser){
+TEST(IRC_UserOperations, receivingWhoIsShouldSendInformationsAboutUser){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -44,7 +44,7 @@ TEST(IRC_LogicUserRegistration, receivingWhoIsShouldSendInformationsAboutUser){
 	ASSERT_TRUE(responseContains(result, RPL_WHOISUSER));
 }
 
-TEST(IRC_LogicUserRegistration, whoIsOnUnregisteredNicknameReturnsError){
+TEST(IRC_UserOperations, whoIsOnUnregisteredNicknameReturnsError){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -54,7 +54,7 @@ TEST(IRC_LogicUserRegistration, whoIsOnUnregisteredNicknameReturnsError){
 	ASSERT_TRUE(responseContains(result, ERR_NOSUCHNICK));
 }
 
-TEST(IRC_LogicUserRegistration, whoIsWithoutNicknameReturnsError){
+TEST(IRC_UserOperations, whoIsWithoutNicknameReturnsError){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -64,7 +64,7 @@ TEST(IRC_LogicUserRegistration, whoIsWithoutNicknameReturnsError){
 	ASSERT_TRUE(responseContains(result, ERR_NONICKNAMEGIVEN));
 }
 
-TEST(IRC_LogicUserRegistration, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
+TEST(IRC_UserOperations, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 3);
@@ -78,7 +78,7 @@ TEST(IRC_LogicUserRegistration, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
 	ASSERT_TRUE(responseContains(result, RPL_WHOWASUSER));
 }
 
-TEST(IRC_LogicUserRegistration, whoWasWithoutNicknameReturnsError){
+TEST(IRC_UserOperations, whoWasWithoutNicknameReturnsError){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -88,7 +88,7 @@ TEST(IRC_LogicUserRegistration, whoWasWithoutNicknameReturnsError){
 	ASSERT_TRUE(responseContains(result, ERR_NONICKNAMEGIVEN));
 }
 
-TEST(IRC_LogicUserRegistration, whoWasOnUnregisteredNicknameReturnsError){
+TEST(IRC_UserOperations, whoWasOnUnregisteredNicknameReturnsError){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -98,7 +98,7 @@ TEST(IRC_LogicUserRegistration, whoWasOnUnregisteredNicknameReturnsError){
 	ASSERT_TRUE(responseContains(result, ERR_WASNOSUCHNICK));
 }
 
-TEST(IRC_LogicUserRegistration, changedNickAppearsOnWhoWas){
+TEST(IRC_UserOperations, changedNickAppearsOnWhoWas){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -112,5 +112,5 @@ TEST(IRC_LogicUserRegistration, changedNickAppearsOnWhoWas){
 	ASSERT_EQ(2, countSubStrings(result, "setNick"));
 }
 
-#endif //TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
+#endif //TEST_TESTIRC_CHANNELOPERATIONS_HPP_
 

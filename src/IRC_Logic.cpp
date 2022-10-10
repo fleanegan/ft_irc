@@ -45,9 +45,7 @@ std::string IRC_Logic::processInput(int fd, const std::string &input) {
 }
 
 std::string IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	const std::vector<std::string> &splitMessageVector1 = splitMessageVector;
-
-	if (splitMessageVector1[0] == "PASS")
+	if (splitMessageVector[0] == "PASS")
 		return processPassMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "CAP")
 		return "";
@@ -66,6 +64,8 @@ std::string IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<
 		return processWhoIsMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "WHOWAS")
 		return processWhoWasMessage(user, splitMessageVector);
+	else if (splitMessageVector[0] == "JOIN")
+		return processJoinMessage(user, splitMessageVector);
 	else
 		return "";
 }
@@ -159,8 +159,12 @@ std::vector<std::string> IRC_Logic::extractFirstMessage(IRC_User *user) {
 	return result;
 }
 
-std::vector<IRC_User> IRC_Logic::getRegisteredUsers() {
+std::vector<IRC_User>& IRC_Logic::getRegisteredUsers() {
 	return _users;
+}
+
+std::vector<IRC_Channel>& IRC_Logic::getChannels() {
+	return _channels;
 }
 
 std::queue<IRC_Message> &IRC_Logic::getMessageQueue() {
@@ -208,7 +212,7 @@ std::string IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<st
 		return generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
 	result = generateWhoWasMessage(splitMessageVector);
 	if (result.empty()){
-		return generateResponse(ERR_WASNOSUCHNICK, "This user was never not registered");}
+		return generateResponse(ERR_WASNOSUCHNICK, "This user was never registered");}
 	return result + RPL_ENDOFWHOWAS + "\r\n";
 }
 
@@ -221,4 +225,21 @@ IRC_Logic::generateWhoWasMessage(const std::vector<std::string> &splitMessageVec
 			result += generateResponse(RPL_WHOWASUSER, rit->toString());
 	}
 	return result;
+}
+
+std::string IRC_Logic::processJoinMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	(void) user;
+	if (splitMessageVector.size() == 1)
+		return generateResponse(ERR_NEEDMOREPARAMS, "Join requires <channel_name> and <password>");
+	const IRC_Channel &channelCandidate = IRC_Channel(splitMessageVector[1]);
+	if (!isChannelAlreadyPresent(channelCandidate))
+		_channels.push_back(channelCandidate);
+	return "";
+}
+
+bool IRC_Logic::isChannelAlreadyPresent(const IRC_Channel &channelCandidate) {
+	for (std::vector<IRC_Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+		if (*it == channelCandidate)
+			return true;
+	return false;
 }
