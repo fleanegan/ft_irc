@@ -70,5 +70,15 @@ void registerDummyUser(IRC_Logic *logic, int n) {
 	}
 }
 
+int countSubStrings(const std::string &string, const std::string &toFind){
+	int occurrences = 0;
+
+	std::string::size_type pos = 0;
+	while ((pos = string.find(toFind, pos )) != std::string::npos) {
+		++ occurrences;
+		pos += toFind.length();
+	}
+	return occurrences;
+}
 
 #endif     // TEST_TESTUTILS_HPP_

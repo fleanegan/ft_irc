@@ -111,6 +111,7 @@ std::string IRC_Logic::processNickMessage(IRC_User *user, const std::vector<std:
 		return generateResponse(ERR_ERRONEOUSNICK, "Sigh, think again. NO FORBIDDEN CHARACTERS!");
 	else if (isNickAlreadyPresent(splitMessageVector[1]))
 		return generateResponse(ERR_NICKNAMEINUSE, "Sorry, someone was just as creative as you are.");
+	_prevUsers.push_back(*user);
 	user->nick = splitMessageVector[1].substr(0, 9);
 	return welcomeNewUser(user);
 }
@@ -180,10 +181,16 @@ bool IRC_Logic::isUserRegistered(IRC_User *user) {
 	return true;
 }
 
+// todo idle check
 std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	const IRC_User::UserIterator &result = getUserByNick(splitMessageVector[1]);
+	IRC_User::UserIterator result;
 	(void)user;
-	return std::string(RPL_WHOISUSER) + " " + result->nick + " " + result->userName + " " + " 127.0.0.1 * :" + result->fullName + "\r\n";
+	if (splitMessageVector.size() == 1)
+		return generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
+	result = getUserByNick(splitMessageVector[1]);
+	if (result == _users.end())
+		return generateResponse(ERR_NOSUCHNICK, "This user is not registered");
+	return std::string(RPL_WHOISUSER) + " " + result->nick + " " + result->userName + " " + " 127.0.0.1 * :" + result->fullName + " " + RPL_ENDOFWHOIS + "\r\n";
 }
 
 void IRC_Logic::disconnectUser( int fd ) {
@@ -194,7 +201,16 @@ void IRC_Logic::disconnectUser( int fd ) {
 }
 
 std::string IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	const IRC_User::UserIterator &result = IRC_User::findUserByNickInVector(&_prevUsers, splitMessageVector[1]);
-	(void)user;
-	return std::string(RPL_WHOWASUSER) + " " + result->nick + " " + result->userName + " 127.0.0.1 * :" + result->fullName + "\r\n";
+	std::string result;
+	(void) user;
+
+	if (splitMessageVector.size() == 1)
+		return generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
+	for (std::vector<IRC_User>::reverse_iterator rit = _prevUsers.rbegin(); rit != _prevUsers.rend(); ++rit){
+		if (rit->nick == splitMessageVector[1])
+			result += std::string(RPL_WHOWASUSER) + " " + rit->nick + " " + rit->userName + " 127.0.0.1 * :" + rit->fullName + "\r\n";
+	}
+	if (result.empty()){
+		return generateResponse(ERR_WASNOSUCHNICK, "This user was never not registered");}
+	return result + RPL_ENDOFWHOWAS + "\r\n";
 }

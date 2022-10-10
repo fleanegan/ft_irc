@@ -40,11 +40,30 @@ TEST(IRC_LogicUserRegistration, receivingWhoIsShouldSendInformationsAboutUser){
 
 	result = logic.processInput(1, "WHOIS nick0\r\n");
 
-	//nick userName userName host * :fullName
 	ASSERT_TRUE(responseContains(result, "nick0" ));
 }
 
-TEST(IRC_LogicUserRegistration, removingUserFromServerMovesToWasList) {
+TEST(IRC_LogicUserRegistration, whoIsOnUnregisteredNicknameReturnsError){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 2);
+
+	result = logic.processInput(1, "WHOIS notExistingNick\r\n");
+
+	ASSERT_TRUE(responseContains(result, ERR_NOSUCHNICK));
+}
+
+TEST(IRC_LogicUserRegistration, whoIsWithoutNicknameReturnsError){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 2);
+
+	result = logic.processInput(1, "WHOIS\r\n");
+
+	ASSERT_TRUE(responseContains(result, ERR_NONICKNAMEGIVEN));
+}
+
+TEST(IRC_LogicUserRegistration, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 3);
@@ -55,6 +74,40 @@ TEST(IRC_LogicUserRegistration, removingUserFromServerMovesToWasList) {
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
 	ASSERT_TRUE(responseContains(result, "nick1"));
+}
+
+TEST(IRC_LogicUserRegistration, whoWasWithoutNicknameReturnsError){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 2);
+
+	result = logic.processInput(1, "WHOWAS\r\n");
+
+	ASSERT_TRUE(responseContains(result, ERR_NONICKNAMEGIVEN));
+}
+
+TEST(IRC_LogicUserRegistration, whoWasOnUnregisteredNicknameReturnsError){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 2);
+
+	result = logic.processInput(1, "WHOWAS notExistingNick\r\n");
+
+	ASSERT_TRUE(responseContains(result, ERR_WASNOSUCHNICK));
+}
+
+TEST(IRC_LogicUserRegistration, changedNickAppearsOnWhoWas){
+	IRC_Logic logic("password");
+	std::string result;
+	registerDummyUser(&logic, 2);
+	setNick(&logic, 0, "setNick");
+	setNick(&logic, 0, "unsetNick");
+	setNick(&logic, 1, "setNick");
+	setNick(&logic, 1, "unsetNick1");
+
+	result = logic.processInput(1, "WHOWAS setNick\r\n");
+
+	ASSERT_EQ(2, countSubStrings(result, "setNick"));
 }
 
 #endif //TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
