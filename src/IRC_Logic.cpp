@@ -190,7 +190,7 @@ std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std
 	result = getUserByNick(splitMessageVector[1]);
 	if (result == _users.end())
 		return generateResponse(ERR_NOSUCHNICK, "This user is not registered");
-	return std::string(RPL_WHOISUSER) + " " + result->nick + " " + result->userName + " " + " 127.0.0.1 * :" + result->fullName + " " + RPL_ENDOFWHOIS + "\r\n";
+	return generateResponse(RPL_WHOISUSER, result->toString());
 }
 
 void IRC_Logic::disconnectUser( int fd ) {
@@ -206,11 +206,19 @@ std::string IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<st
 
 	if (splitMessageVector.size() == 1)
 		return generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
-	for (std::vector<IRC_User>::reverse_iterator rit = _prevUsers.rbegin(); rit != _prevUsers.rend(); ++rit){
-		if (rit->nick == splitMessageVector[1])
-			result += std::string(RPL_WHOWASUSER) + " " + rit->nick + " " + rit->userName + " 127.0.0.1 * :" + rit->fullName + "\r\n";
-	}
+	result = generateWhoWasMessage(splitMessageVector);
 	if (result.empty()){
 		return generateResponse(ERR_WASNOSUCHNICK, "This user was never not registered");}
 	return result + RPL_ENDOFWHOWAS + "\r\n";
+}
+
+std::string
+IRC_Logic::generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const{
+	std::string result;
+
+	for (std::vector<IRC_User>::const_reverse_iterator rit = _prevUsers.rbegin(); rit != _prevUsers.rend(); ++rit){
+		if (rit->nick == splitMessageVector[1])
+			result += generateResponse(RPL_WHOWASUSER, rit->toString());
+	}
+	return result;
 }

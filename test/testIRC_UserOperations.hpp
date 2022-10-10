@@ -41,6 +41,7 @@ TEST(IRC_LogicUserRegistration, receivingWhoIsShouldSendInformationsAboutUser){
 	result = logic.processInput(1, "WHOIS nick0\r\n");
 
 	ASSERT_TRUE(responseContains(result, "nick0" ));
+	ASSERT_TRUE(responseContains(result, RPL_WHOISUSER));
 }
 
 TEST(IRC_LogicUserRegistration, whoIsOnUnregisteredNicknameReturnsError){
@@ -74,6 +75,7 @@ TEST(IRC_LogicUserRegistration, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
 	ASSERT_TRUE(responseContains(result, "nick1"));
+	ASSERT_TRUE(responseContains(result, RPL_WHOWASUSER));
 }
 
 TEST(IRC_LogicUserRegistration, whoWasWithoutNicknameReturnsError){
