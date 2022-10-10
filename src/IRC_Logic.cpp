@@ -77,9 +77,14 @@ std::string IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<s
 		return generateResponse(ERR_NOTEXTTOSEND,
 								"Dont bother your friends if you have nothing to tell them! Add a message");
 	if (splitMessageVector[1][0] == '#') {
-		recipients = messageToChannel(user, splitMessageVector);
-		if (recipients.empty())
-			return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This channel does not exist!");
+		std::vector<IRC_Channel>::iterator channelCandidate;
+
+		channelCandidate = getChannelByName(splitMessageVector[1]);
+		if (channelCandidate == _channels.end())
+			return generateResponse(ERR_NOSUCHCHANNEL, "Get an addressbook! This channel does not exist!");
+		if (!isUserInChannel(user, channelCandidate))
+			return generateResponse(ERR_CANNOTSENDTOCHAN, "You're not part of this channel");
+		recipients = messageToChannel(user, channelCandidate);
 	} else {
 		recipients = messageToSingleUser(splitMessageVector);
 		if (recipients.empty())
@@ -87,6 +92,13 @@ std::string IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<s
 	}
 	_messageQueue.push(IRC_Message(recipients, splitMessageVector, user));
 	return "";
+}
+
+bool IRC_Logic::isUserInChannel(IRC_User *user, std::vector<IRC_Channel>::iterator &channelCandidate) const {
+	for (std::vector<int>::iterator it = channelCandidate->membersFd.begin(); it != channelCandidate->membersFd.end(); ++it)
+		if (*it == user->fd)
+			return true;
+	return false;
 }
 
 std::queue<int> IRC_Logic::messageToSingleUser(const std::vector<std::string> &splitMessageVector) {
@@ -99,13 +111,9 @@ std::queue<int> IRC_Logic::messageToSingleUser(const std::vector<std::string> &s
 	return recipients;
 }
 
-std::queue<int> IRC_Logic::messageToChannel(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+std::queue<int> IRC_Logic::messageToChannel(IRC_User *user, std::vector<IRC_Channel>::iterator &channelCandidate) {
 	std::queue<int> recipients;
-	IRC_Channel::ChannelIterator channelCandidate;
 
-	channelCandidate = getChannelByName(splitMessageVector[1]);
-	if (channelCandidate == _channels.end())
-		return recipients;
 	for (std::vector<int>::iterator it = channelCandidate->membersFd.begin();
 		 it != channelCandidate->membersFd.end(); it++)
 		if (user->fd == *it)
@@ -271,8 +279,10 @@ std::string IRC_Logic::processJoinMessage(IRC_User *user, const std::vector<std:
 }
 
 IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(const std::string &name) {
+	std::string nameWithoutPrefix = IRC_Channel::getChannelName(name);
+
 	for (std::vector<IRC_Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		if (IRC_Channel::getChannelName(name) == it->name)
+		if (nameWithoutPrefix == it->name)
 			return it;
 	return _channels.end();
 }
