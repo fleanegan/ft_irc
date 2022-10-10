@@ -7,6 +7,7 @@
 # define RPL_MYINFO "004"
 # define RPL_ISUPPORT "005"
 # define RPL_WHOISUSER "311"
+# define RPL_WHOWASUSER "314"
 # define ERR_NOSUCHNICK "401"
 # define ERR_NOTEXTTOSEND "412"
 # define ERR_NONICKNAMEGIVEN "431"

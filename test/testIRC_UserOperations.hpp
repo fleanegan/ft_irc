@@ -36,12 +36,12 @@ TEST(IRC_LogicUserRegistration, receivingPingWithoutArgumentsReturnsError){
 TEST(IRC_LogicUserRegistration, receivingWhoIsShouldSendInformationsAboutUser){
 	IRC_Logic logic("password");
 	std::string result;
-	registerDummyUser(&logic, 1);
+	registerDummyUser(&logic, 2);
 
-	result = logic.processInput(0, "WHOIS nick0\r\n");
+	result = logic.processInput(1, "WHOIS nick0\r\n");
 
 	//nick userName userName host * :fullName
-	ASSERT_TRUE(responseContains(result, RPL_WHOISUSER));
+	ASSERT_TRUE(responseContains(result, "nick0" ));
 }
 
 TEST(IRC_LogicUserRegistration, removingUserFromServerMovesToWasList) {

@@ -181,8 +181,9 @@ bool IRC_Logic::isUserRegistered(IRC_User *user) {
 }
 
 std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	return std::string(RPL_WHOISUSER) + " " + user->nick + " " + user->userName + " " + user->userName + " 127.0.0.1 * :" + user->fullName + "\r\n";
-	(void) splitMessageVector;
+	const IRC_User::UserIterator &result = getUserByNick(splitMessageVector[1]);
+	(void)user;
+	return std::string(RPL_WHOISUSER) + " " + result->nick + " " + result->userName + " " + " 127.0.0.1 * :" + result->fullName + "\r\n";
 }
 
 void IRC_Logic::disconnectUser( int fd ) {
@@ -194,5 +195,6 @@ void IRC_Logic::disconnectUser( int fd ) {
 
 std::string IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	const IRC_User::UserIterator &result = IRC_User::findUserByNickInVector(&_prevUsers, splitMessageVector[1]);
-	return result->nick;
+	(void)user;
+	return std::string(RPL_WHOWASUSER) + " " + result->nick + " " + result->userName + " 127.0.0.1 * :" + result->fullName + "\r\n";
 }
