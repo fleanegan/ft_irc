@@ -27,6 +27,5 @@ std::string IRC_Message::buildMessageContent(const std::vector<std::string> &spl
 	name = ":" + sender->nick + "!~" + sender->userName + "@127.0.0.1 ";
 	name += concatenateContentFromIndex(0, splitMessageVector);
 
-
 	return name;
 }

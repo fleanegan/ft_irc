@@ -4,7 +4,8 @@
 IRC_Server::IRC_Server(void ): TCP_Server(), _logic("password") {
 }
 
-IRC_Server::IRC_Server( int port, const std::string& password): TCP_Server(port), _logic(password) {
+IRC_Server::IRC_Server( int port, const std::string& password):
+	TCP_Server(port), _logic(password) {
 }
 
 IRC_Server::~IRC_Server() {
@@ -25,11 +26,16 @@ std::string IRC_Server::processMessage(int fd, const std::string& buffer) {
 		while (! currentMessage->recipients.empty()) {
 			currentFd = currentMessage->recipients.front();
 			currentMessage->recipients.pop();
-			_VERBOSE && std::cerr << "sending " << currentMessage->content << " to fd " << currentFd << std::endl;
+			_VERBOSE && std::cerr << "sending " << currentMessage->content
+				<< " to fd " << currentFd << std::endl;
 			std::string sendString = (currentMessage->content + "\r\n");
 			send(currentFd, sendString.c_str(), sendString.size(), 0);
 		}
 		_logic.getMessageQueue().pop();
 	}
 	return result;
+}
+
+void IRC_Server::onDisconnect(int fd) {
+	_logic.disconnectUser(fd);
 }

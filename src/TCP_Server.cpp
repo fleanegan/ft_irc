@@ -46,7 +46,8 @@ void TCP_Server::host(void) {
 	while (poll(_fds.data(), _fds.size(), -1)) {
 		if (_fds.front().revents & POLLIN) {
 			_VERBOSE && std::cerr << "New client socket" << std::endl;
-			newClient = accept(_fds.front().fd, reinterpret_cast<sockaddr *>(&cliaddr), &addrLen);
+			newClient = accept(_fds.front().fd,
+					reinterpret_cast<sockaddr *>(&cliaddr), &addrLen);
 			saveConnectionInfo(newClient);
 		}
 

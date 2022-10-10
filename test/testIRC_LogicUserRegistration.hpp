@@ -245,15 +245,6 @@ TEST(IRC_LogicUserRegistration, irssiLoginSequenceRegistersAUser) {
 	ASSERT_TRUE(responseContains(rep, ERR_CONNECTWITHOUTPWD));
 }
 
-TEST(IRC_LogicUserRegistration, callingNickWhenSetChangesNick) {
-	IRC_Logic logic("password");
-
-	registerUser(&logic, 0, "password", "nick", "username", "Full Name");
-	setNick(&logic, 0, "newNick");
-
-	ASSERT_STREQ("newNick", logic.getRegisteredUsers().front().nick.c_str());
-}
-
 TEST(IRC_LogicUserRegistration, truncateNickNameToNineCharacters) {
 	IRC_Logic logic("password");
 
@@ -277,35 +268,6 @@ TEST(IRC_LogicUserRegistration, capabilitiesNegociationRequestShouldBeignored){
 	registerUser(&logic, 0, "password", "nick", "username", "Full userName");
 
 	ASSERT_STREQ("Full userName", logic.getRegisteredUsers().front().fullName.c_str());
-}
-
-TEST(IRC_LogicUserRegistration, receivingPingReturnsPong){
-	IRC_Logic logic("password");
-	std::string result;
-
-	result = logic.processInput(0, "PING nonEmptyToken\r\n");
-
-	ASSERT_TRUE(responseContains(result, "nonEmptyToken"));
-}
-
-TEST(IRC_LogicUserRegistration, receivingPingWithoutArgumentsReturnsError){
-	IRC_Logic logic("password");
-	std::string result;
-
-	result = logic.processInput(0, "PING\r\n");
-
-	ASSERT_TRUE(responseContains(result, ERR_NEEDMOREPARAMS));
-}
-
-TEST(IRC_LogicUserRegistration, RecievingWhoIsShouldSendInformationsAboutUser){
-	IRC_Logic logic("password");
-	std::string result;
-	registerDummyUser(&logic, 1);
-
-	result = logic.processInput(0, "WHOIS nick0\r\n");
-
-	//nick userName userName host * :fullName
-	ASSERT_TRUE(responseContains(result, RPL_WHOISUSER));
 }
 
 #endif //TEST_TESTIRC_LOGICUSERREGISTRATION_HPP_

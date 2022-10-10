@@ -23,6 +23,7 @@ protected:
 	std::vector<struct pollfd> _fds;
 	struct sockaddr_in _servAddr;
 	int _port;
+	virtual void onDisconnect(int fd) = 0;
 
 public:
 	TCP_Server(void);

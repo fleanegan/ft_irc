@@ -29,17 +29,17 @@ void IRC_Logic::cleanupName(std::string *name) {
 
 std::string IRC_Logic::processInput(int fd, const std::string &input) {
 	std::vector<std::string> splitMessageVector;
-	IRC_User *currentUser = getUserByFd(fd);
+	UserIterator currentUser = getUserByFd(fd);
 	std::string result;
 
-	if (currentUser == NULL) {
+	if (currentUser == _users.end()) {
 		_users.push_back(IRC_User(fd));
-		currentUser = &_users.back();
+		currentUser = _users.end() - 1;
 	}
 	currentUser->receivedCharacters += input;
 	while (currentUser->receivedCharacters.find("\r\n") != std::string::npos) {
-		splitMessageVector = extractFirstMessage(currentUser);
-		result += processIncomingMessage(currentUser, splitMessageVector);
+		splitMessageVector = extractFirstMessage(&(*currentUser));
+		result += processIncomingMessage(&(*currentUser), splitMessageVector);
 	}
 	return result;
 }
@@ -70,12 +70,12 @@ std::string IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<
 
 std::string IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	std::queue<int> recipients;
-	IRC_User *recipient;
+	UserIterator recipient;
 
 	if (splitMessageVector.size() < 3)
 		return generateResponse(ERR_NOTEXTTOSEND, "Dont bother your friends if you have nothing to tell them! Add a message");
 	recipient = getUserByNick(splitMessageVector[1]);
-	if (!recipient)
+	if (recipient == _users.end())
 		return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This nick does not exist!");
 	recipients.push(recipient->fd);
 	_messageQueue.push(IRC_Message(recipients, splitMessageVector, user));
@@ -164,22 +164,22 @@ std::queue<IRC_Message> &IRC_Logic::getMessageQueue() {
 	return _messageQueue;
 }
 
-IRC_User *IRC_Logic::getUserByFd(const int &fd) {
+IRC_Logic::UserIterator IRC_Logic::getUserByFd(const int &fd) {
 	for (std::vector<IRC_User>::iterator it = _users.begin();
 		 it != _users.end(); it++) {
 		if (it->fd == fd)
-			return &(*it);
+			return it;
 	}
-	return NULL;
+	return _users.end();
 }
 
-IRC_User *IRC_Logic::getUserByNick(const std::string &nick) {
+IRC_Logic::UserIterator IRC_Logic::getUserByNick(const std::string &nick) {
 	for (std::vector<IRC_User>::iterator it = _users.begin();
 		 it != _users.end(); it++) {
 		if (it->nick == nick)
-			return &(*it);
+			return it;
 	}
-	return NULL;
+	return _users.end();
 }
 
 bool IRC_Logic::isUserRegistered(IRC_User *user) {
@@ -191,4 +191,8 @@ bool IRC_Logic::isUserRegistered(IRC_User *user) {
 std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	return std::string(RPL_WHOISUSER) + " " + user->nick + " " + user->userName + " " + user->userName + " 127.0.0.1 * :" + user->fullName + "\r\n";
 	(void) splitMessageVector;
+}
+
+void IRC_Logic::disconnectUser( int fd ) {
+	(void)fd;
 }

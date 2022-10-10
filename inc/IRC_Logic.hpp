@@ -16,15 +16,18 @@ private:
 
 	IRC_Logic();
 public:
+	typedef std::vector<IRC_User>::iterator UserIterator;
+
     explicit IRC_Logic(const std::string &password);
     IRC_Logic(const IRC_Logic &other);
     IRC_Logic &operator=(const IRC_Logic &);
     ~IRC_Logic();
 	std::string processInput(int fd, const std::string &input);
 	std::vector<IRC_User> getRegisteredUsers();
-	IRC_User *getUserByFd(const int &fd);
-	IRC_User *getUserByNick(const std::string &nick);
+	UserIterator getUserByFd(const int &fd);
+	UserIterator getUserByNick(const std::string &nick);
 	std::queue<IRC_Message> &getMessageQueue();
+	void disconnectUser( int fd );
 
 private:
     void cleanupName(std::string *name);

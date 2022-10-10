@@ -24,6 +24,8 @@ public:
 	IRC_Server &operator=(const IRC_Server &other);
 
 	std::string processMessage(int fd, const std::string &buffer);
+
+	void onDisconnect(int fd);
 };
 
 #endif // INC_IRC_SERVER_HPP_
