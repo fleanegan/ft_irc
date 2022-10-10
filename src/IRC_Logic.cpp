@@ -53,7 +53,7 @@ std::string IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<
 		return processPingMessage(splitMessageVector);
 	else if (user->isAuthenticated == false)
 		return generateResponse(ERR_CONNECTWITHOUTPWD,
-				"This server is password protected. Have you forgotten to send PASS?");
+								"This server is password protected. Have you forgotten to send PASS?");
 	else if (splitMessageVector[0] == "NICK")
 		return processNickMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "USER")
@@ -72,28 +72,45 @@ std::string IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<
 
 std::string IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	std::queue<int> recipients;
-	IRC_User::UserIterator recipient;
-	IRC_Channel::ChannelIterator channelCandidate;
 
 	if (splitMessageVector.size() < 3)
-		return generateResponse(ERR_NOTEXTTOSEND, "Dont bother your friends if you have nothing to tell them! Add a message");
-
+		return generateResponse(ERR_NOTEXTTOSEND,
+								"Dont bother your friends if you have nothing to tell them! Add a message");
 	if (splitMessageVector[1][0] == '#') {
-		channelCandidate = getChannelByName(splitMessageVector[1]);
-		if (channelCandidate == _channels.end())
+		recipients = messageToChannel(user, splitMessageVector);
+		if (recipients.empty())
 			return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This channel does not exist!");
-		for (std::vector<int>::iterator it = channelCandidate->membersFd.begin(); it != channelCandidate->membersFd.end(); it++)
-			recipients.push(*it);
-		_messageQueue.push(IRC_Message(recipients, splitMessageVector, user));
-		return "";
+	} else {
+		recipients = messageToSingleUser(splitMessageVector);
+		if (recipients.empty())
+			return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This nick does not exist!");
 	}
-
-	recipient = getUserByNick(splitMessageVector[1]);
-	if (recipient == _users.end())
-		return generateResponse(ERR_NOSUCHNICK, "Get an addressbook! This nick does not exist!");
-	recipients.push(recipient->fd);
 	_messageQueue.push(IRC_Message(recipients, splitMessageVector, user));
 	return "";
+}
+
+std::queue<int> IRC_Logic::messageToSingleUser(const std::vector<std::string> &splitMessageVector) {
+	IRC_User::UserIterator recipient;
+	std::queue<int> recipients;
+
+	recipient = getUserByNick(splitMessageVector[1]);
+	if (recipient != _users.end())
+		recipients.push(recipient->fd);
+	return recipients;
+}
+
+std::queue<int> IRC_Logic::messageToChannel(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	std::queue<int> recipients;
+	IRC_Channel::ChannelIterator channelCandidate;
+
+	channelCandidate = getChannelByName(splitMessageVector[1]);
+	if (channelCandidate == _channels.end())
+		return recipients;
+	for (std::vector<int>::iterator it = channelCandidate->membersFd.begin();
+		 it != channelCandidate->membersFd.end(); it++)
+		if (user->fd == *it)
+			recipients.push(*it);
+	return recipients;
 }
 
 std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -102,7 +119,7 @@ std::string IRC_Logic::processPassMessage(IRC_User *user, const std::vector<std:
 	if (splitMessageVector.size() == 2 && splitMessageVector[1] == _password) {
 		user->isAuthenticated = true;
 		return "";
-	} else if (splitMessageVector.size() == 1){
+	} else if (splitMessageVector.size() == 1) {
 		return generateResponse(ERR_NEEDMOREPARAMS, "You did not enter a password");
 	}
 	return generateResponse(ERR_PASSWDMISMATCH, "You did not enter the correct password");
@@ -140,11 +157,13 @@ std::string IRC_Logic::processUserMessage(IRC_User *user, const std::vector<std:
 
 std::string IRC_Logic::welcomeNewUser(IRC_User *user) {
 	if (isUserRegistered(user)) {
-		return generateResponse(RPL_WELCOME, user->nick + " :Welcome to the land of fromage " + user->nick + "!~" + user->userName + "@127.0.0.1")
-			+ generateResponse(RPL_YOURHOST, "This is a ft_irc server")
-			+ generateResponse(RPL_CREATED, "The server was probably created in 2022")
-			+ generateResponse(RPL_MYINFO, "This server has got channels, believe me")
-			+ generateResponse(RPL_ISUPPORT, "Moderate demands");
+		return generateResponse(RPL_WELCOME,
+								user->nick + " :Welcome to the land of fromage " + user->nick + "!~" + user->userName +
+								"@127.0.0.1")
+			   + generateResponse(RPL_YOURHOST, "This is a ft_irc server")
+			   + generateResponse(RPL_CREATED, "The server was probably created in 2022")
+			   + generateResponse(RPL_MYINFO, "This server has got channels, believe me")
+			   + generateResponse(RPL_ISUPPORT, "Moderate demands");
 	}
 	return "";
 }
@@ -171,11 +190,11 @@ std::vector<std::string> IRC_Logic::extractFirstMessage(IRC_User *user) {
 	return result;
 }
 
-std::vector<IRC_User>& IRC_Logic::getRegisteredUsers() {
+std::vector<IRC_User> &IRC_Logic::getRegisteredUsers() {
 	return _users;
 }
 
-std::vector<IRC_Channel>& IRC_Logic::getChannels() {
+std::vector<IRC_Channel> &IRC_Logic::getChannels() {
 	return _channels;
 }
 
@@ -200,7 +219,7 @@ bool IRC_Logic::isUserRegistered(IRC_User *user) {
 // todo idle check
 std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	IRC_User::UserIterator result;
-	(void)user;
+	(void) user;
 	if (splitMessageVector.size() == 1)
 		return generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
 	result = getUserByNick(splitMessageVector[1]);
@@ -209,7 +228,7 @@ std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std
 	return generateResponse(RPL_WHOISUSER, result->toString());
 }
 
-void IRC_Logic::disconnectUser( int fd ) {
+void IRC_Logic::disconnectUser(int fd) {
 	IRC_User::UserIterator userToBeDeleted = getUserByFd(fd);
 
 	_prevUsers.push_back(*userToBeDeleted);
@@ -223,16 +242,17 @@ std::string IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<st
 	if (splitMessageVector.size() == 1)
 		return generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
 	result = generateWhoWasMessage(splitMessageVector);
-	if (result.empty()){
-		return generateResponse(ERR_WASNOSUCHNICK, "This user was never registered");}
+	if (result.empty()) {
+		return generateResponse(ERR_WASNOSUCHNICK, "This user was never registered");
+	}
 	return result + RPL_ENDOFWHOWAS + "\r\n";
 }
 
 std::string
-IRC_Logic::generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const{
+IRC_Logic::generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const {
 	std::string result;
 
-	for (std::vector<IRC_User>::const_reverse_iterator rit = _prevUsers.rbegin(); rit != _prevUsers.rend(); ++rit){
+	for (std::vector<IRC_User>::const_reverse_iterator rit = _prevUsers.rbegin(); rit != _prevUsers.rend(); ++rit) {
 		if (rit->nick == splitMessageVector[1])
 			result += generateResponse(RPL_WHOWASUSER, rit->toString());
 	}
@@ -252,7 +272,7 @@ std::string IRC_Logic::processJoinMessage(IRC_User *user, const std::vector<std:
 
 IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(const std::string &name) {
 	for (std::vector<IRC_Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		if (it->name == name || (name[0] && it->name == name.substr(1, name.size())))
+		if (IRC_Channel::getChannelName(name) == it->name)
 			return it;
 	return _channels.end();
 }

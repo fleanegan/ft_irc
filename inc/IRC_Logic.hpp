@@ -50,5 +50,7 @@ private:
 	std::string generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const;
 	std::string processJoinMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
+	std::queue<int> messageToChannel(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+	std::queue<int> messageToSingleUser(const std::vector<std::string> &splitMessageVector);
 };
 #endif //INC_IRC_LOGIC_HPP_
