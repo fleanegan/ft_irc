@@ -12,11 +12,11 @@ class IRC_Logic {
 private:
     std::string _password;
     std::vector<IRC_User> _users;
+	std::vector<IRC_User> _prevUsers;
 	std::queue<IRC_Message> _messageQueue;
 
 	IRC_Logic();
 public:
-	typedef std::vector<IRC_User>::iterator UserIterator;
 
     explicit IRC_Logic(const std::string &password);
     IRC_Logic(const IRC_Logic &other);
@@ -24,8 +24,8 @@ public:
     ~IRC_Logic();
 	std::string processInput(int fd, const std::string &input);
 	std::vector<IRC_User> getRegisteredUsers();
-	UserIterator getUserByFd(const int &fd);
-	UserIterator getUserByNick(const std::string &nick);
+	IRC_User::UserIterator getUserByFd(const int &fd);
+	IRC_User::UserIterator getUserByNick(const std::string &nick);
 	std::queue<IRC_Message> &getMessageQueue();
 	void disconnectUser( int fd );
 
@@ -43,5 +43,6 @@ private:
 	std::string processPingMessage(const std::vector<std::string> &splitMessageVector);
 	std::string processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 	std::string processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+	std::string processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 };
 #endif //INC_IRC_LOGIC_HPP_

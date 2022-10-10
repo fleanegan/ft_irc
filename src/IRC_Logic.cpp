@@ -29,7 +29,7 @@ void IRC_Logic::cleanupName(std::string *name) {
 
 std::string IRC_Logic::processInput(int fd, const std::string &input) {
 	std::vector<std::string> splitMessageVector;
-	UserIterator currentUser = getUserByFd(fd);
+	IRC_User::UserIterator currentUser = getUserByFd(fd);
 	std::string result;
 
 	if (currentUser == _users.end()) {
@@ -64,13 +64,15 @@ std::string IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<
 		return processPrivMsgMessage(user, splitMessageVector);
 	else if (splitMessageVector[0] == "WHOIS")
 		return processWhoIsMessage(user, splitMessageVector);
+	else if (splitMessageVector[0] == "WHOWAS")
+		return processWhoWasMessage(user, splitMessageVector);
 	else
 		return "";
 }
 
 std::string IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	std::queue<int> recipients;
-	UserIterator recipient;
+	IRC_User::UserIterator recipient;
 
 	if (splitMessageVector.size() < 3)
 		return generateResponse(ERR_NOTEXTTOSEND, "Dont bother your friends if you have nothing to tell them! Add a message");
@@ -164,22 +166,12 @@ std::queue<IRC_Message> &IRC_Logic::getMessageQueue() {
 	return _messageQueue;
 }
 
-IRC_Logic::UserIterator IRC_Logic::getUserByFd(const int &fd) {
-	for (std::vector<IRC_User>::iterator it = _users.begin();
-		 it != _users.end(); it++) {
-		if (it->fd == fd)
-			return it;
-	}
-	return _users.end();
+IRC_User::UserIterator IRC_Logic::getUserByFd(const int &fd) {
+	return IRC_User::findUserByFdInVector(&_users, fd);
 }
 
-IRC_Logic::UserIterator IRC_Logic::getUserByNick(const std::string &nick) {
-	for (std::vector<IRC_User>::iterator it = _users.begin();
-		 it != _users.end(); it++) {
-		if (it->nick == nick)
-			return it;
-	}
-	return _users.end();
+IRC_User::UserIterator IRC_Logic::getUserByNick(const std::string &nick) {
+	return IRC_User::findUserByNickInVector(&_users, nick);
 }
 
 bool IRC_Logic::isUserRegistered(IRC_User *user) {
@@ -194,5 +186,13 @@ std::string IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std
 }
 
 void IRC_Logic::disconnectUser( int fd ) {
-	(void)fd;
+	IRC_User::UserIterator userToBeDeleted = getUserByFd(fd);
+
+	_prevUsers.push_back(*userToBeDeleted);
+	_users.erase(userToBeDeleted);
+}
+
+std::string IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	const IRC_User::UserIterator &result = IRC_User::findUserByNickInVector(&_prevUsers, splitMessageVector[1]);
+	return result->nick;
 }

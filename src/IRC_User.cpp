@@ -4,7 +4,7 @@ IRC_User::IRC_User(int fd) : isAuthenticated(false), fd(fd){
 }
 
 IRC_User::IRC_User(const std::string &nick, const std::string &name, const int &fd):
-		nick(nick), userName(name), isAuthenticated(false),	 fd(fd) {
+		nick(nick), userName(name), isAuthenticated(false), fd(fd) {
 }
 
 bool IRC_User::isNickValid(const std::string &nick) {

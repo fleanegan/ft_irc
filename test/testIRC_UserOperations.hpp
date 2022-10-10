@@ -44,17 +44,18 @@ TEST(IRC_LogicUserRegistration, receivingWhoIsShouldSendInformationsAboutUser){
 	ASSERT_TRUE(responseContains(result, RPL_WHOISUSER));
 }
 
-/*
 TEST(IRC_LogicUserRegistration, removingUserFromServerMovesToWasList) {
 	IRC_Logic logic("password");
 	std::string result;
-	registerDummyUser(&logic, 1);
+	registerDummyUser(&logic, 3);
 
 	logic.disconnectUser(0);
+	logic.disconnectUser(1);
+	result = logic.processInput(2, "WHOWAS nick1\r\n");
 
-	ASSERT_TRUE(logic.getRegisteredUsers().empty());
+	ASSERT_EQ(1, logic.getRegisteredUsers().size());
+	ASSERT_TRUE(responseContains(result, "nick1"));
 }
-*/
 
 #endif //TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
 
