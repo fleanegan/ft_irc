@@ -23,10 +23,7 @@ public:
 	IRC_Message(const IRC_Message &other);
 	IRC_Message &operator=(const IRC_Message &);
 	~IRC_Message();
-
-	std::string buildMessageContent(const std::vector<std::string> &splitMessageVector);
-
-    std::string buildPrefix() const;
+	std::string buildMessageContent(const std::vector<std::string> &splitMessageVector) const;
 };
 
 #endif //FT_IRC_IRC_MESSAGE_HPP

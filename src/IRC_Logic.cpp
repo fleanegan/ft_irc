@@ -68,11 +68,13 @@ void IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<std::st
         processWhoWasMessage(user, splitMessageVector);
     else if (splitMessageVector[0] == "JOIN")
         processJoinMessage(user, splitMessageVector);
+    else if (splitMessageVector[0] == "QUIT") {
+		_returnMessage += generateResponse(ERR_CLOSINGLINK, "Closing link");
+	}
 }
 
 void IRC_Logic::processModeMessage(const IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-    _returnMessage += ":" + user->nick + " " + splitMessageVector[0] + " " + splitMessageVector[1] + " :" +
-                      splitMessageVector[2] + "\r\n";
+    _returnMessage += ":" + user->nick + " " + splitMessageVector[0] + " " + splitMessageVector[1] + " :" + "\r\n";
 }
 
 void IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -266,7 +268,7 @@ void IRC_Logic::removeMemberFromChannel(IRC_User::UserIterator user, std::vector
          recipientFd != channel->membersFd.end(); recipientFd++) {
         if (*recipientFd == user->fd) {
             std::queue<int> recipients = fetchChannelRecipients(user->fd, channel->name);
-            _messageQueue.push(IRC_Message(recipients, "", &*user));
+            _messageQueue.push(IRC_Message(recipients, "QUIT :\"leaving\"", &*user));
             recipientFd = channel->membersFd.erase(recipientFd) - 1;
         }
     }
@@ -300,6 +302,8 @@ IRC_Logic::generateWhoWasMessage(const std::vector<std::string> &splitMessageVec
 
 void IRC_Logic::processJoinMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
     (void) user;
+
+	std::vector<IRC_Channel>::iterator channel;
     if (splitMessageVector.size() == 1) {
         _returnMessage += generateResponse(ERR_NEEDMOREPARAMS, "Join requires <channel_name> and <password>");
         return;
@@ -307,7 +311,19 @@ void IRC_Logic::processJoinMessage(IRC_User *user, const std::vector<std::string
     IRC_Channel channelCandidate = IRC_Channel(splitMessageVector[1]);
     if (getChannelByName(channelCandidate.name) == _channels.end())
         _channels.push_back(channelCandidate);
-    getChannelByName(channelCandidate.name)->membersFd.push_back(user->fd);
+    channel = getChannelByName(channelCandidate.name);
+	channel->membersFd.push_back(user->fd);
+	// JOIN FEEDBACK
+	_returnMessage += user->toPrefixString() + " JOIN :#" + channel->name +"\r\n";
+
+	// NAMREPLY
+	_returnMessage += std::string(RPL_NAMREPLY) + " " + user->nick + " = " + channel->name + " :";
+	for (std::vector<int>::reverse_iterator it = channel->membersFd.rbegin(); it != channel->membersFd.rend(); ++it) {
+		_returnMessage += " " + getUserByFd(*it)->nick;
+	}
+	_returnMessage += "\r\n";
+	// ENDOFNAMES
+	_returnMessage += std::string(RPL_ENDOFNAMES) + " " + user->nick + " #" + channel->name + " :End of NAMES list.\r\n";
 }
 
 IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(const std::string &name) {

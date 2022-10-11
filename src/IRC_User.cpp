@@ -47,3 +47,7 @@ std::string IRC_User::toString() const {
 	return nick + " " + userName + " " + hostName + " * :" + fullName + "\r\n";
 }
 
+std::string IRC_User::toPrefixString() const{
+    return ":" + nick + "!~" + userName + "@" + hostName + " ";
+}
+

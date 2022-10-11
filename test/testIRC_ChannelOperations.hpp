@@ -98,12 +98,23 @@ TEST(IRC_ChannelOperations, disonnectedMemberGetsRemovedFromChannelAndTheirFdIsR
 
 }
 
+//TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther){
+//	IRC_Logic logic("password");
+//	std::string result;
+//    registerMembersAndJoinToChannel(&logic, 2);
+//
+//	ASSERT_FALSE(logic.getMessageQueue().empty());
+//}
+
 TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers){
     IRC_Logic logic("password");
     registerMembersAndJoinToChannel(&logic, 2);
+	std::string result;
 
+	result = logic.processInput(0, "QUIT :leaving\r\n");
     logic.disconnectUser(0);
 
+    ASSERT_TRUE(responseContains(result, ERR_CLOSINGLINK));
     ASSERT_FALSE(logic.getMessageQueue().empty());
     ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
     ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "nick0"));

@@ -10,7 +10,7 @@ IRC_Message::IRC_Message(const IRC_Message &other):
 }
 
 IRC_Message::IRC_Message(const std::queue<int> &recipients, const std::string &messageContent, IRC_User *sender) : recipients(recipients), sender(sender), content(
-        buildPrefix() + messageContent){
+        sender->toPrefixString() + messageContent){
 }
 
 IRC_Message &IRC_Message::operator=(const IRC_Message &other) {
@@ -25,17 +25,12 @@ IRC_Message &IRC_Message::operator=(const IRC_Message &other) {
 IRC_Message::~IRC_Message() {
 }
 
-std::string IRC_Message::buildMessageContent(const std::vector<std::string> &splitMessageVector) {
+std::string IRC_Message::buildMessageContent(const std::vector<std::string> &splitMessageVector) const{
 	std::string name;
 
-    name = buildPrefix();
+    name = sender->toPrefixString();
     name += concatenateContentFromIndex(0, splitMessageVector);
 
 	return name;
-}
-
-std::string IRC_Message::buildPrefix() const {
-    std::string result = ":" + sender->nick + "!~" + sender->userName + "@127.0.0.1 ";
-    return result;
 }
 

@@ -26,6 +26,8 @@ public:
 	std::string processMessage(int fd, const std::string &buffer);
 
 	void onDisconnect(int fd);
+
+    void distributeMessages();
 };
 
 #endif // INC_IRC_SERVER_HPP_

@@ -24,6 +24,8 @@ struct IRC_User{
 	static UserIterator findUserByFdInVector(std::vector<IRC_User> *users, int fd);
 	static UserIterator findUserByNickInVector(std::vector<IRC_User> *users, const std::string &nick);
 
+    std::string toPrefixString() const;
+
 private:
 	IRC_User();
 	//todo: implement
