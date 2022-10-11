@@ -1,10 +1,10 @@
 #include "../inc/IRC_Server.hpp"
 #include <iostream>
 
-IRC_Server::IRC_Server(void ): TCP_Server(), _logic("password") {
+IRC_Server::IRC_Server(void): TCP_Server(), _logic("password") {
 }
 
-IRC_Server::IRC_Server( int port, const std::string& password):
+IRC_Server::IRC_Server(int port, const std::string& password):
 	TCP_Server(port), _logic(password) {
 }
 
@@ -27,9 +27,9 @@ void IRC_Server::distributeMessages() {
     IRC_Message* currentMessage;
     int			currentFd;
 
-    while (! _logic.getMessageQueue().empty()) {
+    while (!_logic.getMessageQueue().empty()) {
         currentMessage = &_logic.getMessageQueue().front();
-        while (! currentMessage->recipients.empty()) {
+        while (!currentMessage->recipients.empty()) {
             currentFd = currentMessage->recipients.front();
             currentMessage->recipients.pop();
             _VERBOSE && std::cerr << "sending \n\t" << currentMessage->content

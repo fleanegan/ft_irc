@@ -10,51 +10,66 @@
 #include "./IRC_Channel.hpp"
 
 class IRC_Logic {
-private:
-    std::string _password;
-    std::vector<IRC_User> _users;
-	std::vector<IRC_Channel> _channels;
-	std::vector<IRC_User> _prevUsers;
-	std::queue<IRC_Message> _messageQueue;
-    std::string _returnMessage;
+	private:
+		std::string _password;
+		std::vector<IRC_User> _users;
+		std::vector<IRC_Channel> _channels;
+		std::vector<IRC_User> _prevUsers;
+		std::queue<IRC_Message> _messageQueue;
+		std::string _returnMessage;
 
-	IRC_Logic();
-public:
+		IRC_Logic();
 
-    explicit IRC_Logic(const std::string &password);
-    IRC_Logic(const IRC_Logic &other);
-    IRC_Logic &operator=(const IRC_Logic &);
-    ~IRC_Logic();
-	std::string processInput(int fd, const std::string &input);
-	IRC_User::UserIterator getUserByFd(const int &fd);
-	IRC_User::UserIterator getUserByNick(const std::string &nick);
-	std::queue<IRC_Message> &getMessageQueue();
-	void disconnectUser( int fd );
-	std::vector<IRC_User>& getRegisteredUsers();
-	std::vector<IRC_Channel>& getChannels();
+	public:
+		explicit IRC_Logic(const std::string &password);
+		IRC_Logic(const IRC_Logic &other);
+		IRC_Logic &operator=(const IRC_Logic &);
+		~IRC_Logic();
+		std::string processInput(int fd, const std::string &input);
+		IRC_User::UserIterator getUserByFd(const int &fd);
+		IRC_User::UserIterator getUserByNick(const std::string &nick);
+		std::queue<IRC_Message> &getMessageQueue();
+		void disconnectUser(int fd);
+		std::vector<IRC_User>& getRegisteredUsers();
+		std::vector<IRC_Channel>& getChannels();
 
-private:
-    void cleanupName(std::string *name);
-	void removeMessageTermination(std::string *message);
-    std::vector<std::string> extractFirstMessage(IRC_User *user);
-	bool isNickAlreadyPresent(const std::string &nick);
-	bool isUserRegistered(IRC_User* user);
-	std::string welcomeNewUser(IRC_User *user);
-	void processIncomingMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processNickMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processUserMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processPassMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processPingMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processWhoIsMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	void processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	std::string generateWhoWasMessage(const std::vector<std::string> &splitMessageVector) const;
-	void processJoinMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
-	IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
-	std::queue<int> fetchChannelRecipients(int fd, const std::string &channelName);
-	std::queue<int> fetchSingleRecipient(int fd, const std::vector<std::string> &splitMessageVector);
-	bool isUserInChannel(int fd, std::vector<IRC_Channel>::const_iterator channelCandidate) const;
-    void processModeMessage(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
-    void removeMemberFromChannel(IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator *channel);
+	private:
+		void cleanupName(std::string *name);
+		void removeMessageTermination(std::string *message);
+		std::vector<std::string> extractFirstMessage(IRC_User *user);
+		bool isNickAlreadyPresent(const std::string &nick);
+		bool isUserRegistered(IRC_User* user);
+		std::string welcomeNewUser(IRC_User *user);
+		void processIncomingMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processNickMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processUserMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processPassMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processPingMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processPrivMsgMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processWhoIsMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processWhoWasMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		std::string generateWhoWasMessage(
+				const std::vector<std::string> &splitMessageVector) const;
+		void processJoinMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
+		std::queue<int> fetchChannelRecipients(
+				int fd, const std::string &channelName);
+		std::queue<int> fetchSingleRecipient(
+				int fd, const std::vector<std::string> &splitMessageVector);
+		bool isUserInChannel(
+				int fd, std::vector<IRC_Channel>::const_iterator channel) const;
+		void processModeMessage(const IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void removeMemberFromChannel(IRC_User::UserIterator user,
+				std::vector<IRC_Channel>::iterator *channel);
 };
-#endif //INC_IRC_LOGIC_HPP_
+#endif  // INC_IRC_LOGIC_HPP_

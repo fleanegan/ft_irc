@@ -11,7 +11,8 @@ TEST(IRC_LogicPrivateMessage, sendingToNonExistingNickGeneratesError) {
 
 	logic.processInput(0, "PRIVMSG nonExisingNick content\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_NOSUCHNICK));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NOSUCHNICK));
 }
 
 TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
@@ -21,7 +22,8 @@ TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
 
 	result = logic.processInput(0, "PRIVMSG nonExisingNick\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_NOTEXTTOSEND));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NOTEXTTOSEND));
 }
 
 TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageRegistersMessage) {
@@ -40,9 +42,10 @@ TEST(IRC_LogicPrivateMessage, messagesSentWithPrefixContainingNick) {
 
 	logic.processInput(0, "PRIVMSG nick1 :content is cool\r\n");
 
-	ASSERT_STREQ(":nick0!~username0@127.0.0.1 PRIVMSG nick1 :content is cool", logic.getMessageQueue().back().content.c_str());
+	ASSERT_STREQ(":nick0!~username0@127.0.0.1 PRIVMSG nick1 :content is cool",
+			logic.getMessageQueue().back().content.c_str());
 }
 
-//:nick_!~fleanegan@127.0.0.1 PRIVMSG testSender:
+// :nick_!~fleanegan@127.0.0.1 PRIVMSG testSender:
 
-#endif //TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_
+#endif  // TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_

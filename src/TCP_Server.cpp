@@ -54,10 +54,12 @@ void TCP_Server::host(void) {
             char *addr_bin = inet_ntoa(in);
             unsigned long ip = inet_addr(addr_bin); //NOLINT (C style function requires C style variables)
             hostent *host = gethostbyaddr(&ip, sizeof(in_addr), 0);
-            std::cout << "this is forbidden. hostname: " << host->h_name << ", ip: " << addr_bin << std::endl;
+            std::cout << "this is forbidden. hostname: "
+				<< host->h_name << ", ip: " << addr_bin << std::endl;
 		}
 
-		for(std::vector<pollfd>::iterator it = _fds.begin() + 1; it != _fds.end(); ++it) {
+		for(std::vector<pollfd>::iterator
+				it = _fds.begin() + 1; it != _fds.end(); ++it) {
 			memset(buffer, 0, BUFFER_LEN);
 			_VERBOSE && std::cerr << "Connection " << it->fd << std::endl;
 			if (it->revents & (POLLIN | POLLERR)) {
@@ -70,7 +72,8 @@ void TCP_Server::host(void) {
 				} else {
                     std::string response;
 
-                    _VERBOSE && std::cerr << "read " << bytesRead << " bytes from fd " << it->fd << std::endl;
+                    _VERBOSE && std::cerr << "read " << bytesRead
+						<< " bytes from fd " << it->fd << std::endl;
 					_VERBOSE && std::cerr << "content:\n\t" << buffer << std::endl;
 					response = processMessage(it->fd, buffer);
 					_VERBOSE && std::cerr << "sending:\n\t" << response << std::endl;

@@ -5,17 +5,19 @@
 #include "./testUtils.hpp"
 #include "gtest/gtest.h"
 
-TEST(IRC_ChannelOperations, joiningAChannelRequiresName){
+TEST(IRC_ChannelOperations, joiningAChannelRequiresName) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 1);
 
 	result = logic.processInput(0, "JOIN\r\n");
 
-	ASSERT_TRUE(countSubStrings(logic.getMessageQueue().back().content, ERR_NEEDMOREPARAMS));
+	ASSERT_TRUE(countSubStrings(logic.getMessageQueue().back().content,
+				ERR_NEEDMOREPARAMS));
 }
 
-TEST(IRC_ChannelOperations, joiningANonExistingChannelCreatesAChannelAccordingToTheGivenName){
+TEST(IRC_ChannelOperations,
+		joiningANonExistingChannelCreatesAChannelAccordingToTheGivenName) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 1);
@@ -26,7 +28,8 @@ TEST(IRC_ChannelOperations, joiningANonExistingChannelCreatesAChannelAccordingTo
 	ASSERT_STREQ("mychan", logic.getChannels().front().name.c_str());
 }
 
-TEST(IRC_ChannelOperations, joiningANonExistingCreatesAChannelAndIgnoreHashtagsign){
+TEST(IRC_ChannelOperations,
+		joiningANonExistingCreatesAChannelAndIgnoreHashtagsign) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 1);
@@ -37,7 +40,7 @@ TEST(IRC_ChannelOperations, joiningANonExistingCreatesAChannelAndIgnoreHashtagsi
 	ASSERT_STREQ("mychan", logic.getChannels().front().name.c_str());
 }
 
-TEST(IRC_ChannelOperations, JoiningAnExistingChannelDoesNotCreateNewChannel){
+TEST(IRC_ChannelOperations, JoiningAnExistingChannelDoesNotCreateNewChannel) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -48,7 +51,7 @@ TEST(IRC_ChannelOperations, JoiningAnExistingChannelDoesNotCreateNewChannel){
 	ASSERT_EQ(1, logic.getChannels().size());
 }
 
-TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage){
+TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -57,11 +60,12 @@ TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage){
 
 	logic.processInput(1, "PRIVMSG #mychan messageContent\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, "PRIVMSG #mychan messageContent"));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"PRIVMSG #mychan messageContent"));
 	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
 }
 
-TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError){
+TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 2);
@@ -69,10 +73,11 @@ TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError){
 
 	result = logic.processInput(1, "PRIVMSG #mychan messageContent\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_CANNOTSENDTOCHAN));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_CANNOTSENDTOCHAN));
 }
 
-TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
+TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError) {
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 1);
@@ -85,7 +90,8 @@ TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
 	ASSERT_EQ(before, after);
 }
 
-TEST(IRC_ChannelOperations, disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused){
+TEST(IRC_ChannelOperations,
+		disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused) {
     IRC_Logic logic("password");
     registerMembersAndJoinToChannel(&logic, 3);
     logic.disconnectUser(0);
@@ -96,18 +102,18 @@ TEST(IRC_ChannelOperations, disonnectedMemberGetsRemovedFromChannelAndTheirFdIsR
     ASSERT_FALSE(logic.getMessageQueue().empty());
     ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
     ASSERT_EQ(2, logic.getMessageQueue().back().recipients.front());
-
 }
 
-//TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther){
-//	IRC_Logic logic("password");
-//	std::string result;
-//    registerMembersAndJoinToChannel(&logic, 2);
+// TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
+// 	IRC_Logic logic("password");
+// 	std::string result;
 //
-//	ASSERT_FALSE(logic.getMessageQueue().empty());
-//}
+//     registerMembersAndJoinToChannel(&logic, 2);
+//
+// 	ASSERT_FALSE(logic.getMessageQueue().empty());
+// }
 
-TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers){
+TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers) {
     IRC_Logic logic("password");
     registerMembersAndJoinToChannel(&logic, 2);
 	std::string result;
@@ -118,13 +124,13 @@ TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers){
     ASSERT_TRUE(responseContains(result, ERR_CLOSINGLINK));
     ASSERT_FALSE(logic.getMessageQueue().empty());
     ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
-    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, "nick0"));
-
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"nick0"));
 }
 
-//TEST(IRC_ChannelOperations, channelNamesAreCaseInsensitive){
-//TEST(IRC_ChannelOperations, channelNamesCanContainDifferentPrefixes){
-//TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong){
+// TEST(IRC_ChannelOperations, channelNamesAreCaseInsensitive) {
+// TEST(IRC_ChannelOperations, channelNamesCanContainDifferentPrefixes) {
+// TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong) {
 
-#endif //TEST_TESTIRC_CHANNELOPERATIONS_HPP_
+#endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_
 

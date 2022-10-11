@@ -11,23 +11,23 @@
 #include "./TCP_Server.hpp"
 
 class IRC_Server : public TCP_Server {
-private:
-	IRC_Logic _logic;
+	private:
+		IRC_Logic _logic;
 
-	IRC_Server(const IRC_Server &other);
-public:
-	IRC_Server(void);
-	IRC_Server(int port, const std::string &password);
+		IRC_Server(const IRC_Server &other);
+	public:
+		IRC_Server(void);
+		IRC_Server(int port, const std::string &password);
 
-	~IRC_Server();
+		~IRC_Server();
 
-	IRC_Server &operator=(const IRC_Server &other);
+		IRC_Server &operator=(const IRC_Server &other);
 
-	std::string processMessage(int fd, const std::string &buffer);
+		std::string processMessage(int fd, const std::string &buffer);
 
-	void onDisconnect(int fd);
+		void onDisconnect(int fd);
 
-    void distributeMessages();
+		void distributeMessages();
 };
 
-#endif // INC_IRC_SERVER_HPP_
+#endif  // INC_IRC_SERVER_HPP_

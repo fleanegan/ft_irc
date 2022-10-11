@@ -13,8 +13,7 @@ void sighandler(int signum) {
 }
 
 // MAIN_CPP
-int	main(int ac, char **av)
-{
+int	main(int ac, char **av) {
 	if (ac != 3) {
 		std::cout << "Usage: ./ircerv <port> <password>"
 			<< "\n\tport: The server listening port"

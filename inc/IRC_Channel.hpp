@@ -14,12 +14,12 @@ struct IRC_Channel{
 	bool operator==(const IRC_Channel &rhs) const;
 	bool operator!=(const IRC_Channel &rhs) const;
 
-	static std::string  getChannelName( const std::string &name);
+	static std::string  getChannelName(const std::string &name);
 
-private:
+	private:
 	IRC_Channel();
 };
 
 
 
-#endif // INC_IRC_CHANNEL_HPP_
+#endif  // INC_IRC_CHANNEL_HPP_

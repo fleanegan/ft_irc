@@ -15,40 +15,40 @@
 #define _VERBOSE true
 
 class TCP_Server {
+	private:
+		TCP_Server(const TCP_Server &other);
+		TCP_Server &operator=(const TCP_Server &other);
 
-private:
-	TCP_Server(const TCP_Server &other);
-	TCP_Server &operator=(const TCP_Server &other);
-protected:
-	std::vector<struct pollfd> _fds;
-	struct sockaddr_in _servAddr;
-	int _port;
-	virtual void onDisconnect(int fd) = 0;
+	protected:
+		std::vector<struct pollfd> _fds;
+		struct sockaddr_in _servAddr;
+		int _port;
+		virtual void onDisconnect(int fd) = 0;
 
-public:
-	TCP_Server(void);
-	explicit TCP_Server(int port);
-	virtual ~TCP_Server(void);
-	virtual std::string processMessage(int fd, const std::string &buffer) = 0;
-	void host(void);
-
-	class socketFailedException : public std::exception {
 	public:
-		virtual const char *what() const throw();
-	};
+		TCP_Server(void);
+		explicit TCP_Server(int port);
+		virtual ~TCP_Server(void);
+		virtual std::string processMessage(int fd, const std::string &buffer) = 0;
+		void host(void);
 
-	class couldNotBindException : public std::exception {
-	public:
-		virtual const char *what() const throw();
-	};
+		class socketFailedException : public std::exception {
+			public: // NOLINT :Not respecting space indentation in this project
+				virtual const char *what() const throw();
+		};
 
-	class brokenConnectionException : public std::exception {
-	public:
-		virtual const char *what() const throw();
-	};
+		class couldNotBindException : public std::exception {
+			public: // NOLINT :Not respecting space indentation in this project
+				virtual const char *what() const throw();
+		};
 
-	void setUpTcpSocket(int port);
-	void saveConnectionInfo(int fd);
+		class brokenConnectionException : public std::exception {
+			public: // NOLINT :Not respecting space indentation in this project
+				virtual const char *what() const throw();
+		};
+
+		void setUpTcpSocket(int port);
+		void saveConnectionInfo(int fd);
 };
 
-#endif // INC_TCP_SERVER_HPP_
+#endif  // INC_TCP_SERVER_HPP_
