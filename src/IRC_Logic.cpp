@@ -71,7 +71,8 @@ void IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<std::st
 }
 
 void IRC_Logic::processModeMessage(const IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-    _returnMessage += ":" + user->nick + " " + splitMessageVector[0] + " " + splitMessageVector[1] + " :" + splitMessageVector[2] + "\r\n";
+    _returnMessage += ":" + user->nick + " " + splitMessageVector[0] + " " + splitMessageVector[1] + " :" +
+                      splitMessageVector[2] + "\r\n";
 }
 
 void IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -81,7 +82,7 @@ void IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::str
         _returnMessage += generateResponse(ERR_NOTEXTTOSEND, "Missing message text");
     else {
         if (splitMessageVector[1][0] == '#')
-            recipients = fetchChannelRecipients(user, splitMessageVector);
+            recipients = fetchChannelRecipients(user->fd, splitMessageVector[1]);
         else
             recipients = fetchSingleRecipient(splitMessageVector);
     }
@@ -89,10 +90,10 @@ void IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::str
         _messageQueue.push(IRC_Message(recipients, splitMessageVector, user));
 }
 
-bool IRC_Logic::isUserInChannel(IRC_User *user, std::vector<IRC_Channel>::iterator &channelCandidate) const {
+bool IRC_Logic::isUserInChannel(int fd, std::vector<IRC_Channel>::iterator &channelCandidate) const {
     for (std::vector<int>::iterator it = channelCandidate->membersFd.begin();
          it != channelCandidate->membersFd.end(); ++it)
-        if (*it == user->fd)
+        if (*it == fd)
             return true;
     return false;
 }
@@ -109,19 +110,19 @@ std::queue<int> IRC_Logic::fetchSingleRecipient(const std::vector<std::string> &
     return recipients;
 }
 
-std::queue<int> IRC_Logic::fetchChannelRecipients(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+std::queue<int> IRC_Logic::fetchChannelRecipients(int fd, const std::string &channelName) {
     std::queue<int> recipients;
-    std::vector<IRC_Channel>::iterator channelCandidate = getChannelByName(splitMessageVector[1]);
+    std::vector<IRC_Channel>::iterator channelCandidate = getChannelByName(channelName);
 
     if (channelCandidate == _channels.end())
         _returnMessage += generateResponse(ERR_NOSUCHCHANNEL,
                                            "Get an addressbook! This channel does not exist!");
-    else if (!isUserInChannel(user, channelCandidate))
+    else if (!isUserInChannel(fd, channelCandidate))
         _returnMessage += generateResponse(ERR_CANNOTSENDTOCHAN, "You're not part of this channel");
     else {
         for (std::vector<int>::iterator it = channelCandidate->membersFd.begin();
              it != channelCandidate->membersFd.end(); it++)
-            if (user->fd != *it)
+            if (fd != *it)
                 recipients.push(*it);
     }
     return recipients;
@@ -253,17 +254,21 @@ void IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::strin
 void IRC_Logic::disconnectUser(int fd) {
     IRC_User::UserIterator userToBeDeleted = getUserByFd(fd);
 
-	for (std::vector<IRC_Channel>::iterator channel = _channels.begin(); channel != _channels.end(); channel++) {
-        removeMemberFromChannel(fd, channel);
+    for (std::vector<IRC_Channel>::iterator channel = _channels.begin(); channel != _channels.end(); channel++) {
+        removeMemberFromChannel(userToBeDeleted, channel);
     }
     _prevUsers.push_back(*userToBeDeleted);
     _users.erase(userToBeDeleted);
 }
 
-void IRC_Logic::removeMemberFromChannel(int fd, std::vector<IRC_Channel>::iterator &channel) const {
-    for (std::vector<int>::iterator recipientFd = channel->membersFd.begin(); recipientFd != channel->membersFd.end(); recipientFd++) {
-        if (*recipientFd == fd)
-                recipientFd = channel->membersFd.erase(recipientFd) - 1;
+void IRC_Logic::removeMemberFromChannel(IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator &channel){
+    for (std::vector<int>::iterator recipientFd = channel->membersFd.begin();
+         recipientFd != channel->membersFd.end(); recipientFd++) {
+        if (*recipientFd == user->fd) {
+            std::queue<int> recipients = fetchChannelRecipients(user->fd, channel->name);
+            _messageQueue.push(IRC_Message(recipients, "", &*user));
+            recipientFd = channel->membersFd.erase(recipientFd) - 1;
+        }
     }
 }
 
@@ -273,7 +278,7 @@ void IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<std::stri
 
     if (splitMessageVector.size() == 1) {
         _returnMessage += generateResponse(ERR_NONICKNAMEGIVEN, "Please provide a nickname");
-        return ;
+        return;
     }
     result = generateWhoWasMessage(splitMessageVector);
     if (result.empty())

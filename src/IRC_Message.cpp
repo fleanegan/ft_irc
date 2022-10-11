@@ -9,6 +9,10 @@ IRC_Message::IRC_Message(const IRC_Message &other):
 	recipients(other.recipients), sender(other.sender), content(other.content){
 }
 
+IRC_Message::IRC_Message(const std::queue<int> &recipients, const std::string &messageContent, IRC_User *sender) : recipients(recipients), sender(sender), content(
+        buildPrefix() + messageContent){
+}
+
 IRC_Message &IRC_Message::operator=(const IRC_Message &other) {
 	if (this != &other) {
 		recipients = other.recipients;
@@ -24,8 +28,14 @@ IRC_Message::~IRC_Message() {
 std::string IRC_Message::buildMessageContent(const std::vector<std::string> &splitMessageVector) {
 	std::string name;
 
-	name = ":" + sender->nick + "!~" + sender->userName + "@127.0.0.1 ";
-	name += concatenateContentFromIndex(0, splitMessageVector);
+    name = buildPrefix();
+    name += concatenateContentFromIndex(0, splitMessageVector);
 
 	return name;
 }
+
+std::string IRC_Message::buildPrefix() const {
+    std::string result = ":" + sender->nick + "!~" + sender->userName + "@127.0.0.1 ";
+    return result;
+}
+

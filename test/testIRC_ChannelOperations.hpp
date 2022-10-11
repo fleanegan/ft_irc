@@ -93,8 +93,20 @@ TEST(IRC_ChannelOperations, disonnectedMemberGetsRemovedFromChannelAndTheirFdIsR
     logic.processInput(1, "PRIVMSG #chan messageContent\r\n");
 
     ASSERT_FALSE(logic.getMessageQueue().empty());
+    ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
+    ASSERT_EQ(2, logic.getMessageQueue().back().recipients.front());
+
+}
+
+TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers){
+    IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 2);
+
+    logic.disconnectUser(0);
+
+    ASSERT_FALSE(logic.getMessageQueue().empty());
     ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
-    ASSERT_EQ(2, logic.getMessageQueue().front().recipients.front());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "nick0"));
 
 }
 
