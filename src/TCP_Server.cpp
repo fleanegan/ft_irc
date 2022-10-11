@@ -1,3 +1,5 @@
+#include <netdb.h>
+#include <arpa/inet.h>
 #include "../inc/TCP_Server.hpp"
 
 TCP_Server::TCP_Server(void) {
@@ -37,7 +39,6 @@ TCP_Server::~TCP_Server(void) {
 void TCP_Server::host(void) {
 	sockaddr_in cliaddr;
 	socklen_t addrLen = sizeof(cliaddr);
-	std::string response;
 	char buffer[BUFFER_LEN];
 	int bytesRead;
 	int newClient;
@@ -49,6 +50,11 @@ void TCP_Server::host(void) {
 			newClient = accept(_fds.front().fd,
 					reinterpret_cast<sockaddr *>(&cliaddr), &addrLen);
 			saveConnectionInfo(newClient);
+            in_addr in = cliaddr.sin_addr;
+            char *addr_bin = inet_ntoa(in);
+            unsigned long ip = inet_addr(addr_bin);
+            hostent *host = gethostbyaddr(&ip, sizeof(in_addr), 0);
+            std::cout << "this is forbidden. hostname: " << host->h_name << ", ip: " << addr_bin << std::endl;
 		}
 
 		for(std::vector<pollfd>::iterator it = _fds.begin() + 1; it != _fds.end(); ++it) {
@@ -61,7 +67,9 @@ void TCP_Server::host(void) {
 					close(it->fd);
 					it = _fds.erase(it) - 1;
 				} else {
-					_VERBOSE && std::cerr << "read " << bytesRead << " bytes from fd " << it->fd << std::endl;
+                    std::string response;
+
+                    _VERBOSE && std::cerr << "read " << bytesRead << " bytes from fd " << it->fd << std::endl;
 					_VERBOSE && std::cerr << "content:\n\t" << buffer << std::endl;
 					response = processMessage(it->fd, buffer);
 					_VERBOSE && std::cerr << "sending:\n\t" << response << std::endl;

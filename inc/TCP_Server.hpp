@@ -28,7 +28,7 @@ protected:
 public:
 	TCP_Server(void);
 	explicit TCP_Server(int port);
-	~TCP_Server(void);
+	virtual ~TCP_Server(void);
 	virtual std::string processMessage(int fd, const std::string &buffer) = 0;
 	void host(void);
 
