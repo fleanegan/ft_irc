@@ -70,6 +70,13 @@ void registerDummyUser(IRC_Logic *logic, int n) {
 	}
 }
 
+void registerMembersAndJoinToChannel(IRC_Logic *logic, int n){
+    registerDummyUser(logic, n);
+    while (--n >= 0) {
+        logic->processInput(n, "JOIN #chan\r\n");
+    }
+}
+
 int countSubStrings(const std::string &string, const std::string &toFind){
 	int occurrences = 0;
 

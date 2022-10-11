@@ -55,5 +55,7 @@ private:
 	std::queue<int> fetchSingleRecipient(const std::vector<std::string> &splitMessageVector);
 	bool isUserInChannel(IRC_User *user, std::vector<IRC_Channel>::iterator &channelCandidate) const;
     void processModeMessage(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
+
+    void removeMemberFromChannel(int fd, std::vector<IRC_Channel>::iterator &channel) const;
 };
 #endif //INC_IRC_LOGIC_HPP_

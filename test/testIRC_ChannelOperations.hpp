@@ -72,7 +72,6 @@ TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError){
 	ASSERT_TRUE(responseContains(result, ERR_CANNOTSENDTOCHAN));
 }
 
-
 TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
 	IRC_Logic logic("password");
 	std::string result;
@@ -82,6 +81,20 @@ TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
 	logic.processInput(0, "PRIVMSG #mychan messageContent\r\n");
 
 	ASSERT_TRUE(logic.getMessageQueue().empty());
+
+}
+
+TEST(IRC_ChannelOperations, disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused){
+    IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 3);
+    logic.disconnectUser(0);
+
+    registerDummyUser(&logic, 1);
+    logic.processInput(1, "PRIVMSG #chan messageContent\r\n");
+
+    ASSERT_FALSE(logic.getMessageQueue().empty());
+    ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
+    ASSERT_EQ(2, logic.getMessageQueue().front().recipients.front());
 
 }
 

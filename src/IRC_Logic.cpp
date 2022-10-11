@@ -71,7 +71,7 @@ void IRC_Logic::processIncomingMessage(IRC_User *user, const std::vector<std::st
 }
 
 void IRC_Logic::processModeMessage(const IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-    _returnMessage += ":" + user->nick + " " + splitMessageVector[0] + " :" + splitMessageVector[1] + "\r\n";
+    _returnMessage += ":" + user->nick + " " + splitMessageVector[0] + " " + splitMessageVector[1] + " :" + splitMessageVector[2] + "\r\n";
 }
 
 void IRC_Logic::processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
@@ -253,8 +253,18 @@ void IRC_Logic::processWhoIsMessage(IRC_User *user, const std::vector<std::strin
 void IRC_Logic::disconnectUser(int fd) {
     IRC_User::UserIterator userToBeDeleted = getUserByFd(fd);
 
+	for (std::vector<IRC_Channel>::iterator channel = _channels.begin(); channel != _channels.end(); channel++) {
+        removeMemberFromChannel(fd, channel);
+    }
     _prevUsers.push_back(*userToBeDeleted);
     _users.erase(userToBeDeleted);
+}
+
+void IRC_Logic::removeMemberFromChannel(int fd, std::vector<IRC_Channel>::iterator &channel) const {
+    for (std::vector<int>::iterator recipientFd = channel->membersFd.begin(); recipientFd != channel->membersFd.end(); recipientFd++) {
+        if (*recipientFd == fd)
+                recipientFd = channel->membersFd.erase(recipientFd) - 1;
+    }
 }
 
 void IRC_Logic::processWhoWasMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {

@@ -65,6 +65,7 @@ void TCP_Server::host(void) {
 				if (bytesRead <= 0) {
 					_VERBOSE && std::cerr << "Connection closed with " << it->fd << std::endl;
 					close(it->fd);
+                    onDisconnect(it->fd);
 					it = _fds.erase(it) - 1;
 				} else {
                     std::string response;
