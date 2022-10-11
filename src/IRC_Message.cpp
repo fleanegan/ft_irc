@@ -13,6 +13,11 @@ IRC_Message::IRC_Message(const std::queue<int> &recipients, const std::string &m
         sender->toPrefixString() + messageContent){
 }
 
+IRC_Message::IRC_Message(int recipientFd, const std::string &messageContent,
+                         const std::string &prefix) : recipients(), sender(NULL), content(prefix + messageContent){
+    recipients.push(recipientFd);
+}
+
 IRC_Message &IRC_Message::operator=(const IRC_Message &other) {
 	if (this != &other) {
 		recipients = other.recipients;
@@ -33,4 +38,3 @@ std::string IRC_Message::buildMessageContent(const std::vector<std::string> &spl
 
 	return name;
 }
-

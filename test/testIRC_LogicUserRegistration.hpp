@@ -58,7 +58,7 @@ TEST(IRC_LogicUserRegistration, nickCannotContainReservedCharacter) {
 	result = authenticateAndSetNick(&logic, 5, "password", "hello world");
 
 	assertAllNicksEmpty(&logic);
-	ASSERT_TRUE(responseContains(result, ERR_ERRONEOUSNICK));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_ERRONEOUSNICK));
 }
 
 TEST(IRC_LogicUserRegistration, sendingTwoCommandAtOnceShouldExecuteBoth) {
@@ -110,25 +110,26 @@ TEST(IRC_LogicUserRegistration, wrongPasswordDoesNotEnableRegistration) {
 	std::string result = registerUser(&logic, 0, "wrong password", "nick", "username", "Full Name");
 
 	ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
-	ASSERT_TRUE(responseContains(result, ERR_PASSWDMISMATCH));
+    ASSERT_FALSE(logic.getMessageQueue().empty());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_PASSWDMISMATCH));
 }
 
 TEST(IRC_LogicUserRegistration, noPasswordSendReturnsError) {
 	IRC_Logic logic("password");
 
-	std::string result = logic.processInput(0, "PASS\r\n");
+	logic.processInput(0, "PASS\r\n");
 
 	ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
-	ASSERT_TRUE(responseContains(result, ERR_NEEDMOREPARAMS));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_NEEDMOREPARAMS));
 }
 
 TEST(IRC_LogicUserRegistration, duplicatePassReturnsError) {
 	IRC_Logic logic("password");
 
 	authenticate(&logic, 0, "password");
-	std::string result = authenticate(&logic, 0, "password");
+	authenticate(&logic, 0, "password");
 
-	ASSERT_TRUE(responseContains(result, ERR_ALREADYREGISTERED));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_ALREADYREGISTERED));
 }
 
 TEST(IRC_LogicUserRegistration, duplicateNickRequestMustNotBeSet) {
@@ -143,33 +144,32 @@ TEST(IRC_LogicUserRegistration, nickApprovalShouldBeCaseInsensitive) {
 	IRC_Logic logic("password");
 
 	authenticateAndSetNick(&logic, 0, "password", "JD");
-	std::string result = authenticateAndSetNick(&logic, 1, "password", "jD");
+	authenticateAndSetNick(&logic, 1, "password", "jD");
 
 	ASSERT_STREQ("", logic.getRegisteredUsers()[1].nick.c_str());
-	ASSERT_TRUE(responseContains(result, ERR_NICKNAMEINUSE));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_NICKNAMEINUSE));
 }
 
 TEST(IRC_LogicUserRegistration, nickWithoutParameterReturnsError) {
 	IRC_Logic logic("password");
-	std::string result;
 
 	authenticate(&logic, 0, "password");
-	result = logic.processInput(0, "NICK\r\n");
-	ASSERT_TRUE(responseContains(result, ERR_NONICKNAMEGIVEN));
+
+	logic.processInput(0, "NICK\r\n");
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_NONICKNAMEGIVEN));
 }
 
 TEST(IRC_LogicUserRegistration, userRegistrationWorksNoMatterTheUserNickOrder) {
 	IRC_Logic logic("password");
-	std::string rep;
 
 	authenticate(&logic, 0, "password");
 	logic.processInput(0, "USER JD JD * John Doe\r\n");
-	rep += setNick(&logic, 0, "JayDee");
+	setNick(&logic, 0, "JayDee");
 
 	ASSERT_STREQ("JayDee", logic.getRegisteredUsers()[0].nick.c_str());
 	ASSERT_STREQ("JD", logic.getRegisteredUsers()[0].userName.c_str());
 	ASSERT_STREQ("John Doe", logic.getRegisteredUsers()[0].fullName.c_str());
-	ASSERT_TRUE(isValidUserRegistrationResponse(rep));
+	ASSERT_TRUE(isValidUserRegistrationResponse(logic.getMessageQueue().back().content));
 }
 
 TEST(IRC_LogicUserRegistration, incompletedUserRegistrationDoesNotSendAcknowledgement) {
@@ -212,28 +212,26 @@ TEST(IRC_LogicUserRegistration, processInputReturnsMessageAccordingToUserRequest
 
 	rep = setUser(&logic, 0, "username", "Full Name");
 
-	ASSERT_TRUE(isValidUserRegistrationResponse(rep));
+	ASSERT_TRUE(isValidUserRegistrationResponse(logic.getMessageQueue().back().content));
 }
 
 TEST(IRC_LogicUserRegistration, blankUserNameReturnsError) {
 	IRC_Logic logic("password");
-	std::string rep;
 	authenticate(&logic, 0, "password");
 
-	rep = logic.processInput(0, "USER\r\n");
+	logic.processInput(0, "USER\r\n");
 
-	ASSERT_TRUE(responseContains(rep, ERR_NEEDMOREPARAMS));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_NEEDMOREPARAMS));
 }
 
 TEST(IRC_LogicUserRegistration, sendingUserMessageTwiceReturnsError) {
 	IRC_Logic logic("password");
-	std::string rep;
 	authenticate(&logic, 0, "password");
 
-	rep = setUser(&logic, 0, "user", "Full User");
-	rep = setUser(&logic, 0, "user", "Full User");
+	setUser(&logic, 0, "user", "Full User");
+	setUser(&logic, 0, "user", "Full User");
 
-	ASSERT_TRUE(responseContains(rep, ERR_ALREADYREGISTERED));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_ALREADYREGISTERED));
 }
 
 TEST(IRC_LogicUserRegistration, irssiLoginSequenceRegistersAUser) {

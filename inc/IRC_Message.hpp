@@ -20,6 +20,7 @@ public:
 
     IRC_Message(const std::queue<int> &recipients, std::vector<std::string> splitMessageVector, IRC_User *sender);
     IRC_Message(const std::queue<int> &recipients, const std::string& messageContent, IRC_User *sender);
+    IRC_Message(int recipientFd, const std::string& messageContent, const std::string& prefix);
 	IRC_Message(const IRC_Message &other);
 	IRC_Message &operator=(const IRC_Message &);
 	~IRC_Message();

@@ -12,7 +12,7 @@ TEST(IRC_ChannelOperations, joiningAChannelRequiresName){
 
 	result = logic.processInput(0, "JOIN\r\n");
 
-	ASSERT_TRUE(countSubStrings(result, ERR_NEEDMOREPARAMS));
+	ASSERT_TRUE(countSubStrings(logic.getMessageQueue().back().content, ERR_NEEDMOREPARAMS));
 }
 
 TEST(IRC_ChannelOperations, joiningANonExistingChannelCreatesAChannelAccordingToTheGivenName){
@@ -57,8 +57,8 @@ TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage){
 
 	logic.processInput(1, "PRIVMSG #mychan messageContent\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "PRIVMSG #mychan messageContent"));
-	ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, "PRIVMSG #mychan messageContent"));
+	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
 }
 
 TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError){
@@ -69,7 +69,7 @@ TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError){
 
 	result = logic.processInput(1, "PRIVMSG #mychan messageContent\r\n");
 
-	ASSERT_TRUE(responseContains(result, ERR_CANNOTSENDTOCHAN));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, ERR_CANNOTSENDTOCHAN));
 }
 
 TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
@@ -77,11 +77,12 @@ TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
 	std::string result;
 	registerDummyUser(&logic, 1);
 	logic.processInput(0, "JOIN #mychan\r\n");
+    int before = logic.getMessageQueue().size();
 
 	logic.processInput(0, "PRIVMSG #mychan messageContent\r\n");
 
-	ASSERT_TRUE(logic.getMessageQueue().empty());
-
+    int after = logic.getMessageQueue().size();
+	ASSERT_EQ(before, after);
 }
 
 TEST(IRC_ChannelOperations, disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused){
@@ -116,8 +117,8 @@ TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers){
 
     ASSERT_TRUE(responseContains(result, ERR_CLOSINGLINK));
     ASSERT_FALSE(logic.getMessageQueue().empty());
-    ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
-    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "nick0"));
+    ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, "nick0"));
 
 }
 
