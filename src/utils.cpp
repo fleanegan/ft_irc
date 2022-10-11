@@ -1,4 +1,4 @@
-#include "utils.hpp"
+#include "../inc/utils.hpp"
 #include "../inc/return_code.hpp"
 
 std::string generateResponse(const std::string &returnCode, const std::string &explanation) {

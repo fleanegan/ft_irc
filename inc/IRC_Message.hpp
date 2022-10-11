@@ -1,14 +1,11 @@
-//
-// Created by fschlute on 10/7/22.
-//
-
-#ifndef FT_IRC_IRC_MESSAGE_HPP
-#define FT_IRC_IRC_MESSAGE_HPP
+#ifndef INC_IRC_MESSAGE_HPP_
+#define INC_IRC_MESSAGE_HPP_
 
 #include <queue>
+#include <vector>
 #include <string>
-#include "utils.hpp"
-#include "IRC_User.hpp"
+#include "./utils.hpp"
+#include "./IRC_User.hpp"
 
 class IRC_Message {
 private:
@@ -27,4 +24,4 @@ public:
 	std::string buildMessageContent(const std::vector<std::string> &splitMessageVector) const;
 };
 
-#endif //FT_IRC_IRC_MESSAGE_HPP
+#endif //INC_IRC_MESSAGE_HPP_

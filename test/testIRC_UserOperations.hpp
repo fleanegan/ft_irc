@@ -1,5 +1,5 @@
-#ifndef TEST_TESTIRC_CHANNELOPERATIONS_HPP_
-#define TEST_TESTIRC_CHANNELOPERATIONS_HPP_
+#ifndef TEST_TESTIRC_USEROPERATIONS_HPP_
+#define TEST_TESTIRC_USEROPERATIONS_HPP_
 
 #include <string>
 #include "./testUtils.hpp"
@@ -103,5 +103,5 @@ TEST(IRC_UserOperations, changedNickAppearsOnWhoWas){
 	ASSERT_EQ(2, countSubStrings(logic.getMessageQueue().back().content, "setNick"));
 }
 
-#endif //TEST_TESTIRC_CHANNELOPERATIONS_HPP_
+#endif //TEST_TESTIRC_USEROPERATIONS_HPP_
 

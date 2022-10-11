@@ -1,7 +1,8 @@
 #ifndef INC_IRC_CHANNEL_HPP_
 #define INC_IRC_CHANNEL_HPP_
 #include <string>
-#include "utils.hpp"
+#include <vector>
+#include "./utils.hpp"
 
 struct IRC_Channel{
 	typedef std::vector<IRC_Channel>::iterator ChannelIterator;
@@ -9,7 +10,7 @@ struct IRC_Channel{
 	std::string name;
 	std::vector<int> membersFd;
 
-	IRC_Channel(const std::string& channelName);
+	explicit IRC_Channel(const std::string& channelName);
 	bool operator==(const IRC_Channel &rhs) const;
 	bool operator!=(const IRC_Channel &rhs) const;
 

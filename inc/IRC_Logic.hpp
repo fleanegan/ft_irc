@@ -6,8 +6,8 @@
 #include "./IRC_User.hpp"
 #include "./return_code.hpp"
 #include "./utils.hpp"
-#include "IRC_Message.hpp"
-#include "IRC_Channel.hpp"
+#include "./IRC_Message.hpp"
+#include "./IRC_Channel.hpp"
 
 class IRC_Logic {
 private:
@@ -53,8 +53,8 @@ private:
 	IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 	std::queue<int> fetchChannelRecipients(int fd, const std::string &channelName);
 	std::queue<int> fetchSingleRecipient(int fd, const std::vector<std::string> &splitMessageVector);
-	bool isUserInChannel(int fd, std::vector<IRC_Channel>::iterator &channelCandidate) const;
+	bool isUserInChannel(int fd, std::vector<IRC_Channel>::const_iterator channelCandidate) const;
     void processModeMessage(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
-    void removeMemberFromChannel(IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator &channel);
+    void removeMemberFromChannel(IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator *channel);
 };
 #endif //INC_IRC_LOGIC_HPP_

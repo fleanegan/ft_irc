@@ -2,7 +2,7 @@
 #define INC_IRC_USER_HPP_
 #include <string>
 #include <vector>
-#include "utils.hpp"
+#include "./utils.hpp"
 
 struct IRC_User{
 	typedef std::vector<IRC_User>::const_iterator ConstUserIterator;

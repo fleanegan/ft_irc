@@ -1,5 +1,5 @@
 #include "../inc/IRC_Message.hpp"
-#include "IRC_User.hpp"
+#include "./IRC_User.hpp"
 
 IRC_Message::IRC_Message(const std::queue<int> &recipients, std::vector<std::string> splitMessageVector, IRC_User *sender) :
 		recipients(recipients), sender(sender), content(buildMessageContent(splitMessageVector)) {

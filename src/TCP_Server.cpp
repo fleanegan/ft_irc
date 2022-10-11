@@ -52,7 +52,7 @@ void TCP_Server::host(void) {
 			saveConnectionInfo(newClient);
             in_addr in = cliaddr.sin_addr;
             char *addr_bin = inet_ntoa(in);
-            unsigned long ip = inet_addr(addr_bin);
+            unsigned long ip = inet_addr(addr_bin); //NOLINT (C style function requires C style variables)
             hostent *host = gethostbyaddr(&ip, sizeof(in_addr), 0);
             std::cout << "this is forbidden. hostname: " << host->h_name << ", ip: " << addr_bin << std::endl;
 		}

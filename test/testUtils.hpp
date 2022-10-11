@@ -2,6 +2,7 @@
 #define TEST_TESTUTILS_HPP_
 #include <string>
 #include <vector>
+#include <sstream>
 #include "gtest/gtest.h"
 #include "../inc/IRC_Logic.hpp"
 #include "../inc/IRC_User.hpp"
@@ -53,8 +54,6 @@ bool isValidUserRegistrationResponse(const std::string &returnMessage){
 bool responseContains(const std::string &returnMessage, const std::string &code){
 	return 	returnMessage.find(code) != std::string::npos;
 }
-
-#include <sstream>
 
 void registerDummyUser(IRC_Logic *logic, int n) {
 	std::string nick("nick");

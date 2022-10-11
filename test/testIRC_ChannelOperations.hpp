@@ -1,5 +1,5 @@
-#ifndef TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
-#define TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
+#ifndef TEST_TESTIRC_CHANNELOPERATIONS_HPP_
+#define TEST_TESTIRC_CHANNELOPERATIONS_HPP_
 
 #include <string>
 #include "./testUtils.hpp"
@@ -126,5 +126,5 @@ TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers){
 //TEST(IRC_ChannelOperations, channelNamesCanContainDifferentPrefixes){
 //TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong){
 
-#endif //TEST_TESTIRC_LOGICUSEROPERATIONS_HPP_
+#endif //TEST_TESTIRC_CHANNELOPERATIONS_HPP_
 
