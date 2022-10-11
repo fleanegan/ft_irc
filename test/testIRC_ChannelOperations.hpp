@@ -73,7 +73,7 @@ TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError){
 }
 
 
-TEST(IRC_ChannelOperations, ifNoRecipientInChannelSendError){
+TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError){
 	IRC_Logic logic("password");
 	std::string result;
 	registerDummyUser(&logic, 1);
@@ -81,7 +81,8 @@ TEST(IRC_ChannelOperations, ifNoRecipientInChannelSendError){
 
 	logic.processInput(0, "PRIVMSG #mychan messageContent\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "PRIVMSG #mychan messageContent"));
+	ASSERT_TRUE(logic.getMessageQueue().empty());
+
 }
 
 //TEST(IRC_ChannelOperations, channelNamesAreCaseInsensitive){
