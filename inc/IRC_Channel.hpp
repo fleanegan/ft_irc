@@ -13,7 +13,7 @@ struct IRC_Channel {
 	typedef std::vector<IRC_Channel>::iterator ChannelIterator;
 
 	std::string name;
-	std::vector<IRC_User *> members;
+	std::vector<IRC_User> members;
 
 	explicit IRC_Channel(const std::string &channelName);
 	bool operator==(const IRC_Channel &rhs) const;

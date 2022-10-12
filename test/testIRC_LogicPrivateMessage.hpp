@@ -18,9 +18,8 @@ TEST(IRC_LogicPrivateMessage, sendingToNonExistingNickGeneratesError) {
 TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 1);
-	std::string result;
 
-	result = logic.processInput(0, "PRIVMSG nonExisingNick\r\n");
+	logic.processInput(0, "PRIVMSG nonExisingNick\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NOTEXTTOSEND));

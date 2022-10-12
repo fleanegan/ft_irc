@@ -1,3 +1,4 @@
+#include <iostream>
 #include "../inc/IRC_Channel.hpp"
 
 IRC_Channel::IRC_Channel(const std::string &channelName):
@@ -13,9 +14,9 @@ bool IRC_Channel::operator!=(const IRC_Channel &rhs) const {
 }
 
 bool IRC_Channel::isUserInChannel(const IRC_User &user) const {
-	for (std::vector<IRC_User *>::const_iterator it = members.begin();
+	for (std::vector<IRC_User>::const_iterator it = members.begin();
 			it != members.end(); ++it)
-		if (&user == *it)
+		if (user.nick == it->nick)
 			return true;
 	return false;
 }
@@ -38,9 +39,9 @@ void IRC_Channel::appendJoinReplyToNewMember(
 
 	reply.content += std::string(RPL_NAMREPLY) + " " + newMember.nick +
 					 " = " + name + " :";
-	for (std::vector<IRC_User *>::reverse_iterator
-				 it = members.rbegin(); it != members.rend(); ++it)
-		reply.content += " " + (*it)->nick;
+	for (std::vector<IRC_User>::reverse_iterator
+		it = members.rbegin(); it != members.rend(); ++it)
+	reply.content += " " + it->nick;
 	reply.content += "\r\n";
 	reply.content += std::string(RPL_ENDOFNAMES) + " "
 					 + newMember.nick + " #" + name +
@@ -54,9 +55,9 @@ void IRC_Channel::appendJoinNotificationToAllMembers(
 	std::queue<int> recipients;
 
 	notifyText = " JOIN :#" + name + "\r\n";
-	for (std::vector<IRC_User *>::reverse_iterator
+	for (std::vector<IRC_User>::reverse_iterator
 				 it = members.rbegin(); it != members.rend(); ++it)
-		recipients.push((*it)->fd);
+		recipients.push(it->fd);
 	IRC_Message notify(recipients, notifyText, &newMember);
 	messageQueue->push(notify);
 }

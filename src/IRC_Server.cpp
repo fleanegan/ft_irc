@@ -42,6 +42,7 @@ void IRC_Server::distributeMessages() {
 }
 
 void IRC_Server::onDisconnect(int fd) {
+	_VERBOSE && std::cerr << "server lost connection without quit from fd " << fd << std::endl;
 	_logic.disconnectUser(fd, generateResponse(ERR_CLOSINGLINK, "Closing Link"));
     distributeMessages();
 }

@@ -15,7 +15,7 @@ void sighandler(int signum) {
 // MAIN_CPP
 int	main(int ac, char **av) {
 	if (ac != 3) {
-		std::cout << "Usage: ./ircerv <port> <password>"
+		std::cerr << "Usage: ./ircerv <port> <password>"
 			<< "\n\tport: The server listening port"
 			<< "\n\tpassword: The password to access the server" << std::endl;
 		return 1;
@@ -26,7 +26,7 @@ int	main(int ac, char **av) {
 		serv = &server;
 		server.host();
 	} catch (const std::exception& e) {
-		std::cout << "ircserv: " << e.what() << std::endl;
+		std::cerr << "ircserv: " << e.what() << std::endl;
 		return (1);
 	}
 }

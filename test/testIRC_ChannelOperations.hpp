@@ -113,6 +113,14 @@ TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
 	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(), RPL_NAMREPLY));
 }
 
+TEST(IRC_ChannelOperations, leavingChannelDoesNotInvalidateOtherUsers) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 50);
+
+	logic.processInput(1, "PRIVMSG #chan messageContent\r\n");
+	ASSERT_FALSE(responseContains(logic.getMessageQueue().back().content, ERR_CANNOTSENDTOCHAN));
+}
+
 TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);

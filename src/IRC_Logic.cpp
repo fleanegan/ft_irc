@@ -1,5 +1,6 @@
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include "../inc/IRC_Logic.hpp"
 
 IRC_Logic::IRC_Logic(const std::string &password) : _password(password) {
@@ -113,11 +114,11 @@ std::queue<int> IRC_Logic::fetchChannelRecipients(
 		reply.content = generateResponse(ERR_CANNOTSENDTOCHAN,
 										 "You're not part of this channel");
 	} else {
-		for (std::vector<IRC_User *>::const_iterator
+		for (std::vector<IRC_User>::const_iterator
 					 it = channelCandidate->members.begin();
 			 it != channelCandidate->members.end(); it++)
-			if (&user != *it)
-				recipients.push((*it)->fd);
+			if (user.nick != it->nick)
+				recipients.push((it)->fd);
 	}
 	if (!reply.content.empty())
 		appendMessage(reply);
@@ -293,27 +294,28 @@ void IRC_Logic::processWhoIsMessage(
 
 void IRC_Logic::disconnectUser(int userFd, const std::string &reason) {
 	IRC_User::UserIterator user = getUserByFd(userFd);
+	if (user == _users.end())
+		return;
 	for (std::vector<IRC_Channel>::iterator
 				 channel = _channels.begin();
 		 channel != _channels.end(); channel++) {
 		removeMemberFromChannel(*user, &*channel, reason);
 	}
 	_prevUsers.push_back(*user);
-	if (user != _users.end())
-		_users.erase(user);
+	_users.erase(user);
 }
 
 void IRC_Logic::removeMemberFromChannel(
-		const IRC_User &user, IRC_Channel *channel,
+		IRC_User &user, IRC_Channel *channel,
 		const std::string &reason) {
 	if (channel->isUserInChannel(user)) {
 		std::queue<int> recipients =
 				fetchChannelRecipients(user, channel->name);
 		_messageQueue.push(
 				IRC_Message(recipients, reason, &user));
-		channel->members.erase(
-				std::find(channel->members.begin(), channel->members.end(),
-					&user));
+		for (std::vector<IRC_User>::iterator it = channel->members.begin(); it != channel->members.end(); ++it)
+			if (it->nick == user.nick)
+				it = channel->members.erase(it) - 1;
 	}
 }
 
@@ -365,14 +367,14 @@ void IRC_Logic::processJoinMessage(
 	if (getChannelByName(channelCandidate.name) == _channels.end())
 		_channels.push_back(channelCandidate);
 	channel = getChannelByName(channelCandidate.name);
-	channel->members.push_back(user);
+	channel->members.push_back(*user);
 	channel->appendJoinMessages(&_messageQueue, *user);
 }
 
 void IRC_Logic::processQuitMessage(
 		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	_messageQueue.push(IRC_Message(
-		user->fd, generateResponse(ERR_CLOSINGLINK, "closing link"), ""));
+			user->fd, generateResponse(ERR_CLOSINGLINK, "closing link"), ""));
 	if (splitMessageVector.size() < 2)
 		disconnectUser(user->fd, "QUIT leaving");
 	else
