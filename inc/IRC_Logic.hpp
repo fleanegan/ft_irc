@@ -29,7 +29,7 @@ class IRC_Logic {
 		IRC_User::UserIterator getUserByFd(const int &fd);
 		IRC_User::UserIterator getUserByNick(const std::string &nick);
 		std::queue<IRC_Message> &getMessageQueue();
-		void disconnectUser(int fd);
+		void disconnectUser(int fd, const std::string &reason);
 		std::vector<IRC_User>& getRegisteredUsers();
 		std::vector<IRC_Channel>& getChannels();
 
@@ -60,17 +60,18 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector) const;
 		void processJoinMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
+		void processQuitMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
 		IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 		std::queue<int> fetchChannelRecipients(
-				int fd, const std::string &channelName);
+				const IRC_User &user, const std::string &channelName);
 		std::queue<int> fetchSingleRecipient(
 				int fd, const std::vector<std::string> &splitMessageVector);
-		bool isUserInChannel(
-				int fd, std::vector<IRC_Channel>::const_iterator channel) const;
 		void processModeMessage(const IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void removeMemberFromChannel(IRC_User::UserIterator user,
-				std::vector<IRC_Channel>::iterator *channel);
+				std::vector<IRC_Channel>::iterator *channel,
+				const std::string &reason);
 	void appendMessage(const IRC_Message &reply);
 };
 #endif  // INC_IRC_LOGIC_HPP_

@@ -19,6 +19,14 @@ struct IRC_Channel {
 	bool operator==(const IRC_Channel &rhs) const;
 	bool operator!=(const IRC_Channel &rhs) const;
 
+	bool isUserInChannel(const IRC_User &user) const {
+		for (std::vector<IRC_User *>::const_iterator it = members.begin();
+			 it != members.end(); ++it)
+			if (&user == *it)
+				return true;
+		return false;
+	}
+
 	void appendJoinMessages(
 			std::queue<IRC_Message> *messageQueue, const IRC_User &newMember);
 
@@ -30,7 +38,7 @@ struct IRC_Channel {
 
 	static std::string getChannelName(const std::string &name);
 
-	private:
+private:
 	IRC_Channel();
 };
 

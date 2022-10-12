@@ -69,8 +69,8 @@ TEST(IRC_UserOperations, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 3);
 
-	logic.disconnectUser(0);
-	logic.disconnectUser(1);
+	logic.disconnectUser(0, "leaving");
+	logic.disconnectUser(1, "leaving");
 	logic.processInput(2, "WHOWAS nick1\r\n");
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
@@ -113,6 +113,19 @@ TEST(IRC_UserOperations, changedNickAppearsOnWhoWas) {
 	ASSERT_EQ(2,
 			countSubStrings(logic.getMessageQueue().back().content, "setNick"));
 }
+
+TEST(IRC_UserOperations, quitRemovesUserFromServerAndNotifiesOtherChannelmembers) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 2);
+
+	logic.processInput(0, "QUIT reason\r\n");
+
+	ASSERT_EQ(1, logic.getRegisteredUsers().size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"reason"));
+}
+
+// TEST(IRC_UserOperations, quitWithoutArgumentShouldGenerateLeaving) {
 
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 

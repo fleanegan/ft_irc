@@ -94,7 +94,7 @@ TEST(IRC_ChannelOperations,
 		disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 3);
-	logic.disconnectUser(0);
+	logic.disconnectUser(0, "leaving");
 
 	registerDummyUser(&logic, 1);
 	logic.processInput(1, "PRIVMSG #chan messageContent\r\n");
@@ -106,7 +106,6 @@ TEST(IRC_ChannelOperations,
 
 TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
 	IRC_Logic logic("password");
-	std::string result;
 
 	registerMembersAndJoinToChannel(&logic, 2);
 
@@ -114,15 +113,15 @@ TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
 	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(), RPL_NAMREPLY));
 }
 
-TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers) {
+TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);
-	std::string result;
 
-	result = logic.processInput(0, "QUIT :leaving\r\n");
-	logic.disconnectUser(0);
+	logic.processInput(0, "QUIT :leaving\r\n");
+//	logic.disconnectUser(0, "leaving");
 
-	ASSERT_TRUE(responseContains(result, ERR_CLOSINGLINK));
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"QUIT"));
 	ASSERT_FALSE(logic.getMessageQueue().empty());
 	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,

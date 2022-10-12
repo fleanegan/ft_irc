@@ -67,7 +67,7 @@ void IRC_Logic::processIncomingMessage(
 	} else if (splitMessageVector[0] == "JOIN") {
 		processJoinMessage(user, splitMessageVector);
 	} else if (splitMessageVector[0] == "QUIT") {
-		_returnMessage += generateResponse(ERR_CLOSINGLINK, "Closing link");
+		processQuitMessage(user, splitMessageVector);
 	}
 }
 
@@ -92,21 +92,12 @@ void IRC_Logic::processPrivMsgMessage(
 	} else {
 		if (splitMessageVector[1][0] == '#')
 			recipients =
-				fetchChannelRecipients(user->fd, splitMessageVector[1]);
+				fetchChannelRecipients(*user, splitMessageVector[1]);
 		else
 			recipients = fetchSingleRecipient(user->fd, splitMessageVector);
 	}
 	if (!recipients.empty())
 		_messageQueue.push(IRC_Message(recipients, splitMessageVector, user));
-}
-
-bool IRC_Logic::isUserInChannel(int fd,
-		std::vector<IRC_Channel>::const_iterator channel) const {
-	for (std::vector<IRC_User*>::const_iterator it = channel->members.begin();
-			it != channel->members.end(); ++it)
-		if ((*it)->fd == fd)
-			return true;
-	return false;
 }
 
 std::queue<int> IRC_Logic::fetchSingleRecipient(
@@ -125,23 +116,23 @@ std::queue<int> IRC_Logic::fetchSingleRecipient(
 }
 
 std::queue<int> IRC_Logic::fetchChannelRecipients(
-		int fd, const std::string &channelName) {
+		const IRC_User &user, const std::string &channelName) {
 	std::queue<int> recipients;
-	IRC_Message reply(fd, "", "");
+	IRC_Message reply(user.fd, "", "");
 	std::vector<IRC_Channel>::const_iterator channelCandidate =
 		getChannelByName(channelName);
 
 	if (channelCandidate == _channels.end()) {
 		reply.content = generateResponse(ERR_NOSUCHCHANNEL,
 				"No such channel on this server");
-	} else if (!isUserInChannel(fd, channelCandidate)) {
+	} else if (!channelCandidate->isUserInChannel(user)) {
 		reply.content = generateResponse(ERR_CANNOTSENDTOCHAN,
 				"You're not part of this channel");
 	} else {
 		for (std::vector<IRC_User *>::const_iterator
 				it = channelCandidate->members.begin();
 				it != channelCandidate->members.end(); it++)
-			if (fd != (*it)->fd)
+			if (&user != *it)
 				recipients.push((*it)->fd);
 	}
 	if (!reply.content.empty())
@@ -316,27 +307,27 @@ void IRC_Logic::processWhoIsMessage(
 	appendMessage(reply);
 }
 
-void IRC_Logic::disconnectUser(int fd) {
-	IRC_User::UserIterator userToBeDeleted = getUserByFd(fd);
-
+void IRC_Logic::disconnectUser(int userFd, const std::string &reason) {
+	IRC_User::UserIterator user = getUserByFd(userFd);
 	for (std::vector<IRC_Channel>::iterator
 			channel = _channels.begin();
 			channel != _channels.end(); channel++) {
-		removeMemberFromChannel(userToBeDeleted, &channel);
+		removeMemberFromChannel(user, &channel, reason);
 	}
-	_prevUsers.push_back(*userToBeDeleted);
-	_users.erase(userToBeDeleted);
+	_prevUsers.push_back(*user);
+	_users.erase(user);
 }
 
 void IRC_Logic::removeMemberFromChannel(
-		IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator *channel) {
+		IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator *channel,
+		const std::string& reason) {
 	for (std::vector<IRC_User *>::iterator recipient = (*channel)->members.begin();
 			recipient != (*channel)->members.end(); recipient++) {
 		if ((*recipient)->fd == user->fd) {
 			std::queue<int> recipients =
-				fetchChannelRecipients(user->fd, (*channel)->name);
+				fetchChannelRecipients(*user, (*channel)->name);
 			_messageQueue.push(
-					IRC_Message(recipients, "QUIT :\"leaving\"", &*user));
+					IRC_Message(recipients, reason, &*user));
 			recipient = (*channel)->members.erase(recipient) - 1;
 		}
 	}
@@ -392,6 +383,11 @@ void IRC_Logic::processJoinMessage(
 	channel = getChannelByName(channelCandidate.name);
 	channel->members.push_back(user);
 	channel->appendJoinMessages(&_messageQueue, *user);
+}
+
+void IRC_Logic::processQuitMessage(
+		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	disconnectUser(user->fd, concatenateContentFromIndex(0, splitMessageVector));
 }
 
 IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(
