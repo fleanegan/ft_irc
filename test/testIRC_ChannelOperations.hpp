@@ -118,7 +118,6 @@ TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 	registerMembersAndJoinToChannel(&logic, 2);
 
 	logic.processInput(0, "QUIT :leaving\r\n");
-//	logic.disconnectUser(0, "leaving");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"QUIT"));

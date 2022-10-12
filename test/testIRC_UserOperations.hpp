@@ -114,7 +114,8 @@ TEST(IRC_UserOperations, changedNickAppearsOnWhoWas) {
 			countSubStrings(logic.getMessageQueue().back().content, "setNick"));
 }
 
-TEST(IRC_UserOperations, quitRemovesUserFromServerAndNotifiesOtherChannelmembers) {
+TEST(IRC_UserOperations,
+		quitRemovesUserFromServerAndNotifiesOtherChannelmembers) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);
 
@@ -125,7 +126,41 @@ TEST(IRC_UserOperations, quitRemovesUserFromServerAndNotifiesOtherChannelmembers
 				"reason"));
 }
 
-// TEST(IRC_UserOperations, quitWithoutArgumentShouldGenerateLeaving) {
+TEST(IRC_UserOperations,
+	 callingQuitAndDisconnectDoesNotAtttemptToRemoveUserTwice) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 2);
+
+	logic.processInput(0, "QUIT reason\r\n");
+	logic.disconnectUser(0, "Causes segfault when not handled with care");
+
+	ASSERT_EQ(1, logic.getRegisteredUsers().size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+								 "reason"));
+}
+
+TEST(IRC_UserOperations, quitWithoutArgumentGeneratesLeaving) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 1);
+
+	logic.processInput(0, "QUIT\r\n");
+
+	ASSERT_TRUE(logic.getRegisteredUsers().empty());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+								 "leaving"));
+}
+
+TEST(IRC_UserOperations,
+	 quitRepliesErrorToSender) {
+	IRC_Logic logic("password");
+	registerDummyUser(&logic, 1);
+
+	logic.processInput(0, "QUIT reason\r\n");
+
+	ASSERT_TRUE(logic.getRegisteredUsers().empty());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+								 ERR_CLOSINGLINK));
+}
 
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 

@@ -12,6 +12,14 @@ bool IRC_Channel::operator!=(const IRC_Channel &rhs) const {
 	return !(rhs == *this);
 }
 
+bool IRC_Channel::isUserInChannel(const IRC_User &user) const {
+	for (std::vector<IRC_User *>::const_iterator it = members.begin();
+			it != members.end(); ++it)
+		if (&user == *it)
+			return true;
+	return false;
+}
+
 std::string  IRC_Channel::getChannelName(const std::string &name) {
 	if (name[0] == '#')
 		return name.substr(1, name.size());

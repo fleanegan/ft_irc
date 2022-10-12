@@ -113,7 +113,7 @@ TEST(IRC_LogicUserRegistration, wrongPasswordDoesNotEnableRegistration) {
 	registerUser(&logic, 0, "wrong password", "nick", "username", "Full Name");
 
 	ASSERT_FALSE(logic.getRegisteredUsers().front().isAuthenticated);
-    ASSERT_FALSE(logic.getMessageQueue().empty());
+	ASSERT_FALSE(logic.getMessageQueue().empty());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_PASSWDMISMATCH));
 }
@@ -278,7 +278,7 @@ TEST(IRC_LogicUserRegistration, removingRealNameLeadingColon) {
 }
 
 TEST(IRC_LogicUserRegistration, capabilitiesNegociationRequestShouldBeignored) {
-    IRC_Logic logic("password");
+	IRC_Logic logic("password");
 
 	registerUser(&logic, 0, "password", "nick", "username", "Full userName");
 
