@@ -2,6 +2,7 @@
 #define TEST_TESTUTILS_HPP_
 #include <string>
 #include <vector>
+#include <queue>
 #include <sstream>
 #include "gtest/gtest.h"
 #include "../inc/IRC_Logic.hpp"
@@ -99,6 +100,17 @@ int countSubStrings(const std::string &string, const std::string &toFind) {
 		pos += toFind.length();
 	}
 	return occurrences;
+}
+
+int countMessageContaining(
+		std::queue<IRC_Message> messageQueue, const std::string &toCount) {
+	int count = 0;
+	while (!messageQueue.empty()) {
+		if (messageQueue.front().content.find(toCount) != std::string::npos)
+			++count;
+		messageQueue.pop();
+	}
+	return count;
 }
 
 #endif     // TEST_TESTUTILS_HPP_

@@ -77,7 +77,7 @@ void IRC_Logic::processModeMessage(const IRC_User *user,
 
 	reply.content = ":" + user->nick + " " + splitMessageVector[0] +
 		" " + splitMessageVector[1] + " :" + "\r\n";
-	_messageQueue.push(reply);
+	appendMessage(reply);
 }
 
 void IRC_Logic::processPrivMsgMessage(
@@ -88,7 +88,7 @@ void IRC_Logic::processPrivMsgMessage(
 	if (splitMessageVector.size() < 3) {
 		reply.content = generateResponse(
 				ERR_NOTEXTTOSEND, "Missing message text");
-		_messageQueue.push(reply);
+		appendMessage(reply);
 	} else {
 		if (splitMessageVector[1][0] == '#')
 			recipients =
@@ -102,9 +102,9 @@ void IRC_Logic::processPrivMsgMessage(
 
 bool IRC_Logic::isUserInChannel(int fd,
 		std::vector<IRC_Channel>::const_iterator channel) const {
-	for (std::vector<int>::const_iterator it = channel->membersFd.begin();
-			it != channel->membersFd.end(); ++it)
-		if (*it == fd)
+	for (std::vector<IRC_User*>::const_iterator it = channel->members.begin();
+			it != channel->members.end(); ++it)
+		if ((*it)->fd == fd)
 			return true;
 	return false;
 }
@@ -138,14 +138,14 @@ std::queue<int> IRC_Logic::fetchChannelRecipients(
 		reply.content = generateResponse(ERR_CANNOTSENDTOCHAN,
 				"You're not part of this channel");
 	} else {
-		for (std::vector<int>::const_iterator
-				it = channelCandidate->membersFd.begin();
-				it != channelCandidate->membersFd.end(); it++)
-			if (fd != *it)
-				recipients.push(*it);
+		for (std::vector<IRC_User *>::const_iterator
+				it = channelCandidate->members.begin();
+				it != channelCandidate->members.end(); it++)
+			if (fd != (*it)->fd)
+				recipients.push((*it)->fd);
 	}
 	if (!reply.content.empty())
-		_messageQueue.push(reply);
+		appendMessage(reply);
 	return recipients;
 }
 
@@ -165,7 +165,12 @@ void IRC_Logic::processPassMessage(
 	else
 		reply.content = generateResponse(ERR_PASSWDMISMATCH,
 				"Incorrect password");
-	_messageQueue.push(reply);
+	appendMessage(reply);
+}
+
+void IRC_Logic::appendMessage(const IRC_Message &reply) {
+	if (!reply.content.empty())
+		_messageQueue.push(reply);
 }
 
 void IRC_Logic::processPingMessage(
@@ -177,7 +182,7 @@ void IRC_Logic::processPingMessage(
 				"Please provide a token to ping");
 	else
 		reply.content = "PONG " + splitMessageVector[1] + "\r\n";
-	_messageQueue.push(reply);
+	appendMessage(reply);
 }
 
 void IRC_Logic::processNickMessage(
@@ -199,7 +204,7 @@ void IRC_Logic::processNickMessage(
 		user->nick = splitMessageVector[1].substr(0, 9);
 		reply.content = welcomeNewUser(user);
 	}
-	_messageQueue.push(reply);
+	appendMessage(reply);
 }
 
 void IRC_Logic::processUserMessage(
@@ -217,7 +222,7 @@ void IRC_Logic::processUserMessage(
 		user->fullName = IRC_User::buildFullName(splitMessageVector);
 		reply.content = welcomeNewUser(user);
 	}
-	_messageQueue.push(reply);
+	appendMessage(reply);
 }
 
 std::string IRC_Logic::welcomeNewUser(IRC_User *user) {
@@ -308,7 +313,7 @@ void IRC_Logic::processWhoIsMessage(
 		else
 			reply.content = generateResponse(RPL_WHOISUSER, result->toString());
 	}
-	_messageQueue.push(reply);
+	appendMessage(reply);
 }
 
 void IRC_Logic::disconnectUser(int fd) {
@@ -325,14 +330,14 @@ void IRC_Logic::disconnectUser(int fd) {
 
 void IRC_Logic::removeMemberFromChannel(
 		IRC_User::UserIterator user, std::vector<IRC_Channel>::iterator *channel) {
-	for (std::vector<int>::iterator recipientFd = (*channel)->membersFd.begin();
-			recipientFd != (*channel)->membersFd.end(); recipientFd++) {
-		if (*recipientFd == user->fd) {
+	for (std::vector<IRC_User *>::iterator recipient = (*channel)->members.begin();
+			recipient != (*channel)->members.end(); recipient++) {
+		if ((*recipient)->fd == user->fd) {
 			std::queue<int> recipients =
 				fetchChannelRecipients(user->fd, (*channel)->name);
 			_messageQueue.push(
 					IRC_Message(recipients, "QUIT :\"leaving\"", &*user));
-			recipientFd = (*channel)->membersFd.erase(recipientFd) - 1;
+			recipient = (*channel)->members.erase(recipient) - 1;
 		}
 	}
 }
@@ -353,7 +358,7 @@ void IRC_Logic::processWhoWasMessage(
 		else
 			reply.content = result + RPL_ENDOFWHOWAS + "\r\n";
 	}
-	_messageQueue.push(reply);
+	appendMessage(reply);
 }
 
 std::string
@@ -378,30 +383,15 @@ void IRC_Logic::processJoinMessage(
 		reply.content = generateResponse(
 				ERR_NEEDMOREPARAMS, "Join requires <channel_name> "
 				"and <password>");
-		_messageQueue.push(reply);
+		appendMessage(reply);
 		return;
 	}
 	IRC_Channel channelCandidate = IRC_Channel(splitMessageVector[1]);
 	if (getChannelByName(channelCandidate.name) == _channels.end())
 		_channels.push_back(channelCandidate);
 	channel = getChannelByName(channelCandidate.name);
-	channel->membersFd.push_back(user->fd);
-	// JOIN FEEDBACK
-	_returnMessage += user->toPrefixString() +
-		" JOIN :#" + channel->name +"\r\n";
-
-	// NAMREPLY
-	_returnMessage += std::string(RPL_NAMREPLY) + " " + user->nick +
-		" = " + channel->name + " :";
-	for (std::vector<int>::reverse_iterator
-			it = channel->membersFd.rbegin();
-			it != channel->membersFd.rend(); ++it) {
-		_returnMessage += " " + getUserByFd(*it)->nick;
-	}
-	_returnMessage += "\r\n";
-	// ENDOFNAMES
-	_returnMessage += std::string(RPL_ENDOFNAMES) + " "
-		+ user->nick + " #" + channel->name + " :End of NAMES list.\r\n";
+	channel->members.push_back(user);
+	channel->appendJoinMessages(&_messageQueue, *user);
 }
 
 IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(

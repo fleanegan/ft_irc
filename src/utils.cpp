@@ -15,7 +15,7 @@ std::string stringToLower(const std::string &input) {
 	std::string result;
 
 	for (std::string::const_iterator it = input.begin();
-		 it != input.end(); ++it) {
+			it != input.end(); ++it) {
 		result += tolower(*it);
 	}
 	return result;

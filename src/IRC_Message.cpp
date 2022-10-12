@@ -2,7 +2,7 @@
 #include "./IRC_User.hpp"
 
 IRC_Message::IRC_Message(const std::queue<int> &recipients,
-		std::vector<std::string> splitMessageVector, IRC_User *sender):
+						 std::vector<std::string> splitMessageVector, const IRC_User *sender):
 		recipients(recipients), sender(sender),
 		content(buildMessageContent(splitMessageVector)) {
 }
@@ -12,7 +12,7 @@ IRC_Message::IRC_Message(const IRC_Message &other):
 }
 
 IRC_Message::IRC_Message(const std::queue<int> &recipients,
-		const std::string &messageContent, IRC_User *sender):
+						 const std::string &messageContent, const IRC_User *sender):
 	recipients(recipients), sender(sender),
 	content(sender->toPrefixString() + messageContent) {
 }

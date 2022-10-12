@@ -71,5 +71,6 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector);
 		void removeMemberFromChannel(IRC_User::UserIterator user,
 				std::vector<IRC_Channel>::iterator *channel);
+	void appendMessage(const IRC_Message &reply);
 };
 #endif  // INC_IRC_LOGIC_HPP_

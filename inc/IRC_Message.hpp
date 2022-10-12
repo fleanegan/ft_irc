@@ -16,9 +16,9 @@ class IRC_Message {
 		std::string content;
 
 		IRC_Message(const std::queue<int> &recipients,
-				std::vector<std::string> splitMessageVector, IRC_User *sender);
+					std::vector<std::string> splitMessageVector, const IRC_User *sender);
 		IRC_Message(const std::queue<int> &recipients,
-				const std::string& messageContent, IRC_User *sender);
+					const std::string& messageContent, const IRC_User *sender);
 		IRC_Message(int recipientFd, const std::string& messageContent,
 				const std::string& prefix);
 		IRC_Message(const IRC_Message &other);

@@ -82,49 +82,50 @@ TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError) {
 	std::string result;
 	registerDummyUser(&logic, 1);
 	logic.processInput(0, "JOIN #mychan\r\n");
-    int before = logic.getMessageQueue().size();
+	int before = logic.getMessageQueue().size();
 
 	logic.processInput(0, "PRIVMSG #mychan messageContent\r\n");
 
-    int after = logic.getMessageQueue().size();
+	int after = logic.getMessageQueue().size();
 	ASSERT_EQ(before, after);
 }
 
 TEST(IRC_ChannelOperations,
 		disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused) {
-    IRC_Logic logic("password");
-    registerMembersAndJoinToChannel(&logic, 3);
-    logic.disconnectUser(0);
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 3);
+	logic.disconnectUser(0);
 
-    registerDummyUser(&logic, 1);
-    logic.processInput(1, "PRIVMSG #chan messageContent\r\n");
+	registerDummyUser(&logic, 1);
+	logic.processInput(1, "PRIVMSG #chan messageContent\r\n");
 
-    ASSERT_FALSE(logic.getMessageQueue().empty());
-    ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
-    ASSERT_EQ(2, logic.getMessageQueue().back().recipients.front());
+	ASSERT_FALSE(logic.getMessageQueue().empty());
+	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
+	ASSERT_EQ(2, logic.getMessageQueue().back().recipients.front());
 }
 
-// TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
-// 	IRC_Logic logic("password");
-// 	std::string result;
-//
-//     registerMembersAndJoinToChannel(&logic, 2);
-//
-// 	ASSERT_FALSE(logic.getMessageQueue().empty());
-// }
+TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
+	IRC_Logic logic("password");
+	std::string result;
+
+	registerMembersAndJoinToChannel(&logic, 2);
+
+	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(), "JOIN"));
+	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(), RPL_NAMREPLY));
+}
 
 TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers) {
-    IRC_Logic logic("password");
-    registerMembersAndJoinToChannel(&logic, 2);
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 2);
 	std::string result;
 
 	result = logic.processInput(0, "QUIT :leaving\r\n");
-    logic.disconnectUser(0);
+	logic.disconnectUser(0);
 
-    ASSERT_TRUE(responseContains(result, ERR_CLOSINGLINK));
-    ASSERT_FALSE(logic.getMessageQueue().empty());
-    ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
-    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+	ASSERT_TRUE(responseContains(result, ERR_CLOSINGLINK));
+	ASSERT_FALSE(logic.getMessageQueue().empty());
+	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"nick0"));
 }
 
@@ -133,4 +134,3 @@ TEST(IRC_ChannelOperations, disonnectedMemberNotifiesOtherMembers) {
 // TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong) {
 
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_
-
