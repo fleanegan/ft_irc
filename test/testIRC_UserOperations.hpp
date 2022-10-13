@@ -120,10 +120,12 @@ TEST(IRC_UserOperations,
 		quitRemovesUserFromServerAndNotifiesOtherChannelmembers) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);
+	registerUser(&logic, 2, "password", "nick", "username", "full name");
 
 	logic.processRequest(0, "QUIT reason\r\n");
 
-	ASSERT_EQ(1, logic.getRegisteredUsers().size());
+	ASSERT_EQ(2, logic.getRegisteredUsers().size());
+	ASSERT_EQ(3, logic.getMessageQueue().back().recipients.size());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"reason"));
 }
@@ -152,17 +154,40 @@ TEST(IRC_UserOperations, quitWithoutArgumentGeneratesLeaving) {
 								 "leaving"));
 }
 
-TEST(IRC_UserOperations,
-	 quitRepliesErrorToSender) {
+TEST(IRC_UserOperations, quitRepliesErrorToSender) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 1);
 
 	logic.processRequest(0, "QUIT reason\r\n");
 
 	ASSERT_TRUE(logic.getRegisteredUsers().empty());
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+	ASSERT_TRUE(countMessageContaining(logic.getMessageQueue(),
 								 ERR_CLOSINGLINK));
 }
+
+
+/*
+TEST(IRC_UserOperations, changingNickNotifiesChannelMembers) {
+    IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 2);
+    registerUser(&logic, 2, "password", "nick", "username", "full name");
+
+   setNick(&logic, 0, "newNick");
+
+	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(),
+				"NICK"));
+}
+*/
+
+/*TEST(IRC_UserOperations, changingNickDoesNotBreakChannelMessages) {
+    IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 2);
+    registerUser(&logic, 2, "password", "nick", "username", "full name");
+
+    setNick(&logic, 0, "newNick");
+
+    ASSERT_EQ()
+}*/
 
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 

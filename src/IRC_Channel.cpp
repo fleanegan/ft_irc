@@ -54,14 +54,19 @@ void IRC_Channel::appendJoinReplyToNewMember(
 void IRC_Channel::appendJoinNotificationToAllMembers(
 		std::queue<IRC_Message> *messageQueue, const IRC_User &newMember) {
 	std::string notifyText;
-	std::queue<int> recipients;
+    std::queue<int> recipients = getMemberFds();
 
-	notifyText = " JOIN :#" + name + "\r\n";
-	for (std::vector<IRC_User>::reverse_iterator
+    notifyText = " JOIN :#" + name + "\r\n";
+    IRC_Message notify(recipients, notifyText, &newMember);
+	messageQueue->push(notify);
+}
+
+std::queue<int> IRC_Channel::getMemberFds() {
+    std::queue<int> recipients;
+    for (std::vector<IRC_User>::reverse_iterator
 			it = members.rbegin(); it != members.rend(); ++it)
 		recipients.push(it->fd);
-	IRC_Message notify(recipients, notifyText, &newMember);
-	messageQueue->push(notify);
+    return recipients;
 }
 
 std::queue<int> IRC_Channel::getRecipientFdsForSender(
@@ -77,17 +82,17 @@ std::queue<int> IRC_Channel::getRecipientFdsForSender(
 	return recipients;
 }
 
-void IRC_Channel::removeMember(
-		const IRC_User &user,
-		std::queue<IRC_Message> *messageQueue,
-		const std::string &reason) {
+void IRC_Channel::removeMember(const IRC_User &user) {
 	if (!isUserInChannel(user))
 		return;
-	std::queue<int> recipients = getRecipientFdsForSender(user);
-	messageQueue->push(
-			IRC_Message(recipients, reason, &user));
 	for (std::vector<IRC_User>::iterator
 			it = members.begin(); it != members.end(); ++it)
 		if (it->nick == user.nick)
 			it = members.erase(it) - 1;
+}
+
+void IRC_Channel::broadCastToAllMembers(
+        const std::string &message, const IRC_User &sender,
+        std::queue<IRC_Message> *messages) {
+    messages->push(IRC_Message(getMemberFds(), message, &sender));
 }

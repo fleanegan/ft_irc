@@ -156,7 +156,7 @@ void IRC_Logic::processPingMessage(
 }
 
 void IRC_Logic::processNickMessage(
-		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	IRC_Message reply(user->fd, "", "");
 
 	if (splitMessageVector.size() == 1) {
@@ -287,15 +287,28 @@ void IRC_Logic::processWhoIsMessage(
 
 void IRC_Logic::disconnectUser(int userFd, const std::string &reason) {
 	IRC_User::UserIterator user = getUserByFd(userFd);
-	if (user == _users.end())
+
+    if (user == _users.end())
 		return;
-	for (std::vector<IRC_Channel>::iterator
+	_messageQueue.push(IRC_Message(userFd, generateResponse(ERR_CLOSINGLINK,
+					"Closing link"), user->toPrefixString()));
+    broadCastToAllUsers(reason, *user);
+    for (std::vector<IRC_Channel>::iterator
 				 channel = _channels.begin();
 		 channel != _channels.end(); channel++) {
-		channel->removeMember(*user, &_messageQueue, reason);
+		channel->removeMember(*user);
 	}
 	_prevUsers.push_back(*user);
 	_users.erase(user);
+}
+
+void IRC_Logic::broadCastToAllUsers(
+        const std::string &message, const IRC_User &user) {
+    std::queue<int> recipients;
+
+    for (IRC_User::UserIterator it = _users.begin(); it != _users.end(); ++it)
+        recipients.push(it->fd);
+    _messageQueue.push(IRC_Message(recipients, message, &user));
 }
 
 void IRC_Logic::processWhoWasMessage(
@@ -383,8 +396,10 @@ void IRC_Logic::processPartMessage(
 						"You are not on this channel"),
 					user->toPrefixString()));
 	} else {
-		channel->removeMember(*user, &_messageQueue,
-				concatenateContentFromIndex(0, splitMessageVector));
+        channel->broadCastToAllMembers(
+                concatenateContentFromIndex(0, splitMessageVector),
+                *user, &_messageQueue);
+        channel->removeMember(*user);
 	}
 }
 

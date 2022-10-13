@@ -34,12 +34,16 @@ struct IRC_Channel {
 
 	std::queue<int> getRecipientFdsForSender(const IRC_User& user) const;
 
-	void removeMember(
-			const IRC_User &user, std::queue<IRC_Message> *messageQueue,
-			const std::string &reason);
+	void removeMember(const IRC_User &user);
+
+	void broadCastToAllMembers(
+			const std::string& message, const IRC_User& sender,
+			std::queue<IRC_Message> *messages);
 
 	private:
 	IRC_Channel();
+
+    std::queue<int> getMemberFds();
 };
 
 #endif  // INC_IRC_CHANNEL_HPP_

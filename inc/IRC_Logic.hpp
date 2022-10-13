@@ -72,5 +72,8 @@ class IRC_Logic {
 		void processModeMessage(const IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void appendMessage(const IRC_Message &reply);
+
+    void broadCastToAllUsers(
+            const std::string &message, const IRC_User &user);
 };
 #endif  // INC_IRC_LOGIC_HPP_

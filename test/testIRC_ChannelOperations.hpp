@@ -131,7 +131,7 @@ TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"QUIT"));
 	ASSERT_FALSE(logic.getMessageQueue().empty());
-	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
+	ASSERT_EQ(2, logic.getMessageQueue().back().recipients.size());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"nick0"));
 }
@@ -182,12 +182,13 @@ TEST(IRC_ChannelOperations, sendingPartChannelLeavesSaidChannel) {
 	ASSERT_EQ(1, logic.getChannels().front().members.size());
 }
 
-TEST(IRC_ChannelOperations, partShouldNotifyOtherMembers) {
+TEST(IRC_ChannelOperations, partNotifiesOtherMembers) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);
 	logic.processRequest(0, "PART #chan\r\n");
 
-	ASSERT_EQ(logic.getMessageQueue().back().recipients.size(), 2);
+	ASSERT_EQ(2, logic.getMessageQueue().back().recipients.size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content, "PART"));
 }
 
 TEST(IRC_ChannelOperations, partWithoutChannelShouldReturnError) {
