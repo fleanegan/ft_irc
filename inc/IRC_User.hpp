@@ -5,19 +5,20 @@
 #include "./utils.hpp"
 
 struct IRC_User{
-	typedef std::vector<IRC_User>::const_iterator ConstUserIterator;
+    typedef std::vector<IRC_User>::const_iterator ConstUserIterator;
 	typedef std::vector<IRC_User>::iterator UserIterator;
 
 	std::string nick;
 	std::string userName;
 	std::string fullName;
-	std::string hostName;
+	std::string hostIp;
 	std::string receivedCharacters;
 	bool isAuthenticated;
 	int fd;
 
-	explicit IRC_User(int fd);
-	IRC_User(const std::string &nick, const std::string &name, const int &fd);
+	IRC_User(int fd, const std::string& hostIP);
+	IRC_User(const std::string &nick, const std::string &name,
+			const int &fd, const std::string &hostIP);
 	static bool isNickValid(const std::string &nick);
 	static std::string buildFullName(
 			const std::vector<std::string>& splitMessageVector);

@@ -14,7 +14,7 @@ void TCP_Server::setUpTcpSocket(int port) {
 	socklen_t addrLen = sizeof(_servAddr);
 	int opt = 0;
 
-	saveConnectionInfo(socket(AF_INET, SOCK_STREAM, 0));
+    saveConnectionInfo(socket(AF_INET, SOCK_STREAM, 0), "");
 	if (_fds.front().fd == -1)
 		throw socketFailedException();
 	if (setsockopt(_fds.front().fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
@@ -28,8 +28,10 @@ void TCP_Server::setUpTcpSocket(int port) {
 		throw couldNotBindException();
 }
 
-void TCP_Server::saveConnectionInfo(int fd) {
+void TCP_Server::saveConnectionInfo(int fd, const std::string &hostIp) {
 	_fds.push_back((pollfd) {fd, POLLIN | POLLERR, 0});
+    if (!hostIp.empty())
+        onConnect(fd, hostIp);
 }
 
 TCP_Server::~TCP_Server(void) {
@@ -49,14 +51,11 @@ void TCP_Server::host(void) {
 			_VERBOSE && std::cerr << "New client socket" << std::endl;
 			newClient = accept(_fds.front().fd,
 					reinterpret_cast<sockaddr *>(&cliaddr), &addrLen);
-			saveConnectionInfo(newClient);
             in_addr in = cliaddr.sin_addr;
             char *addr_bin = inet_ntoa(in);
-            unsigned long ip = inet_addr(addr_bin); //NOLINT (C style function requires C style variables)
-            hostent *host = gethostbyaddr(&ip, sizeof(in_addr), 0);
-            std::cout << "this is forbidden. hostname: "
-				<< host->h_name << ", ip: " << addr_bin << std::endl;
-		}
+//            unsigned long ip = inet_addr(addr_bin); //NOLINT (C style function requires C style variables)
+            saveConnectionInfo(newClient, addr_bin);
+        }
 
 		for(std::vector<pollfd>::iterator
 				it = _fds.begin() + 1; it != _fds.end(); ++it) {

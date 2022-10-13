@@ -1,12 +1,12 @@
 #include "../inc/IRC_User.hpp"
 
-IRC_User::IRC_User(int fd):
-	hostName("127.0.0.1"), isAuthenticated(false), fd(fd) {}
+IRC_User::IRC_User(int fd, const std::string &hostIp):
+	hostIp(hostIp), isAuthenticated(false), fd(fd)  {
+}
 
-IRC_User::IRC_User(
-		const std::string &nick, const std::string &name, const int &fd):
-	nick(nick), userName(name),
-		hostName("127.0.0.1"), isAuthenticated(false), fd(fd) {}
+IRC_User::IRC_User(const std::string &nick, const std::string &name,
+		const int &fd, const std::string &hostIP): nick(nick), userName(name),
+        hostIp(hostIP), isAuthenticated(false), fd(fd) {}
 
 bool IRC_User::isNickValid(const std::string &nick) {
     std::string forbiddenChars = "*,!?@";
@@ -49,10 +49,10 @@ IRC_User::UserIterator IRC_User::findUserByNickInVector(
 }
 
 std::string IRC_User::toString() const {
-	return nick + " " + userName + " " + hostName + " * :" + fullName + "\r\n";
+	return nick + " " + userName + " " + hostIp + " * :" + fullName + "\r\n";
 }
 
 std::string IRC_User::toPrefixString() const {
-    return ":" + nick + "!~" + userName + "@" + hostName + " ";
+    return ":" + nick + "!~" + userName + "@" + hostIp + " ";
 }
 

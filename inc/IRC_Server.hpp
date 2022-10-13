@@ -28,6 +28,8 @@ class IRC_Server : public TCP_Server {
 		void onDisconnect(int fd);
 
 		void distributeMessages();
+
+        void onConnect(int fd, const std::string &hostIp);
 };
 
 #endif  // INC_IRC_SERVER_HPP_

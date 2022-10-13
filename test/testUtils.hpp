@@ -11,7 +11,8 @@
 
 std::string authenticate(
 		IRC_Logic *logic, int fd, const std::string &password ) {
-	return logic->processRequest(fd, "PASS " + password + "\r\n");
+    logic->addUser(fd, "127.0.0.1");
+    return logic->processRequest(fd, "PASS " + password + "\r\n");
 }
 
 std::string setUser(IRC_Logic *logic,

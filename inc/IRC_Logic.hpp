@@ -29,6 +29,8 @@ class IRC_Logic {
 		std::vector<IRC_User>& getRegisteredUsers();
 		std::vector<IRC_Channel>& getChannels();
 
+		void addUser(int fd, const std::string &hostIp);
+
 	private:
 		IRC_Logic();
 		IRC_Logic(const IRC_Logic &other);

@@ -13,10 +13,6 @@ std::string IRC_Logic::processRequest(int fd, const std::string &input) {
 	IRC_User::UserIterator currentUser = getUserByFd(fd);
 	std::string result;
 
-	if (currentUser == _users.end()) {
-		_users.push_back(IRC_User(fd));
-		currentUser = _users.end() - 1;
-	}
 	currentUser->receivedCharacters += input;
 	while (currentUser->receivedCharacters.find("\r\n") != std::string::npos) {
 		splitMessageVector = extractFirstMessage(&(*currentUser));
@@ -372,4 +368,8 @@ IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(
 		if (nameWithoutPrefix == it->name)
 			return it;
 	return _channels.end();
+}
+
+void IRC_Logic::addUser(int fd, const std::string &hostIp) {
+    _users.push_back(IRC_User(fd, hostIp));
 }

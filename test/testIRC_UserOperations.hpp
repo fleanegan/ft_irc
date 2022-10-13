@@ -17,8 +17,9 @@ TEST(IRC_UserOperations, callingNickWhenSetChangesNick) {
 
 TEST(IRC_UserOperations, receivingPingReturnsPong) {
 	IRC_Logic logic("password");
+    logic.addUser(0, "127.0.0.1");
 
-	logic.processRequest(0, "PING nonEmptyToken\r\n");
+    logic.processRequest(0, "PING nonEmptyToken\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"nonEmptyToken"));
@@ -26,6 +27,7 @@ TEST(IRC_UserOperations, receivingPingReturnsPong) {
 
 TEST(IRC_UserOperations, receivingPingWithoutArgumentsReturnsError) {
 	IRC_Logic logic("password");
+    logic.addUser(0, "127.0.0.1");
 
     logic.processRequest(0, "PING\r\n");
 

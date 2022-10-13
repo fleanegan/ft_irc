@@ -46,3 +46,7 @@ void IRC_Server::onDisconnect(int fd) {
 	_logic.disconnectUser(fd, generateResponse(ERR_CLOSINGLINK, "Closing Link"));
     distributeMessages();
 }
+
+void IRC_Server::onConnect(int fd, const std::string &hostIp) {
+    _logic.addUser(fd, hostIp);
+}
