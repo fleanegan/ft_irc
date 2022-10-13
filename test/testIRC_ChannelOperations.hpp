@@ -174,4 +174,51 @@ TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong) {
 	ASSERT_EQ(49, logic.getChannels().front().name.size());
 }
 
+TEST(IRC_ChannelOperations, sendingPartChannelLeavesSaidChannel) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 2);
+	logic.processRequest(0, "PART #chan\r\n");
+
+	ASSERT_EQ(1, logic.getChannels().front().members.size());
+}
+
+TEST(IRC_ChannelOperations, partShouldNotifyOtherMembers) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 2);
+	logic.processRequest(0, "PART #chan\r\n");
+
+	ASSERT_EQ(logic.getMessageQueue().back().recipients.size(), 2);
+}
+
+TEST(IRC_ChannelOperations, partWithoutChannelShouldReturnError) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 2);
+	logic.processRequest(0, "PART\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NEEDMOREPARAMS));
+}
+
+TEST(IRC_ChannelOperations, partOnNonExistingChannelShouldReturnError) {
+	IRC_Logic logic("password");
+	registerDummyUser(&logic, 1);
+	logic.processRequest(0, "PART test\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NOSUCHCHANNEL));
+}
+
+TEST(IRC_ChannelOperations, partNotJoinedChannelShouldReturnError) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 1);
+	registerUser(&logic, 1, "password", "nick", "username", "full name");
+
+	logic.processRequest(1, "PART chan\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NOTONCHANNEL));
+}
+
+// TEST(IRC_ChannelOperations, EmptyChannelsShouldBeDeleted) {
+
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_

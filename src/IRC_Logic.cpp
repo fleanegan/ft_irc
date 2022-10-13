@@ -49,6 +49,8 @@ void IRC_Logic::processIncomingMessage(
 		processJoinMessage(user, splitMessageVector);
 	} else if (splitMessageVector[0] == "QUIT") {
 		processQuitMessage(user, splitMessageVector);
+	} else if (splitMessageVector[0] == "PART") {
+		processPartMessage(user, splitMessageVector);
 	}
 }
 
@@ -264,7 +266,6 @@ bool IRC_Logic::isUserRegistered(IRC_User *user) {
 	return true;
 }
 
-// todo idle check
 void IRC_Logic::processWhoIsMessage(
 		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	IRC_User::UserIterator result;
@@ -357,6 +358,34 @@ void IRC_Logic::processQuitMessage(
 		disconnectUser(user->fd, "QUIT leaving");
 	else
 		disconnectUser(user->fd, concatenateContentFromIndex(0, splitMessageVector));
+}
+
+void IRC_Logic::processPartMessage(
+		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	IRC_Channel::ChannelIterator channel;
+
+	if (splitMessageVector.size() < 2) {
+		_messageQueue.push(IRC_Message(user->fd,
+					generateResponse(ERR_NEEDMOREPARAMS,
+						"Please provide a channel name"),
+					user->toPrefixString()));
+		return;
+	}
+	channel = getChannelByName(splitMessageVector[1]);
+	if (channel == _channels.end()) {
+		_messageQueue.push(IRC_Message(user->fd,
+					generateResponse(ERR_NOSUCHCHANNEL,
+						"This channel does not exist"),
+					user->toPrefixString()));
+	} else if (!channel->isUserInChannel(*user)) {
+		_messageQueue.push(IRC_Message(user->fd,
+					generateResponse(ERR_NOTONCHANNEL,
+						"You are not on this channel"),
+					user->toPrefixString()));
+	} else {
+		channel->removeMember(*user, &_messageQueue,
+				concatenateContentFromIndex(0, splitMessageVector));
+	}
 }
 
 IRC_Channel::ChannelIterator IRC_Logic::getChannelByName(

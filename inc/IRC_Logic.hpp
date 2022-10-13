@@ -62,6 +62,8 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector);
 		void processQuitMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
+		void processPartMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
 		IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 		std::queue<int> fetchChannelRecipients(
 				const IRC_User &user, const std::string &channelName);
