@@ -18,7 +18,7 @@ TEST(IRC_UserOperations, callingNickWhenSetChangesNick) {
 TEST(IRC_UserOperations, receivingPingReturnsPong) {
 	IRC_Logic logic("password");
 
-	logic.processInput(0, "PING nonEmptyToken\r\n");
+	logic.processRequest(0, "PING nonEmptyToken\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"nonEmptyToken"));
@@ -27,7 +27,7 @@ TEST(IRC_UserOperations, receivingPingReturnsPong) {
 TEST(IRC_UserOperations, receivingPingWithoutArgumentsReturnsError) {
 	IRC_Logic logic("password");
 
-    logic.processInput(0, "PING\r\n");
+    logic.processRequest(0, "PING\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NEEDMOREPARAMS));
@@ -37,7 +37,7 @@ TEST(IRC_UserOperations, receivingWhoIsShouldSendInformationsAboutUser) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(1, "WHOIS nick0\r\n");
+	logic.processRequest(1, "WHOIS nick0\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				"nick0"));
@@ -49,7 +49,7 @@ TEST(IRC_UserOperations, whoIsOnUnregisteredNicknameReturnsError) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(1, "WHOIS notExistingNick\r\n");
+	logic.processRequest(1, "WHOIS notExistingNick\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NOSUCHNICK));
@@ -59,7 +59,7 @@ TEST(IRC_UserOperations, whoIsWithoutNicknameReturnsError) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(1, "WHOIS\r\n");
+	logic.processRequest(1, "WHOIS\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NONICKNAMEGIVEN));
@@ -71,7 +71,7 @@ TEST(IRC_UserOperations, WhoWasReturnsInfoOnPreviouslyRegisteredUser) {
 
 	logic.disconnectUser(0, "leaving");
 	logic.disconnectUser(1, "leaving");
-	logic.processInput(2, "WHOWAS nick1\r\n");
+	logic.processRequest(2, "WHOWAS nick1\r\n");
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
@@ -84,7 +84,7 @@ TEST(IRC_UserOperations, whoWasWithoutNicknameReturnsError) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(1, "WHOWAS\r\n");
+	logic.processRequest(1, "WHOWAS\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NONICKNAMEGIVEN));
@@ -94,7 +94,7 @@ TEST(IRC_UserOperations, whoWasOnUnregisteredNicknameReturnsError) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(1, "WHOWAS notExistingNick\r\n");
+	logic.processRequest(1, "WHOWAS notExistingNick\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_WASNOSUCHNICK));
@@ -108,7 +108,7 @@ TEST(IRC_UserOperations, changedNickAppearsOnWhoWas) {
 	setNick(&logic, 1, "setNick");
 	setNick(&logic, 1, "unsetNick1");
 
-	logic.processInput(1, "WHOWAS setNick\r\n");
+	logic.processRequest(1, "WHOWAS setNick\r\n");
 
 	ASSERT_EQ(2,
 			countSubStrings(logic.getMessageQueue().back().content, "setNick"));
@@ -119,7 +119,7 @@ TEST(IRC_UserOperations,
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);
 
-	logic.processInput(0, "QUIT reason\r\n");
+	logic.processRequest(0, "QUIT reason\r\n");
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
@@ -131,7 +131,7 @@ TEST(IRC_UserOperations,
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 2);
 
-	logic.processInput(0, "QUIT reason\r\n");
+	logic.processRequest(0, "QUIT reason\r\n");
 	logic.disconnectUser(0, "Causes segfault when not handled with care");
 
 	ASSERT_EQ(1, logic.getRegisteredUsers().size());
@@ -143,7 +143,7 @@ TEST(IRC_UserOperations, quitWithoutArgumentGeneratesLeaving) {
 	IRC_Logic logic("password");
 	registerMembersAndJoinToChannel(&logic, 1);
 
-	logic.processInput(0, "QUIT\r\n");
+	logic.processRequest(0, "QUIT\r\n");
 
 	ASSERT_TRUE(logic.getRegisteredUsers().empty());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
@@ -155,7 +155,7 @@ TEST(IRC_UserOperations,
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 1);
 
-	logic.processInput(0, "QUIT reason\r\n");
+	logic.processRequest(0, "QUIT reason\r\n");
 
 	ASSERT_TRUE(logic.getRegisteredUsers().empty());
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,

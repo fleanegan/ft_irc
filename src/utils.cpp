@@ -11,12 +11,18 @@ std::string generateResponse(
 	return result;
 }
 
+char toScandinavianLower(const char &c) {
+	if (c >= 'A' && c <= '^')
+		return 32 + c;
+	return c;
+}
+
 std::string stringToLower(const std::string &input) {
 	std::string result;
 
 	for (std::string::const_iterator it = input.begin();
 			it != input.end(); ++it) {
-		result += tolower(*it);
+		result += toScandinavianLower(*it);
 	}
 	return result;
 }

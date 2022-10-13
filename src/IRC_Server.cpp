@@ -17,7 +17,7 @@ IRC_Server& IRC_Server::operator = (const IRC_Server& other) {
 }
 
 std::string IRC_Server::processMessage(int fd, const std::string& buffer) {
-	std::string result = _logic.processInput(fd, buffer);
+	std::string result = _logic.processRequest(fd, buffer);
 
     distributeMessages();
     return result;
@@ -42,7 +42,7 @@ void IRC_Server::distributeMessages() {
 }
 
 void IRC_Server::onDisconnect(int fd) {
-	_VERBOSE && std::cerr << "server lost connection without quit from fd " << fd << std::endl;
+	_VERBOSE && std::cerr << "connection lost from " << fd << std::endl;
 	_logic.disconnectUser(fd, generateResponse(ERR_CLOSINGLINK, "Closing Link"));
     distributeMessages();
 }

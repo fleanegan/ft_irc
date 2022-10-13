@@ -21,7 +21,7 @@ class IRC_Logic {
 	public:
 		explicit IRC_Logic(const std::string &password);
 		~IRC_Logic();
-		std::string processInput(int fd, const std::string &input);
+		std::string processRequest(int fd, const std::string &input);
 		IRC_User::UserIterator getUserByFd(const int &fd);
 		IRC_User::UserIterator getUserByNick(const std::string &nick);
 		std::queue<IRC_Message> &getMessageQueue();
@@ -33,13 +33,12 @@ class IRC_Logic {
 		IRC_Logic();
 		IRC_Logic(const IRC_Logic &other);
 		IRC_Logic &operator=(const IRC_Logic &);
-		void cleanupName(std::string *name);
-		void removeMessageTermination(std::string *message);
 		std::vector<std::string> extractFirstMessage(IRC_User *user);
 		bool isNickAlreadyPresent(const std::string &nick);
 		bool isUserRegistered(IRC_User* user);
 		std::string welcomeNewUser(IRC_User *user);
-		void processIncomingRequest(IRC_User *user,
+		void processIncomingMessage(
+				IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void processNickMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
@@ -68,9 +67,6 @@ class IRC_Logic {
 				int fd, const std::vector<std::string> &splitMessageVector);
 		void processModeMessage(const IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		void removeMemberFromChannel(IRC_User &user,
-									 IRC_Channel *channel,
-									 const std::string &reason);
 		void appendMessage(const IRC_Message &reply);
 };
 #endif  // INC_IRC_LOGIC_HPP_

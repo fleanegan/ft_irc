@@ -11,17 +11,17 @@
 
 std::string authenticate(
 		IRC_Logic *logic, int fd, const std::string &password ) {
-	return logic->processInput(fd, "PASS " + password + "\r\n");
+	return logic->processRequest(fd, "PASS " + password + "\r\n");
 }
 
 std::string setUser(IRC_Logic *logic,
 		int fd, const std::string &userName, const std::string &fullName) {
-	return logic->processInput(fd, "USER "
+	return logic->processRequest(fd, "USER "
 			+ userName + " " + userName + " * :" + fullName + "\r\n");
 }
 
 std::string setNick(IRC_Logic *logic, int fd, const std::string &nick) {
-	return logic->processInput(fd, "NICK " + nick + "\r\n");
+	return logic->processRequest(fd, "NICK " + nick + "\r\n");
 }
 
 std::string authenticateAndSetNick(IRC_Logic *logic,
@@ -87,7 +87,7 @@ void registerDummyUser(IRC_Logic *logic, int n) {
 void registerMembersAndJoinToChannel(IRC_Logic *logic, int n) {
     registerDummyUser(logic, n);
     while (--n >= 0) {
-        logic->processInput(n, "JOIN #chan\r\n");
+        logic->processRequest(n, "JOIN #chan\r\n");
     }
 }
 

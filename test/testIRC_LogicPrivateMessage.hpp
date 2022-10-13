@@ -9,7 +9,7 @@ TEST(IRC_LogicPrivateMessage, sendingToNonExistingNickGeneratesError) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 1);
 
-	logic.processInput(0, "PRIVMSG nonExisingNick content\r\n");
+	logic.processRequest(0, "PRIVMSG nonExisingNick content\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NOSUCHNICK));
@@ -19,7 +19,7 @@ TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 1);
 
-	logic.processInput(0, "PRIVMSG nonExisingNick\r\n");
+	logic.processRequest(0, "PRIVMSG nonExisingNick\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_NOTEXTTOSEND));
@@ -29,7 +29,7 @@ TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageRegistersMessage) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(0, "PRIVMSG nick1 :content is cool\r\n");
+	logic.processRequest(0, "PRIVMSG nick1 :content is cool\r\n");
 
 	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
 	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.front());
@@ -39,12 +39,10 @@ TEST(IRC_LogicPrivateMessage, messagesSentWithPrefixContainingNick) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 2);
 
-	logic.processInput(0, "PRIVMSG nick1 :content is cool\r\n");
+	logic.processRequest(0, "PRIVMSG nick1 :content is cool\r\n");
 
 	ASSERT_STREQ(":nick0!~username0@127.0.0.1 PRIVMSG nick1 :content is cool",
 			logic.getMessageQueue().back().content.c_str());
 }
-
-// :nick_!~fleanegan@127.0.0.1 PRIVMSG testSender:
 
 #endif  // TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_
