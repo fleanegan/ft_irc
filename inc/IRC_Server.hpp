@@ -30,6 +30,8 @@ class IRC_Server : public TCP_Server {
 		void distributeMessages();
 
         void onConnect(int fd, const std::string &hostIp);
+
+    void handleDisconnectionsFromLogic();
 };
 
 #endif  // INC_IRC_SERVER_HPP_

@@ -2,11 +2,11 @@
 #include <arpa/inet.h>
 #include "../inc/TCP_Server.hpp"
 
-TCP_Server::TCP_Server(void) {
+TCP_Server::TCP_Server(void): _fdsToCloseAfterUpdate() {
 	setUpTcpSocket(6667);
 }
 
-TCP_Server::TCP_Server(int port) {
+TCP_Server::TCP_Server(int port): _fdsToCloseAfterUpdate() {
 	setUpTcpSocket(port);
 }
 
@@ -51,12 +51,8 @@ void TCP_Server::host(void) {
 			_VERBOSE && std::cerr << "New client socket" << std::endl;
 			newClient = accept(_fds.front().fd,
 					reinterpret_cast<sockaddr *>(&cliaddr), &addrLen);
-            in_addr in = cliaddr.sin_addr;
-            char *addr_bin = inet_ntoa(in);
-//            unsigned long ip = inet_addr(addr_bin); //NOLINT (C style function requires C style variables)
-            saveConnectionInfo(newClient, addr_bin);
+            saveConnectionInfo(newClient, inet_ntoa(cliaddr.sin_addr));
         }
-
 		for(std::vector<pollfd>::iterator
 				it = _fds.begin() + 1; it != _fds.end(); ++it) {
 			memset(buffer, 0, BUFFER_LEN);
@@ -81,17 +77,21 @@ void TCP_Server::host(void) {
 				}
 			}
 		}
+        closeFdHook();
 	}
 }
 
-void TCP_Server::closeConnectionByFd(int fd){
-    for(std::vector<pollfd>::iterator
-                it = _fds.begin() + 1; it != _fds.end(); ++it)
-        if (it->fd == fd){
-            close(fd);
-            _fds.erase(it);
-            return ;
+void TCP_Server::closeFdHook() {
+    while(_fdsToCloseAfterUpdate.empty() == false) {
+        int currentFd = _fdsToCloseAfterUpdate.front();
+        _fdsToCloseAfterUpdate.pop();
+        close(currentFd);
+        for (std::vector<pollfd>::iterator it = _fds.begin()
+                ; it != _fds.end(); ++it) {
+            if (it->fd == currentFd)
+                it = _fds.erase(it) - 1;
         }
+    }
 }
 
 const char *TCP_Server::socketFailedException::what() const throw() {

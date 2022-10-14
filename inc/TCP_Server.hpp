@@ -10,6 +10,7 @@
 #include <exception>
 #include <string>
 #include <vector>
+#include <queue>
 
 #define BUFFER_LEN 1024
 #define _VERBOSE true
@@ -24,6 +25,7 @@ class TCP_Server {
 		std::vector<struct pollfd> _fds;
 		struct sockaddr_in _servAddr;
 		int _port;
+        std::queue<int> _fdsToCloseAfterUpdate;
 
 		virtual void onDisconnect(int fd) = 0;
 
@@ -59,7 +61,7 @@ class TCP_Server {
 
 		virtual void onConnect(int fd, const std::string &basicString) = 0;
 
-        void closeConnectionByFd(int fd);
+    void closeFdHook();
 };
 
 #endif  // INC_TCP_SERVER_HPP_
