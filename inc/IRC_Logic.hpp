@@ -75,5 +75,7 @@ class IRC_Logic {
 
     void broadCastToAllUsers(
             const std::string &message, const IRC_User &user);
+
+    void notifyChannelsAboutNickChange(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
 };
 #endif  // INC_IRC_LOGIC_HPP_

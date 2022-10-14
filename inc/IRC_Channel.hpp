@@ -39,6 +39,7 @@ struct IRC_Channel {
 	void broadCastToAllMembers(
 			const std::string& message, const IRC_User& sender,
 			std::queue<IRC_Message> *messages);
+    void broadCastToOtherMembers(const std::string &message, const IRC_User &sender, std::queue<IRC_Message> *messages);
 
 	private:
 	IRC_Channel();

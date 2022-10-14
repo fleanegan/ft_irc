@@ -7,7 +7,7 @@
 
 TEST(IRC_LogicPrivateMessage, sendingToNonExistingNickGeneratesError) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 
 	logic.processRequest(0, "PRIVMSG nonExisingNick content\r\n");
 
@@ -17,7 +17,7 @@ TEST(IRC_LogicPrivateMessage, sendingToNonExistingNickGeneratesError) {
 
 TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 
 	logic.processRequest(0, "PRIVMSG nonExisingNick\r\n");
 
@@ -27,7 +27,7 @@ TEST(IRC_LogicPrivateMessage, noTextIsAProblem) {
 
 TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageRegistersMessage) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 2);
+    registerDummyUser(&logic, 0, 2);
 
 	logic.processRequest(0, "PRIVMSG nick1 :content is cool\r\n");
 
@@ -37,7 +37,7 @@ TEST(IRC_LogicPrivateMessage, sendingValidPrivateMessageRegistersMessage) {
 
 TEST(IRC_LogicPrivateMessage, messagesSentWithPrefixContainingNick) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 2);
+    registerDummyUser(&logic, 0, 2);
 
 	logic.processRequest(0, "PRIVMSG nick1 :content is cool\r\n");
 

@@ -170,11 +170,26 @@ void IRC_Logic::processNickMessage(
 		reply.content = generateResponse(ERR_NICKNAMEINUSE,
 										 "nickname " + splitMessageVector[1] + " is already taken.");
 	} else {
-		_prevUsers.push_back(*user);
-		user->nick = splitMessageVector[1].substr(0, 9);
-		reply.content = welcomeNewUser(user);
+		if (!user->nick.empty() ||
+				(user->userName.empty() && user->fullName.empty())) {
+            notifyChannelsAboutNickChange(user, splitMessageVector);
+            _prevUsers.push_back(*user);
+			user->nick = splitMessageVector[1].substr(0, 9);
+			reply.content = concatenateContentFromIndex(0, splitMessageVector);
+		} else {
+			user->nick = splitMessageVector[1].substr(0, 9);
+			reply.content = welcomeNewUser(user);
+		}
 	}
 	appendMessage(reply);
+}
+
+void
+IRC_Logic::notifyChannelsAboutNickChange(const IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+    for (IRC_Channel::ChannelIterator it = _channels.begin(); it != _channels.end(); ++it){
+        if (it->isUserInChannel(*user))
+            it->broadCastToOtherMembers(concatenateContentFromIndex(0, splitMessageVector), *user, &_messageQueue);
+    }
 }
 
 void IRC_Logic::processUserMessage(

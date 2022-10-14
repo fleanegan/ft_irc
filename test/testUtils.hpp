@@ -68,27 +68,29 @@ bool responseContains(
 	return 	returnMessage.find(code) != std::string::npos;
 }
 
-void registerDummyUser(IRC_Logic *logic, int n) {
+void registerDummyUser(IRC_Logic *logic, int beginFd, int endFd) {
 	std::string nick("nick");
 	std::string userName("username");
 	std::string fullName("Full Name");
 	std::string indexString;
 
-	while (--n >= 0) {
+	while (beginFd < endFd) {
 		std::stringstream ss;
-		ss << n;
+		ss << beginFd;
 		ss >> indexString;
-		registerUser(logic, n, "password",
+		registerUser(logic, beginFd, "password",
 				nick + indexString,
 				userName + indexString,
 				fullName + indexString);
+        ++beginFd;
 	}
 }
 
-void registerMembersAndJoinToChannel(IRC_Logic *logic, int n) {
-    registerDummyUser(logic, n);
-    while (--n >= 0) {
-        logic->processRequest(n, "JOIN #chan\r\n");
+void registerMembersAndJoinToChannel(IRC_Logic *logic, int beginFd, int endFd, const std::string &channelName) {
+    registerDummyUser(logic, beginFd, endFd);
+    while (beginFd < endFd) {
+        logic->processRequest(beginFd, "JOIN " + channelName + "\r\n");
+        ++beginFd;
     }
 }
 
@@ -113,5 +115,25 @@ int countMessageContaining(
 	}
 	return count;
 }
+
+std::vector<int> gatherAllRecipientsOfMessageQueue(IRC_Logic *logic) {
+    std::vector<int>recipientsOfNickChange;
+    while (logic->getMessageQueue().empty() == false){
+        IRC_Message tmp = logic->getMessageQueue().front();
+        while (tmp.recipients.empty() == false){
+            recipientsOfNickChange.push_back(tmp.recipients.front());
+            tmp.recipients.pop();
+        }
+        logic->getMessageQueue().pop();
+    }
+    return recipientsOfNickChange;
+}
+
+template <typename T>
+void emptyQueue(std::queue<T>*queue) {
+    std::queue<IRC_Message> test;
+    queue->swap(test);
+}
+
 
 #endif     // TEST_TESTUTILS_HPP_

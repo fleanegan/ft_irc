@@ -96,3 +96,10 @@ void IRC_Channel::broadCastToAllMembers(
         std::queue<IRC_Message> *messages) {
     messages->push(IRC_Message(getMemberFds(), message, &sender));
 }
+
+void IRC_Channel::broadCastToOtherMembers(
+        const std::string &message, const IRC_User &sender,
+        std::queue<IRC_Message> *messages) {
+    messages->push(IRC_Message(getRecipientFdsForSender(sender), message, &sender));
+}
+

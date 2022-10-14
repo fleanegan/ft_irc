@@ -8,7 +8,7 @@
 TEST(IRC_ChannelOperations, joiningAChannelRequiresName) {
 	IRC_Logic logic("password");
 	std::string result;
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 
 	result = logic.processRequest(0, "JOIN\r\n");
 
@@ -20,7 +20,7 @@ TEST(IRC_ChannelOperations,
 		joiningANonExistingChannelCreatesAChannelAccordingToTheGivenName) {
 	IRC_Logic logic("password");
 	std::string result;
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 
 	result = logic.processRequest(0, "JOIN mychan\r\n");
 
@@ -31,10 +31,9 @@ TEST(IRC_ChannelOperations,
 TEST(IRC_ChannelOperations,
 		joiningANonExistingCreatesAChannelAndIgnoreHashtagsign) {
 	IRC_Logic logic("password");
-	std::string result;
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 
-	result = logic.processRequest(0, "JOIN #mychan\r\n");
+	logic.processRequest(0, "JOIN #mychan\r\n");
 
 	ASSERT_EQ(1, logic.getChannels().size());
 	ASSERT_STREQ("mychan", logic.getChannels().front().name.c_str());
@@ -42,21 +41,15 @@ TEST(IRC_ChannelOperations,
 
 TEST(IRC_ChannelOperations, JoiningAnExistingChannelDoesNotCreateNewChannel) {
 	IRC_Logic logic("password");
-	std::string result;
-	registerDummyUser(&logic, 2);
 
-	result = logic.processRequest(0, "JOIN #mychan\r\n");
-	result = logic.processRequest(1, "JOIN #mychan\r\n");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
 
 	ASSERT_EQ(1, logic.getChannels().size());
 }
 
 TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage) {
 	IRC_Logic logic("password");
-	std::string result;
-	registerDummyUser(&logic, 2);
-	logic.processRequest(0, "JOIN #mychan\r\n");
-	logic.processRequest(1, "JOIN #mychan\r\n");
+    registerMembersAndJoinToChannel(&logic,0, 2, "#mychan");
 
 	logic.processRequest(1, "PRIVMSG #mychan messageContent\r\n");
 
@@ -67,11 +60,10 @@ TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage) {
 
 TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError) {
 	IRC_Logic logic("password");
-	std::string result;
-	registerDummyUser(&logic, 2);
+    registerDummyUser(&logic, 0, 2);
 	logic.processRequest(0, "JOIN #mychan\r\n");
 
-	result = logic.processRequest(1, "PRIVMSG #mychan messageContent\r\n");
+	logic.processRequest(1, "PRIVMSG #mychan messageContent\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_CANNOTSENDTOCHAN));
@@ -79,10 +71,8 @@ TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError) {
 
 TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError) {
 	IRC_Logic logic("password");
-	std::string result;
-	registerDummyUser(&logic, 1);
-	logic.processRequest(0, "JOIN #mychan\r\n");
-	int before = logic.getMessageQueue().size();
+    registerMembersAndJoinToChannel(&logic,0, 1, "#mychan");
+    int before = logic.getMessageQueue().size();
 
 	logic.processRequest(0, "PRIVMSG #mychan messageContent\r\n");
 
@@ -93,10 +83,10 @@ TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError) {
 TEST(IRC_ChannelOperations,
 		disonnectedMemberGetsRemovedFromChannelAndTheirFdIsReused) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 3);
+    registerMembersAndJoinToChannel(&logic, 0, 3, "#chan");
 	logic.disconnectUser(0, "leaving");
 
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 	logic.processRequest(1, "PRIVMSG #chan messageContent\r\n");
 
 	ASSERT_FALSE(logic.getMessageQueue().empty());
@@ -107,7 +97,7 @@ TEST(IRC_ChannelOperations,
 TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
 	IRC_Logic logic("password");
 
-	registerMembersAndJoinToChannel(&logic, 2);
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
 
 	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(), "JOIN"));
 	ASSERT_EQ(2, countMessageContaining(logic.getMessageQueue(), RPL_NAMREPLY));
@@ -115,7 +105,7 @@ TEST(IRC_ChannelOperations, joiningAChannelNotifiesOther) {
 
 TEST(IRC_ChannelOperations, leavingChannelDoesNotInvalidateOtherUsers) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 50);
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
 
 	logic.processRequest(1, "PRIVMSG #chan messageContent\r\n");
 	ASSERT_FALSE(responseContains(logic.getMessageQueue().back().content,
@@ -124,7 +114,7 @@ TEST(IRC_ChannelOperations, leavingChannelDoesNotInvalidateOtherUsers) {
 
 TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 2);
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
 
 	logic.processRequest(0, "QUIT :leaving\r\n");
 
@@ -138,7 +128,7 @@ TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 
 TEST(IRC_ChannelOperations, channelNamesAreCaseInsensitive) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 2);
+    registerDummyUser(&logic, 0, 2);
 
 	logic.processRequest(1, "JOIN #ChAn\r\n");
 	logic.processRequest(0, "JOIN #chan\r\n");
@@ -147,7 +137,7 @@ TEST(IRC_ChannelOperations, channelNamesAreCaseInsensitive) {
 
 TEST(IRC_ChannelOperations, channelNamesCanContainDifferentPrefixes) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 4);
+    registerDummyUser(&logic, 0, 4);
 
 	logic.processRequest(0, "JOIN #chan\r\n");
 	logic.processRequest(1, "JOIN &chan\r\n");
@@ -158,7 +148,7 @@ TEST(IRC_ChannelOperations, channelNamesCanContainDifferentPrefixes) {
 
 TEST(IRC_ChannelOperations, bracketAndMoreHaveLowercases) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 2);
+    registerDummyUser(&logic, 0, 2);
 
 	logic.processRequest(1, "JOIN #ChAn\r\n");
 	logic.processRequest(0, "JOIN #chan\r\n");
@@ -167,7 +157,7 @@ TEST(IRC_ChannelOperations, bracketAndMoreHaveLowercases) {
 
 TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 2);
+    registerDummyUser(&logic, 0, 2);
 
 	logic.processRequest(1, "JOIN #CHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 			"AAAAAAAAAN\r\n");
@@ -176,15 +166,17 @@ TEST(IRC_ChannelOperations, channelNamesAreMax50CharsLong) {
 
 TEST(IRC_ChannelOperations, sendingPartChannelLeavesSaidChannel) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 2);
-	logic.processRequest(0, "PART #chan\r\n");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
+
+    logic.processRequest(0, "PART #chan\r\n");
 
 	ASSERT_EQ(1, logic.getChannels().front().members.size());
 }
 
 TEST(IRC_ChannelOperations, partNotifiesOtherMembers) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 2);
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
+
 	logic.processRequest(0, "PART #chan\r\n");
 
 	ASSERT_EQ(2, logic.getMessageQueue().back().recipients.size());
@@ -193,7 +185,7 @@ TEST(IRC_ChannelOperations, partNotifiesOtherMembers) {
 
 TEST(IRC_ChannelOperations, partWithoutChannelShouldReturnError) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 2);
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
 	logic.processRequest(0, "PART\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
@@ -202,7 +194,7 @@ TEST(IRC_ChannelOperations, partWithoutChannelShouldReturnError) {
 
 TEST(IRC_ChannelOperations, partOnNonExistingChannelShouldReturnError) {
 	IRC_Logic logic("password");
-	registerDummyUser(&logic, 1);
+    registerDummyUser(&logic, 0, 1);
 	logic.processRequest(0, "PART test\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
@@ -211,7 +203,7 @@ TEST(IRC_ChannelOperations, partOnNonExistingChannelShouldReturnError) {
 
 TEST(IRC_ChannelOperations, partNotJoinedChannelShouldReturnError) {
 	IRC_Logic logic("password");
-	registerMembersAndJoinToChannel(&logic, 1);
+    registerMembersAndJoinToChannel(&logic, 0, 1, "#chan");
 	registerUser(&logic, 1, "password", "nick", "username", "full name");
 
 	logic.processRequest(1, "PART chan\r\n");

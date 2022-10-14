@@ -149,12 +149,12 @@ TEST(IRC_LogicUserRegistration, userRegistrationWorksNoMatterTheUserNickOrder) {
 	IRC_Logic logic("password");
 
 	authenticate(&logic, 0, "password");
-	logic.processRequest(0, "USER JD JD * John Doe\r\n");
-	setNick(&logic, 0, "JayDee");
+	logic.processRequest(0, "USER uname uname * Full Name\r\n");
+	setNick(&logic, 0, "nick");
 
-	ASSERT_STREQ("JayDee", logic.getRegisteredUsers()[0].nick.c_str());
-	ASSERT_STREQ("JD", logic.getRegisteredUsers()[0].userName.c_str());
-	ASSERT_STREQ("John Doe", logic.getRegisteredUsers()[0].fullName.c_str());
+	ASSERT_STREQ("nick", logic.getRegisteredUsers()[0].nick.c_str());
+	ASSERT_STREQ("uname", logic.getRegisteredUsers()[0].userName.c_str());
+	ASSERT_STREQ("Full Name", logic.getRegisteredUsers()[0].fullName.c_str());
 	ASSERT_TRUE(isValidUserRegistrationResponse(
 				logic.getMessageQueue().back().content));
 }
