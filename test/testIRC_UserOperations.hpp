@@ -122,11 +122,12 @@ TEST(IRC_UserOperations,
     registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
     registerUser(&logic, 2, "password", "nick", "username", "full name");
 
+    emptyQueue(&logic.getMessageQueue());
     logic.processRequest(0, "QUIT reason\r\n");
 
     ASSERT_EQ(2, logic.getRegisteredUsers().size());
-    ASSERT_EQ(3, logic.getMessageQueue().back().recipients.size());
-    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+    ASSERT_EQ(2, logic.getMessageQueue().front().recipients.size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content,
                                  "reason"));
 }
 
@@ -139,18 +140,17 @@ TEST(IRC_UserOperations,
     logic.disconnectUser(0, "Causes segfault when not handled with care");
 
     ASSERT_EQ(1, logic.getRegisteredUsers().size());
-    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
-                                 "reason"));
 }
 
 TEST(IRC_UserOperations, quitWithoutArgumentGeneratesLeaving) {
     IRC_Logic logic("password");
     registerMembersAndJoinToChannel(&logic, 0, 1, "#chan");
+    emptyQueue(&logic.getMessageQueue());
 
     logic.processRequest(0, "QUIT\r\n");
 
     ASSERT_TRUE(logic.getRegisteredUsers().empty());
-    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content,
                                  "leaving"));
 }
 
@@ -174,7 +174,7 @@ TEST(IRC_UserOperations, changingNickNotifiesOnlyChannelMembers) {
     setNick(&logic, 0, "newNick");
 
     std::vector<int> recipientsOfNickChange = gatherAllRecipientsOfMessageQueue(&logic);
-    ASSERT_EQ(2, recipientsOfNickChange.size());
+    ASSERT_EQ(1, recipientsOfNickChange.size());
 }
 
 TEST(IRC_UserOperations, changingNickDoesNotSendWelcomeMessage) {
@@ -185,7 +185,15 @@ TEST(IRC_UserOperations, changingNickDoesNotSendWelcomeMessage) {
 
     ASSERT_EQ(1, countMessageContaining(logic.getMessageQueue(), RPL_WELCOME));
 }
-//TEST(IRC_UserOperations, changingNickDoesNotBreakChannelMessages) {
+
+TEST(IRC_UserOperations, changingNickDoesNotBreakChannelMessages) {
+    IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 1, "chan");
+
+    setNick(&logic, 0, "newNick");
+
+    ASSERT_TRUE(logic.getChannels().back().isUserInChannel(logic.getRegisteredUsers().back()));
+}
 
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 

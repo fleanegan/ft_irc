@@ -30,7 +30,7 @@ struct IRC_Channel {
 	void appendJoinNotificationToAllMembers(
 			std::queue<IRC_Message> *messageQueue, const IRC_User &newMember);
 
-	static std::string getChannelName(const std::string &name);
+	static std::string toChannelName(const std::string &name);
 
 	std::queue<int> getRecipientFdsForSender(const IRC_User& user) const;
 
@@ -40,6 +40,11 @@ struct IRC_Channel {
 			const std::string& message, const IRC_User& sender,
 			std::queue<IRC_Message> *messages);
     void broadCastToOtherMembers(const std::string &message, const IRC_User &sender, std::queue<IRC_Message> *messages);
+
+    void updateNick(const std::string& oldNick, const std::string& newNick);
+
+    static ChannelIterator findChannelByNameInVector(
+            std::vector<IRC_Channel> *channels, const std::string& name);
 
 	private:
 	IRC_Channel();

@@ -35,7 +35,7 @@ void IRC_Server::distributeMessages() {
             _VERBOSE && std::cerr << "sending \n\t" << currentMessage->content
                 << " to fd " << currentFd << std::endl;
             std::string sendString = (currentMessage->content + "\r\n");
-            send(currentFd, sendString.c_str(), sendString.size(), 0);
+                send(currentFd, sendString.c_str(), sendString.size(), 0);
         }
         _logic.getMessageQueue().pop();
     }

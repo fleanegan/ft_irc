@@ -115,15 +115,16 @@ TEST(IRC_ChannelOperations, leavingChannelDoesNotInvalidateOtherUsers) {
 TEST(IRC_ChannelOperations, disconnectedMemberNotifiesOtherMembers) {
 	IRC_Logic logic("password");
     registerMembersAndJoinToChannel(&logic, 0, 2, "#chan");
+    emptyQueue(&logic.getMessageQueue());
 
 	logic.processRequest(0, "QUIT :leaving\r\n");
 
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
-				"QUIT"));
 	ASSERT_FALSE(logic.getMessageQueue().empty());
-	ASSERT_EQ(2, logic.getMessageQueue().back().recipients.size());
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
-				"nick0"));
+	ASSERT_EQ(1, logic.getMessageQueue().back().recipients.size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content,
+                                 "QUIT"));
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+                                 ERR_CLOSINGLINK));
 }
 
 TEST(IRC_ChannelOperations, channelNamesAreCaseInsensitive) {
@@ -213,5 +214,8 @@ TEST(IRC_ChannelOperations, partNotJoinedChannelShouldReturnError) {
 }
 
 // TEST(IRC_ChannelOperations, EmptyChannelsShouldBeDeleted) {
+// TEST(IRC_ChannelOperations, recipientNotFoundSearchInChannels) {
+// TEST(IRC_ChannelOperations, sendingMessageToChannelWithAlternativePrefix) {
+
 
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_

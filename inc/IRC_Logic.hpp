@@ -37,7 +37,6 @@ class IRC_Logic {
 		IRC_Logic &operator=(const IRC_Logic &);
 		std::vector<std::string> extractFirstMessage(IRC_User *user);
 		bool isNickAlreadyPresent(const std::string &nick);
-		bool isUserRegistered(IRC_User* user);
 		std::string welcomeNewUser(IRC_User *user);
 		void processIncomingMessage(
 				IRC_User *user,
@@ -56,7 +55,7 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector);
 		void processWhoWasMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		std::string generateWhoWasMessage(
+		std::string generateWhoWasAnswer(
 				const std::vector<std::string> &splitMessageVector) const;
 		void processJoinMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
@@ -64,7 +63,6 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector);
 		void processPartMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 		std::queue<int> fetchChannelRecipients(
 				const IRC_User &user, const std::string &channelName);
 		std::queue<int> fetchSingleRecipient(
@@ -76,6 +74,18 @@ class IRC_Logic {
     void broadCastToAllUsers(
             const std::string &message, const IRC_User &user);
 
-    void notifyChannelsAboutNickChange(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
+    void updateNickInAllChannels(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
+
+    IRC_Message &updateNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message &reply);
+
+    IRC_Message &initNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message &reply);
+
+    void
+    getRecipients(const IRC_User *user, const std::vector<std::string> &splitMessageVector,
+                  std::queue<int> &recipients);
+
+    IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
+
+    void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
 };
 #endif  // INC_IRC_LOGIC_HPP_

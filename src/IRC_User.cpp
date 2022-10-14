@@ -5,7 +5,7 @@ IRC_User::IRC_User(int fd, const std::string &hostIp):
 }
 
 IRC_User::IRC_User(const std::string &nick, const std::string &name,
-		const int &fd, const std::string &hostIP): nick(nick), userName(name),
+		const int &fd, const std::string &hostIP): nick(stringToLower(nick)), userName(name),
         hostIp(hostIP), isAuthenticated(false), fd(fd) {}
 
 bool IRC_User::isNickValid(const std::string &nick) {
