@@ -12,6 +12,7 @@
 class IRC_Logic {
 	private:
 		std::string _password;
+		std::string _operPassword;
 		std::vector<IRC_User> _users;
 		std::vector<IRC_Channel> _channels;
 		std::vector<IRC_User> _prevUsers;
@@ -62,6 +63,8 @@ class IRC_Logic {
 		void processQuitMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void processPartMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+		void processOperMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		std::queue<int> fetchChannelRecipients(
 				const IRC_User &user, const std::string &channelName);

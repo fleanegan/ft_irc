@@ -195,5 +195,32 @@ TEST(IRC_UserOperations, changingNickDoesNotBreakChannelMessages) {
     ASSERT_TRUE(logic.getChannels().back().isUserInChannel(logic.getRegisteredUsers().back()));
 }
 
+TEST(IRC_UserOperations, operWithoutEnoughArgumentsReturnsError) {
+    IRC_Logic logic("password");
+	registerDummyUser(&logic, 0, 1);
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "OPER nick0\r\n");
+	logic.processRequest(0, "OPER\r\n");
+
+    ASSERT_EQ(2, logic.getMessageQueue().size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content,
+				ERR_NEEDMOREPARAMS));
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NEEDMOREPARAMS));
+}
+
+TEST(IRC_UserOperations, operWithoutCorrectPasswordReturnsError) {
+    IRC_Logic logic("password");
+	registerDummyUser(&logic, 0, 1);
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "OPER nick wrongPassword\r\n");
+
+    ASSERT_EQ(1, logic.getMessageQueue().size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_PASSWDMISMATCH));
+}
+
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 
