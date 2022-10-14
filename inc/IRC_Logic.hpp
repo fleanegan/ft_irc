@@ -54,8 +54,7 @@ private:
 				const std::vector<std::string> &splitMessageVector);
 		void processPingMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		void processPrivMsgMessage(IRC_User *user,
-				const std::vector<std::string> &splitMessageVector);
+		void processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 		void processWhoIsMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void processWhoWasMessage(IRC_User *user,
@@ -70,10 +69,11 @@ private:
 				const std::vector<std::string> &splitMessageVector);
 		void processOperMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		std::queue<int> fetchChannelRecipients(
-				const IRC_User &user, const std::string &channelName);
-		std::queue<int> fetchSingleRecipient(
-				int fd, const std::vector<std::string> &splitMessageVector);
+		void fetchChannelRecipients(const IRC_User &user, const std::string &channelName, std::queue<int> *recipients,
+                                    bool replyToErrors);
+		void
+        fetchSingleRecipient(int fd, const std::vector<std::string> &splitMessageVector, std::queue<int> *recipients,
+                             bool replyToErrors);
 		void processModeMessage(const IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void appendMessage(const IRC_Message &reply);
@@ -88,13 +88,18 @@ private:
     IRC_Message &initNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message &reply);
 
     void
-    getRecipients(const IRC_User *user, const std::vector<std::string> &splitMessageVector,
-                  std::queue<int> &recipients);
+    appendRecipients(const IRC_User *user, const std::vector<std::string> &splitMessageVector,
+                     std::queue<int> &recipients,
+                     bool replyToErrors);
 
     IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 
     void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
 
     void processKillMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+
+    void processNoticeMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+
+    void sendContent(const IRC_User *user, const std::vector<std::string> &splitMessageVector, bool replyToErrors);
 };
 #endif  // INC_IRC_LOGIC_HPP_

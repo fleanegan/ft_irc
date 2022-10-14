@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include "./testUtils.hpp"
 #include "./testIRC_LogicUserRegistration.hpp"
-#include "./testIRC_LogicPrivateMessage.hpp"
+#include "./testIRC_LogicMessage.hpp"
 #include "./testIRC_UserOperations.hpp"
 #include "./testIRC_ChannelOperations.hpp"
 

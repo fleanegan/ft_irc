@@ -32,7 +32,7 @@ struct IRC_Channel {
 
 	static std::string toChannelName(const std::string &name);
 
-	std::queue<int> getRecipientFdsForSender(const IRC_User& user) const;
+	void appendRecipientFdsForSender(const IRC_User &user, std::queue<int> *recipients) const;
 
 	void removeMember(const IRC_User &user);
 

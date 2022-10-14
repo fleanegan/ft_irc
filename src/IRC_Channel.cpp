@@ -67,17 +67,15 @@ std::queue<int> IRC_Channel::getMemberFds() {
     return recipients;
 }
 
-std::queue<int> IRC_Channel::getRecipientFdsForSender(
-		const IRC_User &user) const {
-	std::queue<int> recipients;
+void IRC_Channel::appendRecipientFdsForSender(
+        const IRC_User &user, std::queue<int> *recipients) const {
 
 	for (std::vector<IRC_User>::const_iterator
 			it = members.begin();
 			it != members.end(); it++)
 		if (user.nick != it->nick) {
-			recipients.push((it)->fd);
+			recipients->push((it)->fd);
 		}
-	return recipients;
 }
 
 void IRC_Channel::removeMember(const IRC_User &user) {
@@ -98,7 +96,10 @@ void IRC_Channel::broadCastToAllMembers(
 void IRC_Channel::broadCastToOtherMembers(
         const std::string &message, const IRC_User &sender,
         std::queue<IRC_Message> *messages) {
-    messages->push(IRC_Message(getRecipientFdsForSender(sender), message, &sender));
+    std::queue<int> recipients;
+
+    appendRecipientFdsForSender(sender, &recipients);
+    messages->push(IRC_Message(recipients, message, &sender));
 }
 
 void IRC_Channel::updateNick(const std::string &oldNick, const std::string &newNick) {

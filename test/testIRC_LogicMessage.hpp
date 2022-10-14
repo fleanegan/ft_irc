@@ -45,4 +45,34 @@ TEST(IRC_LogicPrivateMessage, messagesSentWithPrefixContainingNick) {
 			logic.getMessageQueue().back().content.c_str());
 }
 
+TEST(IRC_LogicNotice, noticeToNonexistingNickRepliesNothing) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "NOTICE nonexistingNick content\r\n");
+
+    ASSERT_TRUE(logic.getMessageQueue().empty());
+}
+
+TEST(IRC_LogicNotice, noticeWithoutTextRepliesNothing) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "NOTICE nick1\r\n");
+
+    ASSERT_TRUE(logic.getMessageQueue().empty());
+}
+
+TEST(IRC_LogicNotice, noticeToExistingNickRepliesNothingButSendsTextToRecipient) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "NOTICE nick1 content\r\n");
+
+    ASSERT_EQ(1, logic.getMessageQueue().size());
+}
+
 #endif  // TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_
