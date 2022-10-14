@@ -58,6 +58,8 @@ class TCP_Server {
 		void saveConnectionInfo(int fd, const std::string &hostIp);
 
 		virtual void onConnect(int fd, const std::string &basicString) = 0;
+
+        void closeConnectionByFd(int fd);
 };
 
 #endif  // INC_TCP_SERVER_HPP_

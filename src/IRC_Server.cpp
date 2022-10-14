@@ -20,6 +20,9 @@ std::string IRC_Server::processMessage(int fd, const std::string& buffer) {
 	std::string result = _logic.processRequest(fd, buffer);
 
     distributeMessages();
+    int fdToDisconnect = _logic.popFdToDisconnect();
+    if (fdToDisconnect)
+        TCP_Server::closeConnectionByFd(fdToDisconnect);
     return result;
 }
 

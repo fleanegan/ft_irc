@@ -215,12 +215,89 @@ TEST(IRC_UserOperations, operWithoutCorrectPasswordReturnsError) {
 	registerDummyUser(&logic, 0, 1);
 	emptyQueue(&logic.getMessageQueue());
 
-	logic.processRequest(0, "OPER nick wrongPassword\r\n");
+	logic.processRequest(0, "OPER oper wrongPassword\r\n");
+	logic.processRequest(0, "OPER wrongNick operPassword\r\n");
+
+    ASSERT_EQ(2, logic.getMessageQueue().size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_PASSWDMISMATCH));
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content,
+				ERR_PASSWDMISMATCH));
+}
+
+TEST(IRC_UserOperations, operWithCorrectPasswordPromotesUser) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 1);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "OPER oper operPassword\r\n");
+
+    ASSERT_EQ(1, logic.getMessageQueue().size());
+    ASSERT_TRUE(logic.getUserByNick("nick0")->isOper);
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+                                 RPL_YOUREOPER));
+}
+
+TEST(IRC_UserOperations, modeWithoutArgumentsReturnsError) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 1);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "MODE\r\n");
 
     ASSERT_EQ(1, logic.getMessageQueue().size());
     ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
-				ERR_PASSWDMISMATCH));
+				ERR_NEEDMOREPARAMS));
 }
+
+TEST(IRC_UserOperations, normalUserCannotUseKill) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "KILL nick1 reason\r\n");
+
+    ASSERT_EQ(1, logic.getMessageQueue().size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_NOPRIVILEGES));
+}
+
+TEST(IRC_UserOperations, killNeedsOneParameter) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "KILL\r\n");
+
+    ASSERT_EQ(1, logic.getMessageQueue().size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+                                 ERR_NEEDMOREPARAMS));
+}
+
+TEST(IRC_UserOperations, killingANonExistingNickNameReturnsError) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+
+    logic.processRequest(0, "KILL notExistingNick reason\r\n");
+
+    ASSERT_EQ(1, logic.getMessageQueue().size());
+    ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+                                 ERR_NOSUCHNICK));
+}
+
+TEST(IRC_UserOperations, killingAUserDisconnectsIt) {
+    IRC_Logic logic("password");
+    registerDummyUser(&logic, 0, 2);
+    emptyQueue(&logic.getMessageQueue());
+    logic.processRequest(0, "OPER oper operPassword\r\n");
+
+    logic.processRequest(0, "KILL nick1 reason\r\n");
+
+    ASSERT_EQ(1, logic.getRegisteredUsers().size());
+}
+
+// TEST(IRC_UserOperations, operHaveAccessToKillCommands) {
 
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 

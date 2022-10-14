@@ -84,6 +84,16 @@ void TCP_Server::host(void) {
 	}
 }
 
+void TCP_Server::closeConnectionByFd(int fd){
+    for(std::vector<pollfd>::iterator
+                it = _fds.begin() + 1; it != _fds.end(); ++it)
+        if (it->fd == fd){
+            close(fd);
+            _fds.erase(it);
+            return ;
+        }
+}
+
 const char *TCP_Server::socketFailedException::what() const throw() {
 	return ("Socket failed to initialize");
 }

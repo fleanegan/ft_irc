@@ -1,12 +1,12 @@
 #include "../inc/IRC_User.hpp"
 
 IRC_User::IRC_User(int fd, const std::string &hostIp):
-	hostIp(hostIp), isAuthenticated(false), fd(fd)  {
+	hostIp(hostIp), isAuthenticated(false), fd(fd), isOper() {
 }
 
 IRC_User::IRC_User(const std::string &nick, const std::string &name,
 		const int &fd, const std::string &hostIP): nick(stringToLower(nick)), userName(name),
-        hostIp(hostIP), isAuthenticated(false), fd(fd) {}
+        hostIp(hostIP), isAuthenticated(false), fd(fd), isOper() {}
 
 bool IRC_User::isNickValid(const std::string &nick) {
     std::string forbiddenChars = "*,!?@";
@@ -55,4 +55,3 @@ std::string IRC_User::toString() const {
 std::string IRC_User::toPrefixString() const {
     return ":" + nick + "!~" + userName + "@" + hostIp + " ";
 }
-

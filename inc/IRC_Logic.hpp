@@ -12,12 +12,14 @@
 class IRC_Logic {
 	private:
 		std::string _password;
+		std::string _operName;
 		std::string _operPassword;
 		std::vector<IRC_User> _users;
 		std::vector<IRC_Channel> _channels;
 		std::vector<IRC_User> _prevUsers;
 		std::queue<IRC_Message> _messageQueue;
 		std::string _returnMessage;
+        int _fdToDisconnect;
 
 	public:
 		explicit IRC_Logic(const std::string &password);
@@ -32,7 +34,9 @@ class IRC_Logic {
 
 		void addUser(int fd, const std::string &hostIp);
 
-	private:
+    int popFdToDisconnect();
+
+private:
 		IRC_Logic();
 		IRC_Logic(const IRC_Logic &other);
 		IRC_Logic &operator=(const IRC_Logic &);
@@ -90,5 +94,7 @@ class IRC_Logic {
     IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 
     void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
+
+    void processKillMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 };
 #endif  // INC_IRC_LOGIC_HPP_

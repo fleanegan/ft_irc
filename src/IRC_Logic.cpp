@@ -3,7 +3,8 @@
 #include <iostream>
 #include "../inc/IRC_Logic.hpp"
 
-IRC_Logic::IRC_Logic(const std::string &password) : _password(password), _operPassword("operPassword") {
+IRC_Logic::IRC_Logic(const std::string &password) : _password(password),
+	_operName("oper"), _operPassword("operPassword"), _fdToDisconnect(0) {
 }
 
 IRC_Logic::~IRC_Logic() {}
@@ -24,44 +25,50 @@ std::string IRC_Logic::processRequest(int fd, const std::string &input) {
 
 void IRC_Logic::processIncomingMessage(
 		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-	if (splitMessageVector[0] == "PASS") {
+	std::string command = stringToLower(splitMessageVector[0]);
+
+	if (command == "pass") {
 		processPassMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "CAP") {
-	} else if (splitMessageVector[0] == "PING") {
+	} else if (command == "cap") {
+	} else if (command == "ping") {
 		processPingMessage(user, splitMessageVector);
 	} else if (user->isAuthenticated == false) {
 		_returnMessage += generateResponse(
 				ERR_CONNECTWITHOUTPWD, "This server is password protected.");
-	} else if (splitMessageVector[0] == "MODE") {
+	} else if (command == "mode") {
 		processModeMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "NICK") {
+	} else if (command == "nick") {
 		processNickMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "USER") {
+	} else if (command == "user") {
 		processUserMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "PRIVMSG") {
+	} else if (command == "privmsg") {
 		processPrivMsgMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "WHOIS") {
+	} else if (command == "whois") {
 		processWhoIsMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "WHOWAS") {
+	} else if (command == "whowas") {
 		processWhoWasMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "JOIN") {
+	} else if (command == "join") {
 		processJoinMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "QUIT") {
+	} else if (command == "quit") {
 		processQuitMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "PART") {
+	} else if (command == "part") {
 		processPartMessage(user, splitMessageVector);
-	} else if (splitMessageVector[0] == "OPER") {
-		processOperMessage(user, splitMessageVector);
-	}
+	} else if (command == "oper") {
+        processOperMessage(user, splitMessageVector);
+    } else if (command == "kill") {
+        processKillMessage(user, splitMessageVector);
+    }
 }
 
 void IRC_Logic::processModeMessage(const IRC_User *user,
 		const std::vector<std::string> &splitMessageVector) {
-	IRC_Message reply(user->fd, "", "");
-
-	reply.content = ":" + user->nick + " " + splitMessageVector[0] +
-		" " + splitMessageVector[1] + " :" + "\r\n";
-	appendMessage(reply);
+	std::string replyContent;
+	if (splitMessageVector.size() < 2)
+		replyContent = generateResponse(ERR_NEEDMOREPARAMS,
+				"Please provide a nickname");
+	else
+		replyContent = concatenateContentFromIndex(0, splitMessageVector);
+	appendMessage(IRC_Message(user->fd, replyContent, ""));
 }
 
 void IRC_Logic::processPrivMsgMessage(
@@ -444,19 +451,51 @@ void IRC_Logic::processPartMessage(
 
 void IRC_Logic::processOperMessage(IRC_User *user,
 		const std::vector<std::string> &splitMessageVector) {
+    IRC_Message reply(user->fd, "",user->toPrefixString());
 	if (splitMessageVector.size() != 3)
-		appendMessage(IRC_Message(user->fd,
-					generateResponse(ERR_NEEDMOREPARAMS,
-						"Please provide a channel name and and a password"),
-					user->toPrefixString()));
-	else if (splitMessageVector[2] != _operPassword)
-		appendMessage(IRC_Message(user->fd,
-					generateResponse(ERR_PASSWDMISMATCH,
-						"Password incorrect"),
-					user->toPrefixString()));
+		reply.content = generateResponse(ERR_NEEDMOREPARAMS,
+            "Please provide a channel name and and a password");
+	else if (splitMessageVector[1] != _operName || splitMessageVector[2] != _operPassword)
+        reply.content = generateResponse(ERR_PASSWDMISMATCH,
+            "Password incorrect");
+    else
+    {
+        reply.content = generateResponse(RPL_YOUREOPER, "You are now oper");
+        user->isOper = true;
+    }
+    appendMessage(reply);
 }
 
 
 void IRC_Logic::addUser(int fd, const std::string &hostIp) {
 	_users.push_back(IRC_User(fd, hostIp));
+}
+
+#include <unistd.h>
+void IRC_Logic::processKillMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+    IRC_Message reply(user->fd, "", "");
+
+	if (splitMessageVector.size() < 2)
+        reply.content = generateResponse(ERR_NEEDMOREPARAMS,
+				"Please provide a nickname to kill");
+	else if (getUserByNick(splitMessageVector[1]) == _users.end())
+        reply.content = generateResponse(ERR_NOSUCHNICK,
+                                         "This user does not exist");
+    else if (user->isOper == false)
+        reply.content = generateResponse(ERR_NOPRIVILEGES,
+				"You need to be oper in order to kill");
+	else
+	{
+        _fdToDisconnect = getUserByNick(splitMessageVector[1])->fd;
+		disconnectUser(_fdToDisconnect,
+                       "QUIT " + splitMessageVector[1] + " killed by oper\r\n");
+	}
+    appendMessage(reply);
+}
+
+int IRC_Logic::popFdToDisconnect() {
+    int result = _fdToDisconnect;
+
+    _fdToDisconnect = 0;
+    return result;
 }

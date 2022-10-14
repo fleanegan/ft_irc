@@ -15,6 +15,7 @@ struct IRC_User{
 	std::string receivedCharacters;
 	bool isAuthenticated;
 	int fd;
+    bool isOper;
 
 	IRC_User(int fd, const std::string& hostIP);
 	IRC_User(const std::string &nick, const std::string &name,
