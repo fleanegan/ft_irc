@@ -23,10 +23,18 @@ bool IRC_Channel::isUserInChannel(const IRC_User &user) const {
 
 std::string IRC_Channel::toChannelName(const std::string &name) {
 	std::string result = stringToLower(name);
-	std::string prefix = "#&+!";
-    if (prefix.find(result[0]) != std::string::npos)
+
+	if(isChannelPrefix(result))
 		return result.substr(1, 49);
 	return result.substr(0, 49);
+}
+
+bool IRC_Channel::isChannelPrefix(const std::string &result) {
+	std::string prefix = "#&+!";
+
+	if (prefix.find(result[0]) != std::string::npos)
+		return true;
+	return false;
 }
 
 void IRC_Channel::appendJoinMessages(

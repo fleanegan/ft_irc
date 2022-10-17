@@ -2,7 +2,6 @@
 #include <signal.h>
 #include <iostream>
 #include "../inc/IRC_Server.hpp"
-#include "../inc/IRC_Logic.hpp"
 
 IRC_Server *serv;
 

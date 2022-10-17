@@ -5,6 +5,13 @@
 #include "./testUtils.hpp"
 #include "gtest/gtest.h"
 
+void assertAllNicksEmpty(IRC_Logic *logic) {
+	std::vector<IRC_User> users = logic->getRegisteredUsers();
+	for (std::vector<IRC_User>::iterator
+				 it = users.begin(); it != users.end(); ++it)
+		ASSERT_STREQ("", it->nick.c_str());
+}
+
 TEST(IRC_LogicUserRegistration, zeroUsersAfterInstantiation) {
 	IRC_Logic logic("password");
 

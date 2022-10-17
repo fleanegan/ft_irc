@@ -4,7 +4,6 @@
 #include <vector>
 #include <queue>
 #include <sstream>
-#include "gtest/gtest.h"
 #include "../inc/IRC_Logic.hpp"
 #include "../inc/IRC_User.hpp"
 #include "../inc/return_code.hpp"
@@ -48,12 +47,6 @@ std::string registerUser(IRC_Logic *logic,
 	return result;
 }
 
-void assertAllNicksEmpty(IRC_Logic *logic) {
-    std::vector<IRC_User> users = logic->getRegisteredUsers();
-    for (std::vector<IRC_User>::iterator
-			it = users.begin(); it != users.end(); ++it)
-        ASSERT_STREQ("", it->nick.c_str());
-}
 
 bool isValidUserRegistrationResponse(const std::string &returnMessage) {
 	return 	returnMessage.find(RPL_WELCOME) != std::string::npos &&

@@ -1,5 +1,5 @@
-#ifndef TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_
-#define TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_
+#ifndef TEST_TESTIRC_LOGICMESSAGE_HPP_
+#define TEST_TESTIRC_LOGICMESSAGE_HPP_
 
 #include <string>
 #include "./testUtils.hpp"
@@ -75,4 +75,64 @@ TEST(IRC_LogicNotice, noticeToExistingNickRepliesNothingButSendsTextToRecipient)
     ASSERT_EQ(1, logic.getMessageQueue().size());
 }
 
-#endif  // TEST_TESTIRC_LOGICPRIVATEMESSAGE_HPP_
+TEST(IRC_ChannelOperations, sendingMessageToChannelWithAlternativePrefix) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 0, 2, "&chan");
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "NOTICE &chan hello\r\n");
+
+	ASSERT_EQ(1, logic.getMessageQueue().size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "hello"));
+}
+
+//TEST(IRC_ChannelOperations,
+//		sendingAMessageToANickEndingWithWildcardShouldFindIt) {
+//	IRC_Logic logic("password");
+//	registerDummyUser(&logic, 0, 1);
+//	emptyQueue(&logic.getMessageQueue());
+//
+//	logic.processRequest(0, "PRIVMSG nick* hello\r\n");
+//
+//	ASSERT_EQ(1, logic.getMessageQueue().size());
+//	ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
+//	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "hello"));
+//}
+
+TEST(wildcardUtils, matchingSingleStarAtEnd) {
+	std::string input = "nick0";
+	std::string expression = "nick*";
+
+	ASSERT_TRUE(isMatchingWildcardExpression(input, expression));
+}
+
+TEST(wildcardUtils, noWildCardInExpression) {
+	std::string input = "nick0";
+	std::string expression = "nick0";
+
+	ASSERT_TRUE(isMatchingWildcardExpression(input, expression));
+}
+
+TEST(wildcardUtils, wildCardAtBeginning) {
+	std::string input = "nick0";
+	std::string expression = "*ick0";
+
+	ASSERT_TRUE(isMatchingWildcardExpression(input, expression));
+}
+
+TEST(wildcardUtils, wildCardInMiddle) {
+	std::string input = "nick0";
+	std::string expression = "n*0";
+
+	ASSERT_TRUE(isMatchingWildcardExpression(input, expression));
+}
+
+TEST(wildcardUtils, multipleWildcards) {
+	std::string input = "nick0";
+	std::string expression = "n*c*0";
+
+	ASSERT_TRUE(isMatchingWildcardExpression(input, expression));
+}
+
+
+#endif  // TEST_TESTIRC_LOGICMESSAGE_HPP_

@@ -46,6 +46,8 @@ struct IRC_Channel {
     static ChannelIterator findChannelByNameInVector(
             std::vector<IRC_Channel> *channels, const std::string& name);
 
+	static bool isChannelPrefix(const std::string &result);
+
 	private:
 	IRC_Channel();
 

@@ -2,6 +2,7 @@
 #define TEST_TESTIRC_USEROPERATIONS_HPP_
 
 #include <string>
+#include <vector>
 #include "./testUtils.hpp"
 #include "gtest/gtest.h"
 

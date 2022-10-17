@@ -19,7 +19,7 @@ class IRC_Logic {
 		std::vector<IRC_User> _prevUsers;
 		std::queue<IRC_Message> _messageQueue;
 		std::string _returnMessage;
-        int _fdToDisconnect;
+		int _fdToDisconnect;
 
 	public:
 		explicit IRC_Logic(const std::string &password);
@@ -34,9 +34,9 @@ class IRC_Logic {
 
 		void addUser(int fd, const std::string &hostIp);
 
-    int popFdToDisconnect();
+		int popFdToDisconnect();
 
-private:
+	private:
 		IRC_Logic();
 		IRC_Logic(const IRC_Logic &other);
 		IRC_Logic &operator=(const IRC_Logic &);
@@ -70,36 +70,37 @@ private:
 		void processOperMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void fetchChannelRecipients(const IRC_User &user, const std::string &channelName, std::queue<int> *recipients,
-                                    bool replyToErrors);
+				bool replyToErrors);
 		void
-        fetchSingleRecipient(int fd, const std::vector<std::string> &splitMessageVector, std::queue<int> *recipients,
-                             bool replyToErrors);
+			fetchSingleRecipient(int fd, const std::vector<std::string> &splitMessageVector, std::queue<int> *recipients,
+					bool replyToErrors);
 		void processModeMessage(const IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void appendMessage(const IRC_Message &reply);
 
-    void broadCastToAllUsers(
-            const std::string &message, const IRC_User &user);
+		void broadCastToAllUsers(
+				const std::string &message, const IRC_User &user);
 
-    void updateNickInAllChannels(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void updateNickInAllChannels(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
 
-    IRC_Message &updateNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message &reply);
+		IRC_Message *updateNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message *reply);
 
-    IRC_Message &initNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message &reply);
+		IRC_Message *initNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message *reply);
 
-    void
-    appendRecipients(const IRC_User *user, const std::vector<std::string> &splitMessageVector,
-                     std::queue<int> &recipients,
-                     bool replyToErrors);
+		void appendRecipients(
+				const IRC_User *user,
+				const std::vector<std::string> &splitMessageVector,
+				std::queue<int> *recipients,
+				bool replyToErrors);
 
-    IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
+		IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
 
-    void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
+		void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
 
-    void processKillMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void processKillMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 
-    void processNoticeMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void processNoticeMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 
-    void sendContent(const IRC_User *user, const std::vector<std::string> &splitMessageVector, bool replyToErrors);
+		void sendMsg(const IRC_User *user, const std::vector<std::string> &splitMessageVector, bool replyToErrors);
 };
 #endif  // INC_IRC_LOGIC_HPP_

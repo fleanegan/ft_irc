@@ -213,9 +213,27 @@ TEST(IRC_ChannelOperations, partNotJoinedChannelShouldReturnError) {
 				ERR_NOTONCHANNEL));
 }
 
-// TEST(IRC_ChannelOperations, EmptyChannelsShouldBeDeleted) {
-// TEST(IRC_ChannelOperations, recipientNotFoundSearchInChannels) {
-// TEST(IRC_ChannelOperations, sendingMessageToChannelWithAlternativePrefix) {
+TEST(IRC_ChannelOperations, EmptyChannelsShouldBeDeleted) {
+	IRC_Logic logic("password");
+	registerMembersAndJoinToChannel(&logic, 0, 1, "#chan");
+
+	logic.processRequest(0, "PART chan\r\n");
+
+	ASSERT_TRUE(logic.getChannels().empty());
+}
+ 
+TEST(IRC_ChannelOperations, recipientNotFoundSearchInChannels) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic,0, 2, "#mychan");
+    int before = logic.getMessageQueue().size();
+
+	emptyQueue(&logic.getMessageQueue());
+	logic.processRequest(0, "PRIVMSG mychan messageContent\r\n");
+
+	ASSERT_EQ(1, logic.getMessageQueue().size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"messageContent"));
+}
 
 
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_
