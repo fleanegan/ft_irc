@@ -122,5 +122,8 @@ class IRC_Logic {
 			const std::string &target);
 
     bool isValidRecipientMask(const IRC_User &user, const std::string &target);
+
+    void processListMessage(
+			IRC_User *user, const std::vector<std::string> &splitMessageVector);
 };
 #endif  // INC_IRC_LOGIC_HPP_

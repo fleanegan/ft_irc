@@ -59,8 +59,10 @@ void IRC_Logic::processIncomingMessage(
 	} else if (command == "kill") {
 		processKillMessage(user, splitMessageVector);
 	} else if (command == "notice") {
-		processNoticeMessage(user, splitMessageVector);
-	}
+        processNoticeMessage(user, splitMessageVector);
+    } else if (command == "list") {
+        processListMessage(user, splitMessageVector);
+    }
 }
 
 void IRC_Logic::processModeMessage(const IRC_User *user,
@@ -128,6 +130,23 @@ void IRC_Logic::appendRecipients(
 						generateResponse(ERR_NOSUCHNICK,
 							"This nick is not found!"), ""));
 	}
+}
+
+void IRC_Logic::processListMessage(
+		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+    IRC_Message result(user->fd, "", "");
+    std::string channelNames = user->nick +
+		" Channels present on this server: ";
+
+    for (IRC_Channel::iterator it = _channels.begin();
+			it != _channels.end(); ++it) {
+        channelNames += (it->name) + " ";
+    }
+    result.content += generateResponse(RPL_LIST, channelNames);
+    result.content += generateResponse(RPL_LISTEND, "");
+    appendMessage(result);
+    (void) user;
+    (void) splitMessageVector;
 }
 
 bool IRC_Logic::appendMatchingChannelRecipients(const IRC_User &user,
