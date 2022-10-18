@@ -12,4 +12,6 @@ std::string concatenateContentFromIndex(
 
 bool isMatchingWildcardExpression(const std::string &stringToMatch, const std::string &expression);
 
+std::vector<std::string> splitOnToken(std::string message, const std::string &splitPattern);
+
 #endif  // INC_UTILS_HPP_

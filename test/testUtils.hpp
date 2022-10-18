@@ -79,7 +79,9 @@ void registerDummyUser(IRC_Logic *logic, int beginFd, int endFd) {
 	}
 }
 
-void registerMembersAndJoinToChannel(IRC_Logic *logic, int beginFd, int endFd, const std::string &channelName) {
+void registerMembersAndJoinToChannel(
+		IRC_Logic *logic, int beginFd, int endFd,
+		const std::string &channelName) {
     registerDummyUser(logic, beginFd, endFd);
     while (beginFd < endFd) {
         logic->processRequest(beginFd, "JOIN " + channelName + "\r\n");
@@ -111,9 +113,9 @@ int countMessageContaining(
 
 std::vector<int> gatherAllRecipientsOfMessageQueue(IRC_Logic *logic) {
     std::vector<int>recipientsOfNickChange;
-    while (logic->getMessageQueue().empty() == false){
+    while (logic->getMessageQueue().empty() == false) {
         IRC_Message tmp = logic->getMessageQueue().front();
-        while (tmp.recipients.empty() == false){
+        while (tmp.recipients.empty() == false) {
             recipientsOfNickChange.push_back(tmp.recipients.front());
             tmp.recipients.pop();
         }

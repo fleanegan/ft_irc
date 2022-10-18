@@ -65,7 +65,8 @@ TEST(IRC_LogicNotice, noticeWithoutTextRepliesNothing) {
 	ASSERT_TRUE(logic.getMessageQueue().empty());
 }
 
-TEST(IRC_LogicNotice, noticeToExistingNickRepliesNothingButSendsTextToRecipient) {
+TEST(IRC_LogicNotice,
+		noticeToExistingNickRepliesNothingButSendsTextToRecipient) {
 	IRC_Logic logic("password");
 	registerDummyUser(&logic, 0, 2);
 	emptyQueue(&logic.getMessageQueue());
@@ -83,7 +84,9 @@ TEST(IRC_ChannelOperations, sendingMessageToChannelWithAlternativePrefix) {
 	logic.processRequest(0, "NOTICE &chan hello\r\n");
 
 	ASSERT_EQ(1, logic.getMessageQueue().size());
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "hello"));
+	ASSERT_TRUE(
+			responseContains(logic.getMessageQueue().front().content,
+				"hello"));
 }
 
 TEST(IRC_ChannelOperations,
@@ -96,7 +99,9 @@ TEST(IRC_ChannelOperations,
 
 	ASSERT_EQ(1, logic.getMessageQueue().size());
 	ASSERT_EQ(1, logic.getMessageQueue().front().recipients.size());
-	ASSERT_TRUE(responseContains(logic.getMessageQueue().front().content, "hello"));
+	ASSERT_TRUE(
+			responseContains(logic.getMessageQueue().front().content,
+				"hello"));
 }
 
 TEST(wildcardUtils, sendingAMessagetoChannelWithWildcardSendToAllMatching) {
@@ -163,7 +168,9 @@ TEST(IRC_LogicPrivateMessage, messageSentWithAUsernameAndMaskShouldSend) {
 
 	logic.processRequest(0, "PRIVMSG username1@127.0.0.1 :content is cool\r\n");
 
-	ASSERT_STREQ(":nick0!~username0@127.0.0.1 PRIVMSG username1@127.0.0.1 :content is cool",
+	ASSERT_STREQ(
+			":nick0!~username0@127.0.0.1 PRIVMSG username1@127.0.0.1"
+			" :content is cool",
 			logic.getMessageQueue().back().content.c_str());
 }
 
@@ -186,6 +193,19 @@ TEST(IRC_LogicPrivateMessage,
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 				ERR_WILDTOPLEVEL));
+}
+
+TEST(IRC_LogicPrivateMessage,
+		SendingAMessageToMultipleUsersSendsMessageToMultipleUsers) {
+	IRC_Logic logic("password");
+	registerDummyUser(&logic, 0, 4);
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "PRIVMSG nick1,nick2,nick3 :content is cool\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"content is cool"));
+	ASSERT_EQ(3, logic.getMessageQueue().back().recipients.size());
 }
 
 

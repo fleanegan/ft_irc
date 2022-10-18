@@ -113,8 +113,8 @@ TEST(IRC_UserOperations, changedNickAppearsOnWhoWas) {
 
     logic.processRequest(1, "WHOWAS setNick\r\n");
 
-    ASSERT_EQ(2,
-              countSubStrings(logic.getMessageQueue().back().content, "setNick"));
+    ASSERT_EQ(2, countSubStrings(logic.getMessageQueue().back().content,
+				  "setNick"));
 }
 
 TEST(IRC_UserOperations,
@@ -174,7 +174,8 @@ TEST(IRC_UserOperations, changingNickNotifiesOnlyChannelMembers) {
 
     setNick(&logic, 0, "newNick");
 
-    std::vector<int> recipientsOfNickChange = gatherAllRecipientsOfMessageQueue(&logic);
+    std::vector<int> recipientsOfNickChange =
+		gatherAllRecipientsOfMessageQueue(&logic);
     ASSERT_EQ(1, recipientsOfNickChange.size());
 }
 
@@ -193,7 +194,8 @@ TEST(IRC_UserOperations, changingNickDoesNotBreakChannelMessages) {
 
     setNick(&logic, 0, "newNick");
 
-    ASSERT_TRUE(logic.getChannels().back().isUserInChannel(logic.getRegisteredUsers().back()));
+    ASSERT_TRUE(logic.getChannels().back().
+			isUserInChannel(logic.getRegisteredUsers().back()));
 }
 
 TEST(IRC_UserOperations, operWithoutEnoughArgumentsReturnsError) {

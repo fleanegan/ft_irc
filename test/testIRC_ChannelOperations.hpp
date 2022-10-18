@@ -49,7 +49,7 @@ TEST(IRC_ChannelOperations, JoiningAnExistingChannelDoesNotCreateNewChannel) {
 
 TEST(IRC_ChannelOperations, allMembersOfAChannelButTheSenderReceiveTheMessage) {
 	IRC_Logic logic("password");
-    registerMembersAndJoinToChannel(&logic,0, 2, "#mychan");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
 
 	logic.processRequest(1, "PRIVMSG #mychan messageContent\r\n");
 
@@ -71,7 +71,7 @@ TEST(IRC_ChannelOperations, tryingToSendToChannelYouAreNotAPartOfReturnsError) {
 
 TEST(IRC_ChannelOperations, ifNoRecipientInChannelDoesNotSendError) {
 	IRC_Logic logic("password");
-    registerMembersAndJoinToChannel(&logic,0, 1, "#mychan");
+    registerMembersAndJoinToChannel(&logic, 0, 1, "#mychan");
     int before = logic.getMessageQueue().size();
 
 	logic.processRequest(0, "PRIVMSG #mychan messageContent\r\n");
@@ -221,10 +221,10 @@ TEST(IRC_ChannelOperations, EmptyChannelsShouldBeDeleted) {
 
 	ASSERT_TRUE(logic.getChannels().empty());
 }
- 
+
 TEST(IRC_ChannelOperations, recipientNotFoundSearchInChannels) {
 	IRC_Logic logic("password");
-    registerMembersAndJoinToChannel(&logic,0, 2, "#mychan");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
     int before = logic.getMessageQueue().size();
 
 	emptyQueue(&logic.getMessageQueue());

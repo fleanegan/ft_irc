@@ -44,7 +44,8 @@ std::string concatenateContentFromIndex(
     return name;
 }
 
-bool isMatchingWildcardExpressionRecursion(const char *stringToMatch, const char *expression) {
+bool isMatchingWildcardExpressionRecursion(
+        const char *stringToMatch, const char *expression) {
     if (*expression == '\0' && *stringToMatch == '\0')
         return true;
     if (*expression == '*') {
@@ -55,13 +56,31 @@ bool isMatchingWildcardExpressionRecursion(const char *stringToMatch, const char
         && *stringToMatch == '\0')
         return false;
     if (*expression == '?' || *expression == *stringToMatch)
-        return isMatchingWildcardExpressionRecursion(stringToMatch + 1, expression + 1);
+        return isMatchingWildcardExpressionRecursion(
+                stringToMatch + 1, expression + 1);
     if (*expression == '*')
-        return isMatchingWildcardExpressionRecursion(stringToMatch, expression + 1)
-               || isMatchingWildcardExpressionRecursion(stringToMatch + 1, expression);
+        return isMatchingWildcardExpressionRecursion(
+                stringToMatch, expression + 1)
+               || isMatchingWildcardExpressionRecursion(stringToMatch + 1,
+                                                        expression);
     return false;
 }
 
-bool isMatchingWildcardExpression(const std::string &stringToMatch, const std::string &expression) {
-    return isMatchingWildcardExpressionRecursion(stringToMatch.c_str(), expression.c_str());
+bool isMatchingWildcardExpression(
+        const std::string &stringToMatch, const std::string &expression) {
+    return isMatchingWildcardExpressionRecursion(
+            stringToMatch.c_str(), expression.c_str());
+}
+
+std::vector<std::string> splitOnToken(std::string message, const std::string &splitPattern) {
+    std::vector<std::string> result;
+    size_t pos;
+
+    while ((pos = message.find(splitPattern)) != std::string::npos) {
+        result.push_back(message.substr(0, pos));
+        message.erase(0, pos + 1);
+    }
+    if (message.empty() == false)
+        result.push_back(message);
+    return result;
 }
