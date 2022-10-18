@@ -54,7 +54,8 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector);
 		void processPingMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		void processPrivMsgMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void processPrivMsgMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
 		void processWhoIsMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void processWhoWasMessage(IRC_User *user,
@@ -77,11 +78,16 @@ class IRC_Logic {
 		void broadCastToAllUsers(
 				const std::string &message, const IRC_User &user);
 
-		void updateNickInAllChannels(const IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void updateNickInAllChannels(const IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
 
-		IRC_Message *updateNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message *reply);
+		IRC_Message *updateNick(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector,
+				IRC_Message *reply);
 
-		IRC_Message *initNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message *reply);
+		IRC_Message *initNick(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector,
+				IRC_Message *reply);
 
 		void appendRecipients(
                 const IRC_User &user,
@@ -91,17 +97,29 @@ class IRC_Logic {
 
 		IRC_Channel::iterator getChannelByName(const std::string &name);
 
-		void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
+		void broadCastToOtherUsers(const std::string &message,
+				const IRC_User &user);
 
-		void processKillMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void processKillMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
 
-		void processNoticeMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
+		void processNoticeMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
 
-		void sendMsg(const IRC_User *user, const std::vector<std::string> &splitMessageVector, bool replyToErrors);
+		void sendMsg(
+				const IRC_User *user,
+				const std::vector<std::string> &splitMessageVector,
+				bool replyToErrors);
 
-    bool appendMatchingSingleRecipients(const IRC_User &user, std::queue<int> *recipients, const std::string &target);
+    bool appendMatchingSingleRecipients(
+			const IRC_User &user,
+			std::queue<int> *recipients,
+			const std::string &target);
 
-    bool appendMatchingChannelRecipients(const IRC_User &user, std::queue<int> *recipients, const std::string &target);
+    bool appendMatchingChannelRecipients(
+			const IRC_User &user,
+			std::queue<int> *recipients,
+			const std::string &target);
 
     bool isValidRecipientMask(const IRC_User &user, const std::string &target);
 };

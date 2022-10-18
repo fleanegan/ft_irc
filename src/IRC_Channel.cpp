@@ -77,7 +77,6 @@ std::queue<int> IRC_Channel::getMemberFds() {
 
 void IRC_Channel::appendRecipientFdsForSender(
         const IRC_User &user, std::queue<int> *recipients) const {
-
 	for (std::vector<IRC_User>::const_iterator
 			it = members.begin();
 			it != members.end(); it++)
@@ -110,16 +109,17 @@ void IRC_Channel::broadCastToOtherMembers(
     messages->push(IRC_Message(recipients, message, &sender));
 }
 
-void IRC_Channel::updateNick(const std::string &oldNick, const std::string &newNick) {
+void IRC_Channel::updateNick(
+		const std::string &oldNick, const std::string &newNick) {
     for (IRC_User::iterator it = members.begin(); it != members.end(); ++it)
-        if (oldNick == it->nick){
+        if (oldNick == it->nick) {
             it->nick = newNick;
             return;
         }
 }
 
-IRC_Channel::iterator
-IRC_Channel::findChannelByNameInVector(std::vector<IRC_Channel> *channels, const std::string &name) {
+IRC_Channel::iterator IRC_Channel::findChannelByNameInVector(
+		std::vector<IRC_Channel> *channels, const std::string &name) {
     std::string normedChannelName = toChannelName(name);
 
     for (iterator

@@ -72,7 +72,8 @@ bool isMatchingWildcardExpression(
             stringToMatch.c_str(), expression.c_str());
 }
 
-std::vector<std::string> splitOnToken(std::string message, const std::string &splitPattern) {
+std::vector<std::string> splitOnToken(
+		std::string message, const std::string &splitPattern) {
     std::vector<std::string> result;
     size_t pos;
 

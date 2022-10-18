@@ -5,7 +5,8 @@ IRC_User::IRC_User(int fd, const std::string &hostIp):
 }
 
 IRC_User::IRC_User(const std::string &nick, const std::string &name,
-		const int &fd, const std::string &hostIP): nick(stringToLower(nick)), userName(name),
+		const int &fd, const std::string &hostIP):
+	nick(stringToLower(nick)), userName(name),
         hostIp(hostIP), isAuthenticated(false), fd(fd), isOper() {}
 
 bool IRC_User::isNickValid(const std::string &nick) {
@@ -54,4 +55,10 @@ std::string IRC_User::toString() const {
 
 std::string IRC_User::toPrefixString() const {
     return ":" + nick + "!~" + userName + "@" + hostIp + " ";
+}
+
+bool IRC_User::isValid() {
+    if (nick.empty() || userName.empty() || fullName.empty())
+        return false;
+    return true;
 }

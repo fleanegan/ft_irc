@@ -32,14 +32,16 @@ struct IRC_Channel {
 
 	static std::string toChannelName(const std::string &name);
 
-	void appendRecipientFdsForSender(const IRC_User &user, std::queue<int> *recipients) const;
+	void appendRecipientFdsForSender(const IRC_User &user,
+			std::queue<int> *recipients) const;
 
 	void removeMember(const IRC_User &user);
 
 	void broadCastToAllMembers(
 			const std::string& message, const IRC_User& sender,
 			std::queue<IRC_Message> *messages);
-    void broadCastToOtherMembers(const std::string &message, const IRC_User &sender, std::queue<IRC_Message> *messages);
+    void broadCastToOtherMembers(const std::string &message,
+			const IRC_User &sender, std::queue<IRC_Message> *messages);
 
     void updateNick(const std::string& oldNick, const std::string& newNick);
 

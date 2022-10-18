@@ -28,11 +28,7 @@ struct IRC_User{
 			std::vector<IRC_User> *users, int fd);
 	static iterator findUserByNickInVector(
 			std::vector<IRC_User> *users, const std::string &nick);
-    bool isValid(){
-        if (nick.empty() || userName.empty() || fullName.empty())
-            return false;
-        return true;
-    }
+    bool isValid();
 
 	std::string toPrefixString() const;
 

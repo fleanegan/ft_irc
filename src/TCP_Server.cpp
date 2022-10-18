@@ -82,7 +82,7 @@ void TCP_Server::host(void) {
 }
 
 void TCP_Server::closeFdHook() {
-    while(_fdsToCloseAfterUpdate.empty() == false) {
+    while (_fdsToCloseAfterUpdate.empty() == false) {
         int currentFd = _fdsToCloseAfterUpdate.front();
         _fdsToCloseAfterUpdate.pop();
         close(currentFd);
