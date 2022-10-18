@@ -28,9 +28,9 @@ std::string IRC_User::buildFullName(
 	return name;
 }
 
-IRC_User::UserIterator IRC_User::findUserByFdInVector(
+IRC_User::iterator IRC_User::findUserByFdInVector(
 		std::vector<IRC_User> *users, int fd) {
-	for (UserIterator it = users->begin();
+	for (iterator it = users->begin();
 		 it != users->end(); it++) {
 		if (it->fd == fd)
 			return it;
@@ -38,9 +38,9 @@ IRC_User::UserIterator IRC_User::findUserByFdInVector(
 	return users->end();
 }
 
-IRC_User::UserIterator IRC_User::findUserByNickInVector(
+IRC_User::iterator IRC_User::findUserByNickInVector(
 		std::vector<IRC_User> *users, const std::string &nick) {
-	for (UserIterator it = users->begin();
+	for (iterator it = users->begin();
 		 it != users->end(); it++) {
 		if (it->nick == nick)
 			return it;

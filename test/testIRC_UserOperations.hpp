@@ -298,7 +298,5 @@ TEST(IRC_UserOperations, killingAUserDisconnectsIt) {
     ASSERT_EQ(1, logic.getRegisteredUsers().size());
 }
 
-// TEST(IRC_UserOperations, operHaveAccessToKillCommands) {
-
 #endif  // TEST_TESTIRC_USEROPERATIONS_HPP_
 

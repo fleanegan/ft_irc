@@ -10,6 +10,6 @@ void removeLeadingColon(std::string *input);
 std::string concatenateContentFromIndex(
 		int startIndex, const std::vector<std::string> &splitMessageVector);
 
-bool isMatchingWildcardExpression(const std::string& input, const std::string& expression);
+bool isMatchingWildcardExpression(const std::string &stringToMatch, const std::string &expression);
 
 #endif  // INC_UTILS_HPP_

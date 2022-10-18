@@ -25,8 +25,8 @@ class IRC_Logic {
 		explicit IRC_Logic(const std::string &password);
 		~IRC_Logic();
 		std::string processRequest(int fd, const std::string &input);
-		IRC_User::UserIterator getUserByFd(const int &fd);
-		IRC_User::UserIterator getUserByNick(const std::string &nick);
+		IRC_User::iterator getUserByFd(const int &fd);
+		IRC_User::iterator getUserByNick(const std::string &nick);
 		std::queue<IRC_Message> &getMessageQueue();
 		void disconnectUser(int fd, const std::string &reason);
 		std::vector<IRC_User>& getRegisteredUsers();
@@ -69,12 +69,8 @@ class IRC_Logic {
 				const std::vector<std::string> &splitMessageVector);
 		void processOperMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
-		void fetchChannelRecipients(const IRC_User &user, const std::string &channelName, std::queue<int> *recipients,
-				bool replyToErrors);
-		void
-			fetchSingleRecipient(int fd, const std::vector<std::string> &splitMessageVector, std::queue<int> *recipients,
-					bool replyToErrors);
-		void processModeMessage(const IRC_User *user,
+
+    void processModeMessage(const IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 		void appendMessage(const IRC_Message &reply);
 
@@ -88,12 +84,12 @@ class IRC_Logic {
 		IRC_Message *initNick(IRC_User *user, const std::vector<std::string> &splitMessageVector, IRC_Message *reply);
 
 		void appendRecipients(
-				const IRC_User *user,
-				const std::vector<std::string> &splitMessageVector,
-				std::queue<int> *recipients,
-				bool replyToErrors);
+                const IRC_User &user,
+                const std::vector<std::string> &splitMessageVector,
+                std::queue<int> *recipients,
+                bool replyToErrors);
 
-		IRC_Channel::ChannelIterator getChannelByName(const std::string &name);
+		IRC_Channel::iterator getChannelByName(const std::string &name);
 
 		void broadCastToOtherUsers(const std::string &message, const IRC_User &user);
 
@@ -102,5 +98,11 @@ class IRC_Logic {
 		void processNoticeMessage(IRC_User *user, const std::vector<std::string> &splitMessageVector);
 
 		void sendMsg(const IRC_User *user, const std::vector<std::string> &splitMessageVector, bool replyToErrors);
+
+    bool appendMatchingSingleRecipients(const IRC_User &user, std::queue<int> *recipients, const std::string &target);
+
+    bool appendMatchingChannelRecipients(const IRC_User &user, std::queue<int> *recipients, const std::string &target);
+
+    bool isValidRecipientMask(const IRC_User &user, const std::string &target);
 };
 #endif  // INC_IRC_LOGIC_HPP_

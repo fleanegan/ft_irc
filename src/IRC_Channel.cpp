@@ -111,18 +111,18 @@ void IRC_Channel::broadCastToOtherMembers(
 }
 
 void IRC_Channel::updateNick(const std::string &oldNick, const std::string &newNick) {
-    for (IRC_User::UserIterator it = members.begin(); it != members.end(); ++it)
+    for (IRC_User::iterator it = members.begin(); it != members.end(); ++it)
         if (oldNick == it->nick){
             it->nick = newNick;
             return;
         }
 }
 
-IRC_Channel::ChannelIterator
+IRC_Channel::iterator
 IRC_Channel::findChannelByNameInVector(std::vector<IRC_Channel> *channels, const std::string &name) {
     std::string normedChannelName = toChannelName(name);
 
-    for (ChannelIterator
+    for (iterator
                  it = channels->begin(); it != channels->end(); ++it)
         if (normedChannelName == it->name)
             return it;

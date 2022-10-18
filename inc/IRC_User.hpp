@@ -6,7 +6,7 @@
 
 struct IRC_User{
     typedef std::vector<IRC_User>::const_iterator ConstUserIterator;
-	typedef std::vector<IRC_User>::iterator UserIterator;
+	typedef std::vector<IRC_User>::iterator iterator;
 
 	std::string nick;
 	std::string userName;
@@ -24,9 +24,9 @@ struct IRC_User{
 	static std::string buildFullName(
 			const std::vector<std::string>& splitMessageVector);
 	std::string toString() const;
-	static UserIterator findUserByFdInVector(
+	static iterator findUserByFdInVector(
 			std::vector<IRC_User> *users, int fd);
-	static UserIterator findUserByNickInVector(
+	static iterator findUserByNickInVector(
 			std::vector<IRC_User> *users, const std::string &nick);
     bool isValid(){
         if (nick.empty() || userName.empty() || fullName.empty())

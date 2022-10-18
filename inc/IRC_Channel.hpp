@@ -10,7 +10,7 @@
 #include "./return_code.hpp"
 
 struct IRC_Channel {
-	typedef std::vector<IRC_Channel>::iterator ChannelIterator;
+	typedef std::vector<IRC_Channel>::iterator iterator;
 
 	std::string name;
 	std::vector<IRC_User> members;
@@ -43,7 +43,7 @@ struct IRC_Channel {
 
     void updateNick(const std::string& oldNick, const std::string& newNick);
 
-    static ChannelIterator findChannelByNameInVector(
+    static iterator findChannelByNameInVector(
             std::vector<IRC_Channel> *channels, const std::string& name);
 
 	static bool isChannelPrefix(const std::string &result);
