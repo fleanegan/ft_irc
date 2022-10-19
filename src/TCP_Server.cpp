@@ -36,6 +36,7 @@ void TCP_Server::saveConnectionInfo(int fd, const std::string &hostIp) {
 
 TCP_Server::~TCP_Server(void) {
 	shutdown(_fds.front().fd, SHUT_RDWR);
+	close(_fds.front().fd);
 }
 
 void TCP_Server::host(void) {
