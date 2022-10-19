@@ -16,12 +16,11 @@ IRC_Server& IRC_Server::operator = (const IRC_Server& other) {
 	return *this;
 }
 
-std::string IRC_Server::processMessage(int fd, const std::string& buffer) {
-	std::string result = _logic.processRequest(fd, buffer);
+void IRC_Server::processMessage(int fd, const std::string& buffer) {
+	_logic.processRequest(fd, buffer);
 
     distributeMessages();
     handleDisconnectionsFromLogic();
-    return result;
 }
 
 void IRC_Server::handleDisconnectionsFromLogic() {

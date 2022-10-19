@@ -66,15 +66,10 @@ void TCP_Server::host(void) {
                     onDisconnect(it->fd);
 					it = _fds.erase(it) - 1;
 				} else {
-                    std::string response;
-
                     _VERBOSE && std::cerr << "read " << bytesRead
 						<< " bytes from fd " << it->fd << std::endl;
 					_VERBOSE && std::cerr << "content:\n\t" << buffer << std::endl;
-					response = processMessage(it->fd, buffer);
-					_VERBOSE && std::cerr << "sending:\n\t" << response << std::endl;
-					if (response.size() > 0)
-						send(it->fd, response.c_str(), response.size(), 0);
+					processMessage(it->fd, buffer);
 				}
 			}
 		}

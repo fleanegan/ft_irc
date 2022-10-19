@@ -23,7 +23,7 @@ class IRC_Server : public TCP_Server {
 
 		IRC_Server &operator=(const IRC_Server &other);
 
-		std::string processMessage(int fd, const std::string &buffer);
+		void processMessage(int fd, const std::string &buffer);
 
 		void onDisconnect(int fd);
 

@@ -7,10 +7,9 @@
 
 TEST(IRC_ChannelOperations, joiningAChannelRequiresName) {
 	IRC_Logic logic("password");
-	std::string result;
     registerDummyUser(&logic, 0, 1);
 
-	result = logic.processRequest(0, "JOIN\r\n");
+	logic.processRequest(0, "JOIN\r\n");
 
 	ASSERT_TRUE(countSubStrings(logic.getMessageQueue().back().content,
 				ERR_NEEDMOREPARAMS));
@@ -19,10 +18,9 @@ TEST(IRC_ChannelOperations, joiningAChannelRequiresName) {
 TEST(IRC_ChannelOperations,
 		joiningANonExistingChannelCreatesAChannelAccordingToTheGivenName) {
 	IRC_Logic logic("password");
-	std::string result;
     registerDummyUser(&logic, 0, 1);
 
-	result = logic.processRequest(0, "JOIN mychan\r\n");
+	logic.processRequest(0, "JOIN mychan\r\n");
 
 	ASSERT_EQ(1, logic.getChannels().size());
 	ASSERT_STREQ("mychan", logic.getChannels().front().name.c_str());

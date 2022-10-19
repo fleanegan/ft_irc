@@ -18,13 +18,12 @@ class IRC_Logic {
 		std::vector<IRC_Channel> _channels;
 		std::vector<IRC_User> _prevUsers;
 		std::queue<IRC_Message> _messageQueue;
-		std::string _returnMessage;
 		int _fdToDisconnect;
 
 	public:
 		explicit IRC_Logic(const std::string &password);
 		~IRC_Logic();
-		std::string processRequest(int fd, const std::string &input);
+		void processRequest(int fd, const std::string &input);
 		IRC_User::iterator getUserByFd(const int &fd);
 		IRC_User::iterator getUserByNick(const std::string &nick);
 		std::queue<IRC_Message> &getMessageQueue();

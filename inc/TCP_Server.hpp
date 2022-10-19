@@ -36,7 +36,7 @@ class TCP_Server {
 
 		virtual ~TCP_Server(void);
 
-		virtual std::string processMessage(int fd, const std::string &buffer) = 0;
+		virtual void processMessage(int fd, const std::string &buffer) = 0;
 
 		void host(void);
 

@@ -8,43 +8,37 @@
 #include "../inc/IRC_User.hpp"
 #include "../inc/return_code.hpp"
 
-std::string authenticate(
+void authenticate(
 		IRC_Logic *logic, int fd, const std::string &password ) {
     logic->addUser(fd, "127.0.0.1");
-    return logic->processRequest(fd, "PASS " + password + "\r\n");
+    logic->processRequest(fd, "PASS " + password + "\r\n");
 }
 
-std::string setUser(IRC_Logic *logic,
+void setUser(IRC_Logic *logic,
 		int fd, const std::string &userName, const std::string &fullName) {
-	return logic->processRequest(fd, "USER "
+	logic->processRequest(fd, "USER "
 			+ userName + " " + userName + " * :" + fullName + "\r\n");
 }
 
-std::string setNick(IRC_Logic *logic, int fd, const std::string &nick) {
-	return logic->processRequest(fd, "NICK " + nick + "\r\n");
+void setNick(IRC_Logic *logic, int fd, const std::string &nick) {
+	logic->processRequest(fd, "NICK " + nick + "\r\n");
 }
 
-std::string authenticateAndSetNick(IRC_Logic *logic,
+void authenticateAndSetNick(IRC_Logic *logic,
 		int fd, const std::string &password, const std::string &nick) {
-	std::string result;
-    result += authenticate(logic, fd, password);
-    result += setNick(logic, fd, nick);
-	return result;
+    authenticate(logic, fd, password);
+    setNick(logic, fd, nick);
 }
 
-std::string registerUser(IRC_Logic *logic,
+void registerUser(IRC_Logic *logic,
 		int fd,
 		const std::string &password,
 		const std::string &nick,
 		const std::string &userName,
 		const std::string &fullName) {
-	std::string result;
-
-	result += authenticate(logic, fd, password);
-	result += setNick(logic, fd, nick);
-	result += setUser(logic, fd, userName, fullName);
-
-	return result;
+	authenticate(logic, fd, password);
+	setNick(logic, fd, nick);
+	setUser(logic, fd, userName, fullName);
 }
 
 

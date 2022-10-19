@@ -10,18 +10,15 @@ IRC_Logic::IRC_Logic(const std::string &password) : _password(password),
 
 IRC_Logic::~IRC_Logic() {}
 
-std::string IRC_Logic::processRequest(int fd, const std::string &input) {
+void IRC_Logic::processRequest(int fd, const std::string &input) {
 	std::vector<std::string> splitMessageVector;
 	IRC_User::iterator currentUser = getUserByFd(fd);
-	std::string result;
 
 	currentUser->receivedCharacters += input;
 	while (currentUser->receivedCharacters.find("\r\n") != std::string::npos) {
 		splitMessageVector = extractFirstMessage(&(*currentUser));
 		processIncomingMessage(&(*currentUser), splitMessageVector);
 	}
-	result.swap(_returnMessage);
-	return result;
 }
 
 void IRC_Logic::processIncomingMessage(
@@ -34,14 +31,19 @@ void IRC_Logic::processIncomingMessage(
 	} else if (command == "ping") {
 		processPingMessage(user, splitMessageVector);
 	} else if (user->isAuthenticated == false) {
-		_returnMessage += generateResponse(
-				ERR_CONNECTWITHOUTPWD, "This server is password protected.");
-	} else if (command == "mode") {
-		processModeMessage(user, splitMessageVector);
+		appendMessage(IRC_Message(user->fd, generateResponse(
+				ERR_CONNECTWITHOUTPWD,
+				"This server is password protected."), ""));
 	} else if (command == "nick") {
 		processNickMessage(user, splitMessageVector);
 	} else if (command == "user") {
 		processUserMessage(user, splitMessageVector);
+	} else if (user->isValid() == false) {
+		appendMessage(IRC_Message(user->fd, generateResponse(
+				ERR_NOTREGISTERED,
+				"Please register-> only NICK PASS and USER are allowed"), ""));
+	} else if (command == "mode") {
+		processModeMessage(user, splitMessageVector);
 	} else if (command == "privmsg") {
 		processPrivMsgMessage(user, splitMessageVector);
 	} else if (command == "whois") {
