@@ -272,21 +272,38 @@ TEST(IRC_ChannelOperations, firstPersonToJoinChannelIsOp) {
 			logic.getRegisteredUsers().front().fd);
 }
 
-TEST(IRC_ChannelOperations, opLeavingChannelMakesNextOneOp) {
+TEST(IRC_ChannelOperations, opPartingChannelMakesNextOneOp) {
 	IRC_Logic logic("password");
 
     registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
 	logic.processRequest(0, "PART #mychan\r\n");
 
-	ASSERT_TRUE(logic.getChannels().front().opFd ==
-			logic.getRegisteredUsers().back().fd);
+	ASSERT_EQ(1, logic.getChannels().front().opFd);
+}
+
+TEST(IRC_ChannelOperations, opQuittingChannelMakesNextOneOp) {
+	IRC_Logic logic("password");
+
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	logic.processRequest(0, "QUIT reason\r\n");
+
+	ASSERT_EQ(1, logic.getChannels().front().opFd);
+}
+
+TEST(IRC_ChannelOperations, opGettingKickedChannelMakesNextOneOp) {
+	IRC_Logic logic("password");
+
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	logic.processRequest(0, "KICK #mychan nick0\r\n");
+
+	ASSERT_EQ(1, logic.getChannels().front().opFd);
 }
 
 TEST(IRC_ChannelOperations, kickWithoutParameterReturnsError) {
 	IRC_Logic logic("password");
 
 	registerDummyUser(&logic, 0, 1);
-	logic.processRequest(0, "KICK\r\n");
+	logic.processRequest(0, "KICK #mychan\r\n");
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 			ERR_NEEDMOREPARAMS));
@@ -332,6 +349,18 @@ TEST(IRC_ChannelOperations, kickingWhileNotOpReturnsError) {
 
 	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
 			ERR_CHANOPRIVSNEEDED));
+}
+
+TEST(IRC_ChannelOperations, kickRemovesMemberFromChannel) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "KICK #mychan nick1 :Reason to kick you\r\n");
+
+	ASSERT_EQ(1, logic.getChannels().front().members.size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				"KICK"));
 }
 
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_

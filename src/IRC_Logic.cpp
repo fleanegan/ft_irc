@@ -32,16 +32,16 @@ void IRC_Logic::processIncomingMessage(
 		processPingMessage(user, splitMessageVector);
 	} else if (user->isAuthenticated == false) {
 		appendMessage(IRC_Message(user->fd, generateResponse(
-				ERR_CONNECTWITHOUTPWD,
-				"This server is password protected."), ""));
+						ERR_CONNECTWITHOUTPWD,
+						"This server is password protected."), ""));
 	} else if (command == "nick") {
 		processNickMessage(user, splitMessageVector);
 	} else if (command == "user") {
 		processUserMessage(user, splitMessageVector);
 	} else if (user->isValid() == false) {
 		appendMessage(IRC_Message(user->fd, generateResponse(
-				ERR_NOTREGISTERED,
-				"Please register-> only NICK PASS and USER are allowed"), ""));
+						ERR_NOTREGISTERED,
+						"Please register-> only NICK PASS and USER are allowed"), ""));
 	} else if (command == "mode") {
 		processModeMessage(user, splitMessageVector);
 	} else if (command == "privmsg") {
@@ -63,12 +63,12 @@ void IRC_Logic::processIncomingMessage(
 	} else if (command == "kick") {
 		processKickMessage(user, splitMessageVector);
 	} else if (command == "notice") {
-        processNoticeMessage(user, splitMessageVector);
-    } else if (command == "list") {
-        processListMessage(user, splitMessageVector);
-    } else if (command == "names") {
-        processNamesMessage(user, splitMessageVector);
-    }
+		processNoticeMessage(user, splitMessageVector);
+	} else if (command == "list") {
+		processListMessage(user, splitMessageVector);
+	} else if (command == "names") {
+		processNamesMessage(user, splitMessageVector);
+	}
 }
 
 void IRC_Logic::processModeMessage(const IRC_User *user,
@@ -140,23 +140,23 @@ void IRC_Logic::appendRecipients(
 
 void IRC_Logic::processListMessage(
 		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
-    IRC_Message result(user->fd, "", "");
-    std::string channelNames = user->nick +
+	IRC_Message result(user->fd, "", "");
+	std::string channelNames = user->nick +
 		" Channels present on this server: ";
 
-    for (IRC_Channel::iterator it = _channels.begin();
+	for (IRC_Channel::iterator it = _channels.begin();
 			it != _channels.end(); ++it) {
-        channelNames += (it->name) + " ";
-    }
-    result.content += generateResponse(RPL_LIST, channelNames);
-    result.content += generateResponse(RPL_LISTEND, "");
-    appendMessage(result);
-    (void) user;
-    (void) splitMessageVector;
+		channelNames += (it->name) + " ";
+	}
+	result.content += generateResponse(RPL_LIST, channelNames);
+	result.content += generateResponse(RPL_LISTEND, "");
+	appendMessage(result);
+	(void) user;
+	(void) splitMessageVector;
 }
 
 void IRC_Logic::processNamesMessage(
-	IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+		IRC_User *user, const std::vector<std::string> &splitMessageVector) {
 	IRC_Message reply(user->fd, "", "");
 
 	for (IRC_Channel::iterator channel = _channels.begin();
@@ -567,9 +567,6 @@ void IRC_Logic::processPartMessage(
 		channel->removeMember(*user);
 		if (channel->members.empty())
 			_channels.erase(channel);
-		else {
-			channel->opFd = channel->members.front().fd;
-		}
 	}
 }
 
@@ -619,28 +616,35 @@ void IRC_Logic::processKickMessage(IRC_User *user,
 		const std::vector<std::string> &splitMessageVector) {
 	IRC_Channel::iterator channel;
 	IRC_User::iterator userToKick;
+	IRC_Message reply(user->fd, "", "");
+
 	if (splitMessageVector.size() < 3) {
-		appendMessage(IRC_Message(user->fd, generateResponse(ERR_NEEDMOREPARAMS,
-	 			"Please provide a channel name and a nickname"), ""));
-		return;
+		reply.content = generateResponse(ERR_NEEDMOREPARAMS,
+				"Please provide a channel name and a nickname");
+	} else {
+		channel = getChannelByName(splitMessageVector[1]);
+		userToKick = getUserByNick(splitMessageVector[2]);
+		if (channel == _channels.end()) {
+			reply.content = generateResponse(ERR_NOSUCHCHANNEL,
+					"This channel does not exist");
+		} else if (!channel->isUserInChannel(*user)) {
+			reply.content = generateResponse(ERR_NOTONCHANNEL,
+					"You are not in this channel");
+		} else if (userToKick == _users.end() ||
+				!channel->isUserInChannel(*userToKick)) {
+			reply.content = generateResponse(ERR_USERNOTINCHANNEL,
+					"This user is not in the channel");
+		} else if (channel->opFd != user->fd) {
+			reply.content = generateResponse(ERR_CHANOPRIVSNEEDED,
+					"You need to be a channel operator to kick");
+		} else {
+			channel->broadCastToAllMembers(
+					concatenateContentFromIndex(0, splitMessageVector),
+					*user, &_messageQueue);
+			channel->removeMember(*userToKick);
+		}
 	}
-	channel = getChannelByName(splitMessageVector[1]);
-	userToKick = getUserByNick(splitMessageVector[2]);
-	if (channel == _channels.end())
-		appendMessage(IRC_Message(user->fd, generateResponse(ERR_NOSUCHCHANNEL,
-	 			"This channel does not exist"), ""));
-	else if (!channel->isUserInChannel(*user))
-		appendMessage(IRC_Message(user->fd, generateResponse(ERR_NOTONCHANNEL,
-	 			"You are not in this channel"), ""));
-	else if (userToKick == _users.end() ||
-			!channel->isUserInChannel(*userToKick))
-		appendMessage(IRC_Message(user->fd,
-					generateResponse(ERR_USERNOTINCHANNEL,
-	 			"This user is not in the channel"), ""));
-	else if (channel->opFd != user->fd)
-		appendMessage(IRC_Message(user->fd,
-					generateResponse(ERR_CHANOPRIVSNEEDED,
-	 			"You need to be a channel operator to kick"), ""));
+	appendMessage(reply);
 }
 
 int IRC_Logic::popFdToDisconnect() {

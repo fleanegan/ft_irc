@@ -90,8 +90,11 @@ void IRC_Channel::removeMember(const IRC_User &user) {
 		return;
 	for (std::vector<IRC_User>::iterator
 			it = members.begin(); it != members.end(); ++it)
-		if (it->nick == user.nick)
+		if (it->nick == user.nick) {
+			if (it->fd == opFd && members.size() > 1)
+				opFd = (it + 1)->fd;
 			it = members.erase(it) - 1;
+		}
 }
 
 void IRC_Channel::broadCastToAllMembers(
