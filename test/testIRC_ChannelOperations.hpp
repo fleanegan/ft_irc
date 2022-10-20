@@ -263,4 +263,75 @@ TEST(IRC_ChannelOperations, namesWithAChannelParameterReturnsList) {
 				"mychan1"));
 }
 
+TEST(IRC_ChannelOperations, firstPersonToJoinChannelIsOp) {
+	IRC_Logic logic("password");
+
+    registerMembersAndJoinToChannel(&logic, 0, 1, "#mychan");
+
+	ASSERT_EQ(logic.getChannels().front().opFd,
+			logic.getRegisteredUsers().front().fd);
+}
+
+TEST(IRC_ChannelOperations, opLeavingChannelMakesNextOneOp) {
+	IRC_Logic logic("password");
+
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	logic.processRequest(0, "PART #mychan\r\n");
+
+	ASSERT_TRUE(logic.getChannels().front().opFd ==
+			logic.getRegisteredUsers().back().fd);
+}
+
+TEST(IRC_ChannelOperations, kickWithoutParameterReturnsError) {
+	IRC_Logic logic("password");
+
+	registerDummyUser(&logic, 0, 1);
+	logic.processRequest(0, "KICK\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+			ERR_NEEDMOREPARAMS));
+}
+
+TEST(IRC_ChannelOperations, kickWithNonExistingChannelReturnsError) {
+	IRC_Logic logic("password");
+
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	logic.processRequest(0, "KICK #notmychan nick1\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+			ERR_NOSUCHCHANNEL));
+}
+
+TEST(IRC_ChannelOperations, kickingWhileNotOnChannelReturnsError) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	logic.processRequest(0, "JOIN #nonick1club\r\n");
+
+	logic.processRequest(1, "KICK #nonick1club nick0\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+			ERR_NOTONCHANNEL));
+}
+
+TEST(IRC_ChannelOperations, kickingUserNotInChannelReturnsError) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+	logic.processRequest(0, "JOIN #nonick1club\r\n");
+
+	logic.processRequest(0, "KICK #nonick1club nick1\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+			ERR_USERNOTINCHANNEL));
+}
+
+TEST(IRC_ChannelOperations, kickingWhileNotOpReturnsError) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+
+	logic.processRequest(1, "KICK #mychan nick0\r\n");
+
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+			ERR_CHANOPRIVSNEEDED));
+}
+
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_

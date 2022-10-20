@@ -128,4 +128,3 @@ IRC_Channel::iterator IRC_Channel::findChannelByNameInVector(
             return it;
     return channels->end();
 }
-

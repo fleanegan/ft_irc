@@ -102,6 +102,9 @@ class IRC_Logic {
 		void processKillMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 
+		void processKickMessage(IRC_User *user,
+				const std::vector<std::string> &splitMessageVector);
+
 		void processNoticeMessage(IRC_User *user,
 				const std::vector<std::string> &splitMessageVector);
 

@@ -14,6 +14,7 @@ struct IRC_Channel {
 
 	std::string name;
 	std::vector<IRC_User> members;
+	int	opFd;
 
 	explicit IRC_Channel(const std::string &channelName);
 	bool operator==(const IRC_Channel &rhs) const;

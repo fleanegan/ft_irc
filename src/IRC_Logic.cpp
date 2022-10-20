@@ -60,6 +60,8 @@ void IRC_Logic::processIncomingMessage(
 		processOperMessage(user, splitMessageVector);
 	} else if (command == "kill") {
 		processKillMessage(user, splitMessageVector);
+	} else if (command == "kick") {
+		processKickMessage(user, splitMessageVector);
 	} else if (command == "notice") {
         processNoticeMessage(user, splitMessageVector);
     } else if (command == "list") {
@@ -518,8 +520,10 @@ void IRC_Logic::processJoinMessage(
 		return;
 	}
 	channelCandidate = new IRC_Channel(splitMessageVector[1]);
-	if (getChannelByName(channelCandidate->name) == _channels.end())
+	if (getChannelByName(channelCandidate->name) == _channels.end()) {
 		_channels.push_back(*channelCandidate);
+		_channels.back().opFd = user->fd;
+	}
 	channel = getChannelByName(channelCandidate->name);
 	delete channelCandidate;
 	channel->members.push_back(*user);
@@ -563,6 +567,9 @@ void IRC_Logic::processPartMessage(
 		channel->removeMember(*user);
 		if (channel->members.empty())
 			_channels.erase(channel);
+		else {
+			channel->opFd = channel->members.front().fd;
+		}
 	}
 }
 
@@ -606,6 +613,34 @@ void IRC_Logic::processKillMessage(
 				"QUIT " + splitMessageVector[1] + " killed by oper\r\n");
 	}
 	appendMessage(reply);
+}
+
+void IRC_Logic::processKickMessage(IRC_User *user,
+		const std::vector<std::string> &splitMessageVector) {
+	IRC_Channel::iterator channel;
+	IRC_User::iterator userToKick;
+	if (splitMessageVector.size() < 3) {
+		appendMessage(IRC_Message(user->fd, generateResponse(ERR_NEEDMOREPARAMS,
+	 			"Please provide a channel name and a nickname"), ""));
+		return;
+	}
+	channel = getChannelByName(splitMessageVector[1]);
+	userToKick = getUserByNick(splitMessageVector[2]);
+	if (channel == _channels.end())
+		appendMessage(IRC_Message(user->fd, generateResponse(ERR_NOSUCHCHANNEL,
+	 			"This channel does not exist"), ""));
+	else if (!channel->isUserInChannel(*user))
+		appendMessage(IRC_Message(user->fd, generateResponse(ERR_NOTONCHANNEL,
+	 			"You are not in this channel"), ""));
+	else if (userToKick == _users.end() ||
+			!channel->isUserInChannel(*userToKick))
+		appendMessage(IRC_Message(user->fd,
+					generateResponse(ERR_USERNOTINCHANNEL,
+	 			"This user is not in the channel"), ""));
+	else if (channel->opFd != user->fd)
+		appendMessage(IRC_Message(user->fd,
+					generateResponse(ERR_CHANOPRIVSNEEDED,
+	 			"You need to be a channel operator to kick"), ""));
 }
 
 int IRC_Logic::popFdToDisconnect() {
