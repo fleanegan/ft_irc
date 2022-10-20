@@ -124,5 +124,8 @@ class IRC_Logic {
 
     void processListMessage(
 			IRC_User *user, const std::vector<std::string> &splitMessageVector);
+
+    void processNamesMessage(
+			IRC_User *user, const std::vector<std::string> &splitMessageVector);
 };
 #endif  // INC_IRC_LOGIC_HPP_

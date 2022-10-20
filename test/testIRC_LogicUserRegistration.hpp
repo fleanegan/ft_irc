@@ -49,9 +49,9 @@ TEST(IRC_LogicUserRegistration, nickCannotContainReservedCharacter) {
 	authenticateAndSetNick(&logic, 4, "password", "hello@world");
 	authenticateAndSetNick(&logic, 5, "password", "hello world");
 
-//	assertAllNicksEmpty(&logic);
-//	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
-//				ERR_ERRONEOUSNICK));
+	assertAllNicksEmpty(&logic);
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				ERR_ERRONEOUSNICK));
 }
 
 TEST(IRC_LogicUserRegistration, sendingTwoCommandAtOnceShouldExecuteBoth) {
@@ -187,7 +187,8 @@ TEST(IRC_LogicUserRegistration,
 	ASSERT_TRUE(logic.getMessageQueue().empty());
 }
 
-TEST(IRC_LogicUserRegistration, cannotExecuteCommandsBeforeRegistrationCompletion) {
+TEST(IRC_LogicUserRegistration,
+		cannotExecuteCommandsBeforeRegistrationCompletion) {
 	IRC_Logic logic("password");
 	authenticate(&logic, 0, "password");
 

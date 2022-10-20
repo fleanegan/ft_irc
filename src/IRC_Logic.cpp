@@ -64,6 +64,8 @@ void IRC_Logic::processIncomingMessage(
         processNoticeMessage(user, splitMessageVector);
     } else if (command == "list") {
         processListMessage(user, splitMessageVector);
+    } else if (command == "names") {
+        processNamesMessage(user, splitMessageVector);
     }
 }
 
@@ -149,6 +151,27 @@ void IRC_Logic::processListMessage(
     appendMessage(result);
     (void) user;
     (void) splitMessageVector;
+}
+
+void IRC_Logic::processNamesMessage(
+	IRC_User *user, const std::vector<std::string> &splitMessageVector) {
+	IRC_Message reply(user->fd, "", "");
+
+	for (IRC_Channel::iterator channel = _channels.begin();
+			channel != _channels.end(); ++channel) {
+		if (splitMessageVector.size() == 1 ||
+				isMatchingWildcardExpression(
+					channel->name, splitMessageVector[1])) {
+			reply.content += std::string(RPL_NAMREPLY) + " :";
+			for (IRC_Channel::iterator user = _channels.begin();
+					user != _channels.end(); ++user) {
+				reply.content += (user->name) + " ";
+			}
+			reply.content += "\r\n";
+		}
+	}
+	reply.content += generateResponse(RPL_ENDOFNAMES, "End of NAME list");
+	appendMessage(reply);
 }
 
 bool IRC_Logic::appendMatchingChannelRecipients(const IRC_User &user,

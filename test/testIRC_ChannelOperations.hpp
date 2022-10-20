@@ -233,5 +233,34 @@ TEST(IRC_ChannelOperations, recipientNotFoundSearchInChannels) {
 				"messageContent"));
 }
 
+TEST(IRC_ChannelOperations, namesWithoutParameterReturnsListOfAllChannel) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan2");
+
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "NAMES\r\n");
+
+	ASSERT_EQ(1, logic.getMessageQueue().size());
+	ASSERT_TRUE(responseContains(
+				logic.getMessageQueue().back().content, RPL_NAMREPLY));
+}
+
+TEST(IRC_ChannelOperations, namesWithAChannelParameterReturnsList) {
+	IRC_Logic logic("password");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan");
+    registerMembersAndJoinToChannel(&logic, 0, 2, "#mychan2");
+
+	emptyQueue(&logic.getMessageQueue());
+
+	logic.processRequest(0, "NAMES mychan2\r\n");
+
+	ASSERT_EQ(1, logic.getMessageQueue().size());
+	ASSERT_TRUE(responseContains(logic.getMessageQueue().back().content,
+				RPL_NAMREPLY));
+	ASSERT_FALSE(responseContains(logic.getMessageQueue().back().content,
+				"mychan1"));
+}
 
 #endif  // TEST_TESTIRC_CHANNELOPERATIONS_HPP_
