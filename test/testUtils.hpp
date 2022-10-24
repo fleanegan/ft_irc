@@ -120,8 +120,8 @@ std::vector<int> gatherAllRecipientsOfMessageQueue(IRC_Logic *logic) {
 
 template <typename T>
 void emptyQueue(std::queue<T>*queue) {
-    std::queue<IRC_Message> test;
-    queue->swap(test);
+    while (queue->empty() == false)
+        queue->pop();
 }
 
 

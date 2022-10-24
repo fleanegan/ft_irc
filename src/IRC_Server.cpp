@@ -1,4 +1,5 @@
 #include "../inc/IRC_Server.hpp"
+#include "../test/testUtils.hpp"
 #include <iostream>
 
 IRC_Server::IRC_Server(void): TCP_Server(), _logic("password") {
@@ -28,6 +29,9 @@ void IRC_Server::handleDisconnectionsFromLogic() {
     if (fdToDisconnect)
         _fdsToCloseAfterUpdate.push(fdToDisconnect);
 }
+#include <unistd.h>
+#include <fcntl.h>
+#include <cerrno>
 
 void IRC_Server::distributeMessages() {
     IRC_Message* currentMessage;
@@ -38,10 +42,19 @@ void IRC_Server::distributeMessages() {
         while (!currentMessage->recipients.empty()) {
             currentFd = currentMessage->recipients.front();
             currentMessage->recipients.pop();
-            _VERBOSE && std::cerr << "sending \n\t" << currentMessage->content
-                << " to fd " << currentFd << std::endl;
+
             std::string sendString = (currentMessage->content + "\r\n");
+            if (errno){
+                errno = 0;
+                emptyQueue(&_logic.getMessageQueue());
+                _VERBOSE && std::cerr << "ohoh, weve got some errors" << std::endl;
+                return;
+            }
+            else{
+                _VERBOSE && std::cerr << "sending \n\t" << currentMessage->content
+                                      << " to fd " << currentFd << std::endl;
                 send(currentFd, sendString.c_str(), sendString.size(), 0);
+            }
         }
         _logic.getMessageQueue().pop();
     }
