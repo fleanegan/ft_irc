@@ -24,8 +24,10 @@ void TCP_Server::setUpTcpSocket(int port) {
 	_servAddr.sin_addr.s_addr = INADDR_ANY;
 	_servAddr.sin_port = htons(port);
 	if (bind(_fds.front().fd, reinterpret_cast<struct sockaddr *>(&_servAddr),
-			 addrLen))
+			 addrLen)) {
+		close(_fds.front().fd);
 		throw couldNotBindException();
+	}
 }
 
 void TCP_Server::saveConnectionInfo(int fd, const std::string &hostIp) {
@@ -36,7 +38,9 @@ void TCP_Server::saveConnectionInfo(int fd, const std::string &hostIp) {
 
 TCP_Server::~TCP_Server(void) {
 	shutdown(_fds.front().fd, SHUT_RDWR);
-	close(_fds.front().fd);
+	for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();
+			++it)
+		close(it->fd);
 }
 
 void TCP_Server::host(void) {
