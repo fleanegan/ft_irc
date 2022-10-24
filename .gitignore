@@ -53,6 +53,10 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# ignore experiments
+**/experiments/*
+**/gtest/*
+
 # ignore intellij stuff
 **/.idea/*
 

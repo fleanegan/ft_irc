@@ -10,7 +10,15 @@ TEST_PATH = ./test/
 
 # Names
 
-SRC_NAME =	main.cpp\
+SRC_NAME =	TCP_Server.cpp\
+			IRC_Server.cpp\
+			IRC_Logic.cpp\
+			IRC_User.cpp\
+			IRC_Message.cpp\
+			IRC_Channel.cpp\
+			utils.cpp\
+			main.cpp\
+			
 
 TEST_SRC_NAME =	test_main.cpp \
 
