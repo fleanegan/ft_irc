@@ -17,7 +17,8 @@ void IRC_Logic::processRequest(int fd, const std::string &input) {
 	currentUser->receivedCharacters += input;
 	while (currentUser->receivedCharacters.find("\r\n") != std::string::npos) {
 		splitMessageVector = extractFirstMessage(&(*currentUser));
-		processIncomingMessage(&(*currentUser), splitMessageVector);
+		if (splitMessageVector.size() != 0)
+			processIncomingMessage(&(*currentUser), splitMessageVector);
 	}
 }
 
